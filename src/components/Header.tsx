@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Moon, Sun } from "lucide-react";
+import { Menu, X, Moon, Sun, LogIn, LogOut, LayoutDashboard } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const { user, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -29,6 +34,14 @@ const Header = () => {
       localStorage.setItem("theme", "light");
     }
   };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  // Don't show login/admin buttons on admin pages
+  const isAdminPage = location.pathname.startsWith('/admin');
 
   return (
     <header className="sticky top-0 z-50 py-2 sm:py-4">
@@ -77,9 +90,40 @@ const Header = () => {
               )}
             </button>
             
-            <Button className="hidden md:flex bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8 py-2 hover:scale-105 transition-all">
-              Join Now
-            </Button>
+            {!isAdminPage && (
+              <>
+                {user ? (
+                  <div className="hidden md:flex items-center gap-2">
+                    {isAdmin && (
+                      <Button
+                        variant="ghost"
+                        className="rounded-full px-4 py-2"
+                        onClick={() => navigate('/admin')}
+                      >
+                        <LayoutDashboard className="h-4 w-4 mr-2" />
+                        Dashboard
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      className="rounded-full px-4 py-2"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    className="hidden md:flex bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6 py-2 hover:scale-105 transition-all"
+                    onClick={() => navigate('/login')}
+                  >
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Login
+                  </Button>
+                )}
+              </>
+            )}
 
             {/* Mobile Menu Button */}
             <button
@@ -111,9 +155,49 @@ const Header = () => {
               <a href="/about" className="text-sm font-medium hover:text-accent transition-colors">
                 About
               </a>
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-full">
-                Join Now
-              </Button>
+              {!isAdminPage && (
+                <>
+                  {user ? (
+                    <>
+                      {isAdmin && (
+                        <Button
+                          variant="ghost"
+                          className="rounded-full w-full justify-start"
+                          onClick={() => {
+                            navigate('/admin');
+                            setIsMenuOpen(false);
+                          }}
+                        >
+                          <LayoutDashboard className="h-4 w-4 mr-2" />
+                          Dashboard
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        className="rounded-full w-full"
+                        onClick={() => {
+                          handleLogout();
+                          setIsMenuOpen(false);
+                        }}
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Logout
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-full"
+                      onClick={() => {
+                        navigate('/login');
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Login
+                    </Button>
+                  )}
+                </>
+              )}
             </nav>
           </div>
         )}
