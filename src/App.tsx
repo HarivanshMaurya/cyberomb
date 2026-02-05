@@ -19,8 +19,8 @@ import StyleGuide from "./pages/StyleGuide";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
- import AdminLogin from "./pages/admin/AdminLogin";
- import AdminDashboard from "./pages/admin/AdminDashboard";
+import Login from "./pages/Login";
+import AdminDashboard from "./pages/admin/AdminDashboard";
  import HeroEditor from "./pages/admin/HeroEditor";
  import ArticlesList from "./pages/admin/ArticlesList";
  import ArticleEditor from "./pages/admin/ArticleEditor";
@@ -30,7 +30,8 @@ import NotFound from "./pages/NotFound";
  import MediaLibrary from "./pages/admin/MediaLibrary";
  import SEOSettings from "./pages/admin/SEOSettings";
  import Settings from "./pages/admin/Settings";
- import DynamicPage from "./pages/DynamicPage";
+import DynamicPage from "./pages/DynamicPage";
+import BlogArticle from "./pages/BlogArticle";
 
 const queryClient = new QueryClient();
 
@@ -56,9 +57,11 @@ const App = () => (
              <Route path="/privacy" element={<Privacy />} />
              <Route path="/terms" element={<Terms />} />
              <Route path="/page/:slug" element={<DynamicPage />} />
+              <Route path="/blog/:slug" element={<BlogArticle />} />
+              <Route path="/login" element={<Login />} />
  
-             {/* Admin Login */}
-             <Route path="/admin/login" element={<AdminLogin />} />
+              {/* Admin Login - redirect to unified login */}
+              <Route path="/admin/login" element={<Login />} />
  
              {/* Protected Admin Routes */}
              <Route
