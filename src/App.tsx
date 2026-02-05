@@ -32,6 +32,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
  import Settings from "./pages/admin/Settings";
 import DynamicPage from "./pages/DynamicPage";
 import BlogArticle from "./pages/BlogArticle";
+ import CategoryPage from "./pages/CategoryPage";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
              <Route path="/terms" element={<Terms />} />
              <Route path="/page/:slug" element={<DynamicPage />} />
               <Route path="/blog/:slug" element={<BlogArticle />} />
+               <Route path="/category/:slug" element={<CategoryPage />} />
               <Route path="/login" element={<Login />} />
  
               {/* Admin Login - redirect to unified login */}
