@@ -57,7 +57,7 @@ const HeroSection = () => {
                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8 py-4 md:px-10 md:py-6 text-base font-medium transition-all hover:scale-105 w-full sm:w-auto"
                asChild
              >
-               <a href={buttonLink}>{buttonText}</a>
+               <a href="/admin/login">Admin Login</a>
              </Button>
 
             <div className="flex items-center gap-4">
