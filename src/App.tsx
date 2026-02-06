@@ -34,6 +34,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import DynamicPage from "./pages/DynamicPage";
 import BlogArticle from "./pages/BlogArticle";
  import CategoryPage from "./pages/CategoryPage";
+import PageSectionsEditor from "./pages/admin/PageSectionsEditor";
 
 const queryClient = new QueryClient();
 
@@ -80,11 +81,12 @@ const App = () => (
                <Route path="hero" element={<HeroEditor />} />
                <Route path="articles" element={<ArticlesList />} />
                <Route path="articles/:id" element={<ArticleEditor />} />
-               <Route path="pages" element={<PagesList />} />
-               <Route path="pages/:id" element={<PageEditor />} />
-               <Route path="sections" element={<SiteSections />} />
-               <Route path="media" element={<MediaLibrary />} />
-               <Route path="seo" element={<SEOSettings />} />
+              <Route path="pages" element={<PagesList />} />
+              <Route path="pages/:id" element={<PageEditor />} />
+              <Route path="page-sections" element={<PageSectionsEditor />} />
+              <Route path="sections" element={<SiteSections />} />
+              <Route path="media" element={<MediaLibrary />} />
+              <Route path="seo" element={<SEOSettings />} />
                <Route path="settings" element={<Settings />} />
              </Route>
  

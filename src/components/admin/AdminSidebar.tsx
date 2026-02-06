@@ -13,6 +13,7 @@
    Globe,
    Search,
    Palette,
+   Layers,
  } from 'lucide-react';
  import { Button } from '@/components/ui/button';
  import { useState } from 'react';
@@ -22,6 +23,7 @@
    { to: '/admin/hero', icon: Palette, label: 'Hero Section' },
    { to: '/admin/articles', icon: Newspaper, label: 'Articles' },
    { to: '/admin/pages', icon: FileText, label: 'Pages' },
+   { to: '/admin/page-sections', icon: Layers, label: 'Page Sections' },
    { to: '/admin/sections', icon: Globe, label: 'Site Content' },
    { to: '/admin/media', icon: Image, label: 'Media Library' },
    { to: '/admin/seo', icon: Search, label: 'SEO Settings' },

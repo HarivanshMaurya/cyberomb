@@ -170,6 +170,42 @@ export type Database = {
         }
         Relationships: []
       }
+      page_sections: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          page_key: string
+          page_name: string
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          page_key: string
+          page_name: string
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          page_key?: string
+          page_name?: string
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pages: {
         Row: {
           content: string | null
