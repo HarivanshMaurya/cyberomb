@@ -43,7 +43,7 @@ const Index = () => {
         <section id="articles" className="py-12">
           <div className="flex items-center justify-between mb-12 animate-slide-up">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Featured Articles</h2>
-            <a href="#all" className="text-sm font-medium text-muted-foreground hover:text-accent transition-colors px-4 py-2 rounded-full hover:bg-muted/60">
+            <a href="/articles" className="text-sm font-medium text-muted-foreground hover:text-accent transition-colors px-4 py-2 rounded-full hover:bg-muted/60">
               View all →
             </a>
           </div>
@@ -117,7 +117,7 @@ const Index = () => {
             </div>
           </div>
           <div className="pt-8 border-t border-border text-center text-sm text-muted-foreground">
-             <p>{footerContent?.copyright || '© 2025 Perspective. All rights reserved.'}</p>
+             <p>{footerContent?.copyright || '© 2025 Cyberom. All rights reserved.'}</p>
           </div>
         </div>
       </footer>

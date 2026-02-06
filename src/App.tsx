@@ -20,6 +20,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import Articles from "./pages/Articles";
 import AdminDashboard from "./pages/admin/AdminDashboard";
  import HeroEditor from "./pages/admin/HeroEditor";
  import ArticlesList from "./pages/admin/ArticlesList";
@@ -44,9 +45,10 @@ const App = () => (
          <Sonner />
          <BrowserRouter>
            <Routes>
-             {/* Public Routes */}
-             <Route path="/" element={<Index />} />
-             <Route path="/article/:id" element={<Article />} />
+            {/* Public Routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/articles" element={<Articles />} />
+            <Route path="/article/:id" element={<Article />} />
              <Route path="/wellness" element={<Wellness />} />
              <Route path="/travel" element={<Travel />} />
              <Route path="/creativity" element={<Creativity />} />
