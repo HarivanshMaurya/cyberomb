@@ -3,6 +3,7 @@ import { Menu, X, Moon, Sun, LogIn, LogOut, LayoutDashboard } from "lucide-react
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import cyberomLogo from "@/assets/cyberom-logo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -50,10 +51,12 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center min-w-0">
             <a href="/" className="flex items-center gap-1.5 sm:gap-2">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-primary-foreground font-bold text-base sm:text-lg">P</span>
-              </div>
-              <span className="text-base sm:text-xl font-bold font-serif truncate">Perspective</span>
+              <img 
+                src={cyberomLogo} 
+                alt="Cyberom" 
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-contain flex-shrink-0"
+              />
+              <span className="text-base sm:text-xl font-bold font-serif truncate">Cyberom</span>
             </a>
           </div>
 
@@ -62,7 +65,7 @@ const Header = () => {
             <a href="/" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
               Home
             </a>
-            <a href="/#articles" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
+            <a href="/articles" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
               Articles
             </a>
             <a href="/wellness" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
@@ -143,7 +146,7 @@ const Header = () => {
               <a href="/" className="text-sm font-medium hover:text-accent transition-colors">
                 Home
               </a>
-              <a href="/#articles" className="text-sm font-medium hover:text-accent transition-colors">
+              <a href="/articles" className="text-sm font-medium hover:text-accent transition-colors">
                 Articles
               </a>
               <a href="/wellness" className="text-sm font-medium hover:text-accent transition-colors">
