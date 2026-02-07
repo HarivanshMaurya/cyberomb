@@ -1,34 +1,38 @@
- import { NavLink, useLocation } from 'react-router-dom';
- import { useAuth } from '@/contexts/AuthContext';
- import { cn } from '@/lib/utils';
- import {
-   LayoutDashboard,
-   FileText,
-   Image,
-   Settings,
-   LogOut,
-   PanelLeftClose,
-   PanelLeft,
-   Newspaper,
-   Globe,
-   Search,
-   Palette,
-   Layers,
- } from 'lucide-react';
- import { Button } from '@/components/ui/button';
- import { useState } from 'react';
- 
- const navItems = [
-   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
-   { to: '/admin/hero', icon: Palette, label: 'Hero Section' },
-   { to: '/admin/articles', icon: Newspaper, label: 'Articles' },
-   { to: '/admin/pages', icon: FileText, label: 'Pages' },
-   { to: '/admin/page-sections', icon: Layers, label: 'Page Sections' },
-   { to: '/admin/sections', icon: Globe, label: 'Site Content' },
-   { to: '/admin/media', icon: Image, label: 'Media Library' },
-   { to: '/admin/seo', icon: Search, label: 'SEO Settings' },
-   { to: '/admin/settings', icon: Settings, label: 'Settings' },
- ];
+import { NavLink, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
+import {
+  LayoutDashboard,
+  FileText,
+  Image,
+  Settings,
+  LogOut,
+  PanelLeftClose,
+  PanelLeft,
+  Newspaper,
+  Globe,
+  Search,
+  Palette,
+  Layers,
+  Tags,
+  LayoutGrid,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+
+const navItems = [
+  { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
+  { to: '/admin/hero', icon: Palette, label: 'Hero Section' },
+  { to: '/admin/articles', icon: Newspaper, label: 'Articles' },
+  { to: '/admin/categories', icon: Tags, label: 'Categories' },
+  { to: '/admin/pages', icon: FileText, label: 'Pages' },
+  { to: '/admin/page-sections', icon: Layers, label: 'Page Sections' },
+  { to: '/admin/section-cards', icon: LayoutGrid, label: 'Section Cards' },
+  { to: '/admin/sections', icon: Globe, label: 'Site Content' },
+  { to: '/admin/media', icon: Image, label: 'Media Library' },
+  { to: '/admin/seo', icon: Search, label: 'SEO Settings' },
+  { to: '/admin/settings', icon: Settings, label: 'Settings' },
+];
  
  export function AdminSidebar() {
    const { signOut, user } = useAuth();
