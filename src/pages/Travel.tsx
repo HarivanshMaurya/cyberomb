@@ -2,16 +2,20 @@ import Header from "@/components/Header";
 import ArticleCard from "@/components/ArticleCard";
 import { useArticles } from "@/hooks/useArticles";
 import { usePageSection } from "@/hooks/usePageSections";
+import { useSectionCards } from "@/hooks/useSectionCards";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "react-router-dom";
 
 const Travel = () => {
   const { data: articles } = useArticles('published');
   const { data: pageData, isLoading } = usePageSection('travel');
+  const { data: sectionCards, isLoading: cardsLoading } = useSectionCards('travel_cards');
 
   const travelArticles = articles?.filter(article => 
     article.category.toLowerCase() === "travel"
   ) || [];
 
+  const featuredCards = sectionCards?.content?.cards || [];
   const content = pageData?.content as { section_title?: string; section_content?: string } | undefined;
 
   if (isLoading) {
@@ -43,8 +47,47 @@ const Travel = () => {
           </p>
         </div>
 
+        {/* Featured Cards from Admin */}
+        {featuredCards.length > 0 && (
+          <section className="mb-16">
+            <h2 className="text-2xl font-bold mb-6">Featured</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredCards.map((card, index) => (
+                <Link 
+                  key={card.id || index} 
+                  to={card.link || '#'}
+                  className={`group block animate-slide-up stagger-${Math.min(index + 1, 6)}`}
+                >
+                  <div className="rounded-2xl overflow-hidden bg-card border border-border hover:shadow-lg transition-all duration-300">
+                    {card.image && (
+                      <div className="aspect-video overflow-hidden">
+                        <img 
+                          src={card.image} 
+                          alt={card.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                        {card.title}
+                      </h3>
+                      {card.description && (
+                        <p className="text-muted-foreground text-sm line-clamp-2">
+                          {card.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Articles Grid */}
         <section>
+          <h2 className="text-2xl font-bold mb-6">Articles</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {travelArticles.map((article, index) => (
               <div key={article.id} className={`animate-slide-up stagger-${Math.min(index + 2, 6)}`}>
