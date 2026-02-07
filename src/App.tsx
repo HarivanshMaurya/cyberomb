@@ -22,19 +22,21 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Articles from "./pages/Articles";
 import AdminDashboard from "./pages/admin/AdminDashboard";
- import HeroEditor from "./pages/admin/HeroEditor";
- import ArticlesList from "./pages/admin/ArticlesList";
- import ArticleEditor from "./pages/admin/ArticleEditor";
- import PagesList from "./pages/admin/PagesList";
- import PageEditor from "./pages/admin/PageEditor";
- import SiteSections from "./pages/admin/SiteSections";
- import MediaLibrary from "./pages/admin/MediaLibrary";
- import SEOSettings from "./pages/admin/SEOSettings";
- import Settings from "./pages/admin/Settings";
+import HeroEditor from "./pages/admin/HeroEditor";
+import ArticlesList from "./pages/admin/ArticlesList";
+import ArticleEditor from "./pages/admin/ArticleEditor";
+import PagesList from "./pages/admin/PagesList";
+import PageEditor from "./pages/admin/PageEditor";
+import SiteSections from "./pages/admin/SiteSections";
+import MediaLibrary from "./pages/admin/MediaLibrary";
+import SEOSettings from "./pages/admin/SEOSettings";
+import Settings from "./pages/admin/Settings";
 import DynamicPage from "./pages/DynamicPage";
 import BlogArticle from "./pages/BlogArticle";
- import CategoryPage from "./pages/CategoryPage";
+import CategoryPage from "./pages/CategoryPage";
 import PageSectionsEditor from "./pages/admin/PageSectionsEditor";
+import CategoriesManager from "./pages/admin/CategoriesManager";
+import SectionCardsManager from "./pages/admin/SectionCardsManager";
 
 const queryClient = new QueryClient();
 
@@ -79,16 +81,18 @@ const App = () => (
              >
                <Route index element={<AdminDashboard />} />
                <Route path="hero" element={<HeroEditor />} />
-               <Route path="articles" element={<ArticlesList />} />
-               <Route path="articles/:id" element={<ArticleEditor />} />
+              <Route path="articles" element={<ArticlesList />} />
+              <Route path="articles/:id" element={<ArticleEditor />} />
+              <Route path="categories" element={<CategoriesManager />} />
               <Route path="pages" element={<PagesList />} />
               <Route path="pages/:id" element={<PageEditor />} />
               <Route path="page-sections" element={<PageSectionsEditor />} />
+              <Route path="section-cards" element={<SectionCardsManager />} />
               <Route path="sections" element={<SiteSections />} />
               <Route path="media" element={<MediaLibrary />} />
               <Route path="seo" element={<SEOSettings />} />
-               <Route path="settings" element={<Settings />} />
-             </Route>
+              <Route path="settings" element={<Settings />} />
+            </Route>
  
              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
              <Route path="*" element={<NotFound />} />
