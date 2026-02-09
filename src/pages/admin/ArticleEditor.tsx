@@ -1,49 +1,61 @@
- import { useState, useEffect } from 'react';
- import { useParams, useNavigate } from 'react-router-dom';
- import { useArticle, useCreateArticle, useUpdateArticle } from '@/hooks/useArticles';
- import { useAuth } from '@/contexts/AuthContext';
- import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
- import { Input } from '@/components/ui/input';
- import { Label } from '@/components/ui/label';
- import { Textarea } from '@/components/ui/textarea';
- import { Button } from '@/components/ui/button';
- import {
-   Select,
-   SelectContent,
-   SelectItem,
-   SelectTrigger,
-   SelectValue,
- } from '@/components/ui/select';
- import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
- import { RichTextEditor } from '@/components/admin/RichTextEditor';
- import { Loader2, Save, ArrowLeft, Eye } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useArticle, useCreateArticle, useUpdateArticle } from '@/hooks/useArticles';
+import { useCategories } from '@/hooks/useCategories';
+import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RichTextEditor } from '@/components/admin/RichTextEditor';
+import { Loader2, Save, ArrowLeft, Eye } from 'lucide-react';
  
- const categories = ['wellness', 'travel', 'creativity', 'growth', 'uncategorized'];
- 
- export default function ArticleEditor() {
-   const { id } = useParams();
-   const navigate = useNavigate();
-   const { user } = useAuth();
-   const isNew = id === 'new';
- 
-   const { data: article, isLoading } = useArticle(id || '');
-   const createArticle = useCreateArticle();
-   const updateArticle = useUpdateArticle();
- 
-   const [formData, setFormData] = useState({
-     title: '',
-     slug: '',
-     excerpt: '',
-     content: '',
-     featured_image: '',
-     category: 'uncategorized',
-     author_name: '',
-     status: 'draft' as 'draft' | 'published' | 'archived',
-     read_time: '5 min read',
-     meta_title: '',
-     meta_description: '',
-     og_image: '',
-   });
+export default function ArticleEditor() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isNew = id === 'new';
+
+  const { data: article, isLoading } = useArticle(id || '');
+  const createArticle = useCreateArticle();
+  const updateArticle = useUpdateArticle();
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
+
+  const [formData, setFormData] = useState({
+    title: '',
+    slug: '',
+    excerpt: '',
+    content: '',
+    featured_image: '',
+    category: 'uncategorized',
+    author_name: '',
+    status: 'draft' as 'draft' | 'published' | 'archived',
+    read_time: '5 min read',
+    meta_title: '',
+    meta_description: '',
+    og_image: '',
+  });
+
+  const categoryOptions = (() => {
+    const opts = new Map<string, string>();
+    opts.set('uncategorized', 'Uncategorized');
+    (categoriesData || []).forEach((c) => opts.set(c.slug, c.name));
+
+    // If the current value is something legacy, keep it selectable
+    const current = formData.category;
+    if (current && !opts.has(current)) opts.set(current, current);
+
+    return Array.from(opts.entries()).map(([value, label]) => ({ value, label }));
+  })();
  
    useEffect(() => {
      if (article && !isNew) {
@@ -122,14 +134,14 @@
              </p>
            </div>
          </div>
-         {!isNew && article?.status === 'published' && (
-           <Button variant="outline" asChild>
-             <a href={`/article/${article.slug}`} target="_blank" rel="noopener noreferrer">
-               <Eye className="mr-2 h-4 w-4" />
-               View Live
-             </a>
-           </Button>
-         )}
+          {!isNew && article?.status === 'published' && (
+            <Button variant="outline" asChild>
+              <a href={`/blog/${article.slug}`} target="_blank" rel="noopener noreferrer">
+                <Eye className="mr-2 h-4 w-4" />
+                View Live
+              </a>
+            </Button>
+          )}
        </div>
  
        <form onSubmit={handleSubmit}>
@@ -243,24 +255,24 @@
                      <CardTitle>Details</CardTitle>
                    </CardHeader>
                    <CardContent className="space-y-4">
-                     <div className="space-y-2">
-                       <Label>Category</Label>
-                       <Select
-                         value={formData.category}
-                         onValueChange={(value) => setFormData({ ...formData, category: value })}
-                       >
-                         <SelectTrigger>
-                           <SelectValue />
-                         </SelectTrigger>
-                         <SelectContent>
-                           {categories.map((cat) => (
-                             <SelectItem key={cat} value={cat} className="capitalize">
-                               {cat}
-                             </SelectItem>
-                           ))}
-                         </SelectContent>
-                       </Select>
-                     </div>
+                    <div className="space-y-2">
+                      <Label>Category</Label>
+                      <Select
+                        value={formData.category}
+                        onValueChange={(value) => setFormData({ ...formData, category: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={categoriesLoading ? 'Loading categories…' : 'Select category'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categoryOptions.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
  
                      <div className="space-y-2">
                        <Label htmlFor="author_name">Author Name</Label>

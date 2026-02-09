@@ -57,15 +57,16 @@ const App = () => (
              <Route path="/creativity" element={<Creativity />} />
              <Route path="/growth" element={<Growth />} />
              <Route path="/about" element={<About />} />
-             <Route path="/authors" element={<Authors />} />
-             <Route path="/contact" element={<Contact />} />
-             <Route path="/style-guide" element={<StyleGuide />} />
-             <Route path="/privacy" element={<Privacy />} />
-             <Route path="/terms" element={<Terms />} />
-             <Route path="/page/:slug" element={<DynamicPage />} />
+              <Route path="/authors" element={<Authors />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/style-guide" element={<StyleGuide />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/page/:slug" element={<DynamicPage />} />
               <Route path="/blog/:slug" element={<BlogArticle />} />
-               <Route path="/category/:slug" element={<CategoryPage />} />
+              <Route path="/category/:slug" element={<CategoryPage />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/404" element={<NotFound />} />
  
               {/* Admin Login - redirect to unified login */}
               <Route path="/admin/login" element={<Login />} />
