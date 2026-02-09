@@ -4,12 +4,20 @@ import {
   useUpdateSectionCards,
   SectionCard,
 } from '@/hooks/useSectionCards';
+import { useArticles } from '@/hooks/useArticles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Plus, Save, Trash2, Loader2, Heart, Plane, GripVertical } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -21,12 +29,19 @@ const defaultCard: SectionCard = {
   link: '',
 };
 
+interface ArticleOption {
+  slug: string;
+  title: string;
+  featured_image: string | null;
+}
+
 interface CardEditorProps {
   cards: SectionCard[];
   onChange: (cards: SectionCard[]) => void;
+  articleOptions?: ArticleOption[];
 }
 
-const CardEditor = ({ cards, onChange }: CardEditorProps) => {
+const CardEditor = ({ cards, onChange, articleOptions = [] }: CardEditorProps) => {
   const addCard = () => {
     onChange([...cards, { ...defaultCard, id: crypto.randomUUID() }]);
   };
@@ -39,6 +54,20 @@ const CardEditor = ({ cards, onChange }: CardEditorProps) => {
 
   const removeCard = (index: number) => {
     onChange(cards.filter((_, i) => i !== index));
+  };
+
+  const applyArticle = (index: number, slug: string) => {
+    const selected = articleOptions.find((a) => a.slug === slug);
+    if (!selected) return;
+
+    // Always set link to the dynamic blog page
+    updateCard(index, 'link', `/blog/${selected.slug}`);
+
+    // Helpful defaults (only fill if empty)
+    if (!cards[index]?.title?.trim()) updateCard(index, 'title', selected.title);
+    if (!cards[index]?.image?.trim() && selected.featured_image) {
+      updateCard(index, 'image', selected.featured_image);
+    }
   };
 
   return (
@@ -58,6 +87,27 @@ const CardEditor = ({ cards, onChange }: CardEditorProps) => {
               </Button>
             </div>
 
+            {articleOptions.length > 0 && (
+              <div>
+                <Label>Choose existing article (optional)</Label>
+                <Select onValueChange={(slug) => applyArticle(index, slug)}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select an article…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {articleOptions.map((a) => (
+                      <SelectItem key={a.slug} value={a.slug}>
+                        {a.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  This will set Link to <span className="font-mono">/blog/&lt;slug&gt;</span>.
+                </p>
+              </div>
+            )}
+
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <Label>Title</Label>
@@ -73,7 +123,7 @@ const CardEditor = ({ cards, onChange }: CardEditorProps) => {
                 <Input
                   value={card.link}
                   onChange={(e) => updateCard(index, 'link', e.target.value)}
-                  placeholder="/blog/article-slug"
+                  placeholder="Paste full URL, /blog/article-slug, or just article-slug"
                   className="mt-1"
                 />
               </div>
@@ -103,6 +153,7 @@ const CardEditor = ({ cards, onChange }: CardEditorProps) => {
                   src={card.image}
                   alt={card.title}
                   className="mt-2 h-32 w-full object-cover rounded-md"
+                  loading="lazy"
                 />
               )}
             </div>
@@ -121,9 +172,20 @@ const CardEditor = ({ cards, onChange }: CardEditorProps) => {
 export default function SectionCardsManager() {
   const { data: sections, isLoading } = useAllSectionCards();
   const updateSection = useUpdateSectionCards();
+  const { data: articles } = useArticles();
 
   const [wellnessCards, setWellnessCards] = useState<SectionCard[]>([]);
   const [travelCards, setTravelCards] = useState<SectionCard[]>([]);
+
+  const wellnessArticleOptions: ArticleOption[] =
+    articles
+      ?.filter((a) => a.category?.toLowerCase() === 'wellness')
+      .map((a) => ({ slug: a.slug, title: a.title, featured_image: a.featured_image })) || [];
+
+  const travelArticleOptions: ArticleOption[] =
+    articles
+      ?.filter((a) => a.category?.toLowerCase() === 'travel')
+      .map((a) => ({ slug: a.slug, title: a.title, featured_image: a.featured_image })) || [];
 
   useEffect(() => {
     if (sections) {
@@ -197,7 +259,11 @@ export default function SectionCardsManager() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <CardEditor cards={wellnessCards} onChange={setWellnessCards} />
+              <CardEditor
+                cards={wellnessCards}
+                onChange={setWellnessCards}
+                articleOptions={wellnessArticleOptions}
+              />
               <Button
                 onClick={saveWellnessCards}
                 disabled={updateSection.isPending}
@@ -226,7 +292,11 @@ export default function SectionCardsManager() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <CardEditor cards={travelCards} onChange={setTravelCards} />
+              <CardEditor
+                cards={travelCards}
+                onChange={setTravelCards}
+                articleOptions={travelArticleOptions}
+              />
               <Button
                 onClick={saveTravelCards}
                 disabled={updateSection.isPending}
