@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import SEOHead from "@/components/SEOHead";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -27,6 +28,11 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background animate-fade-in">
+      <SEOHead
+        title="Contact Us"
+        description="Have a question, suggestion, or just want to say hello? Get in touch with the Cyberom team."
+        canonical="/contact"
+      />
       <Header />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

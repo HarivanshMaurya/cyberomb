@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import ArticleCard from "@/components/ArticleCard";
+import SEOHead from "@/components/SEOHead";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useArticles } from "@/hooks/useArticles";
 import { usePageSection } from "@/hooks/usePageSections";
@@ -54,6 +55,11 @@ const Wellness = () => {
 
   return (
     <div className="min-h-screen bg-background animate-fade-in">
+      <SEOHead
+        title="Wellness & Self-Care"
+        description="Discover practices, insights, and strategies to nurture your physical, mental, and emotional wellbeing."
+        canonical="/wellness"
+      />
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

@@ -1,13 +1,14 @@
- import { useParams, Navigate } from "react-router-dom";
- import { useQuery } from "@tanstack/react-query";
- import { supabase } from "@/integrations/supabase/client";
- import Header from "@/components/Header";
- import ArticleCard from "@/components/ArticleCard";
- import { useCategories } from "@/hooks/useCategories";
- import { Button } from "@/components/ui/button";
- import { Skeleton } from "@/components/ui/skeleton";
- import { Loader2 } from "lucide-react";
- import { cn } from "@/lib/utils";
+import { useParams, Navigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import Header from "@/components/Header";
+import SEOHead from "@/components/SEOHead";
+import ArticleCard from "@/components/ArticleCard";
+import { useCategories } from "@/hooks/useCategories";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
  
  const CategoryPage = () => {
    const { slug } = useParams<{ slug: string }>();
@@ -42,8 +43,13 @@
    const isLoading = categoriesLoading || articlesLoading;
  
    return (
-     <div className="min-h-screen bg-background animate-fade-in">
-       <Header />
+    <div className="min-h-screen bg-background animate-fade-in">
+      <SEOHead
+        title={currentCategory?.name || slug || "Category"}
+        description={currentCategory?.description || `Browse articles in the ${currentCategory?.name || slug} category.`}
+        canonical={`/category/${slug}`}
+      />
+      <Header />
        
        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
          {/* Category Header */}
