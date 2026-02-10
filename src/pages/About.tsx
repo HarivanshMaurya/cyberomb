@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import SEOHead from "@/components/SEOHead";
 import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePageSection } from "@/hooks/usePageSections";
@@ -36,6 +37,11 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background animate-fade-in">
+      <SEOHead
+        title="About Cyberom"
+        description="A space for exploring ideas, finding inspiration, and discovering new ways of seeing the world."
+        canonical="/about"
+      />
       <Header />
       
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
