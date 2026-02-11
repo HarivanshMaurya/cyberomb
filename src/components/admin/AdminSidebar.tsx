@@ -16,6 +16,7 @@ import {
   Layers,
   Tags,
   LayoutGrid,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -28,6 +29,7 @@ const navItems = [
   { to: '/admin/pages', icon: FileText, label: 'Pages' },
   { to: '/admin/page-sections', icon: Layers, label: 'Page Sections' },
   { to: '/admin/section-cards', icon: LayoutGrid, label: 'Section Cards' },
+  { to: '/admin/authors', icon: Users, label: 'Authors' },
   { to: '/admin/sections', icon: Globe, label: 'Site Content' },
   { to: '/admin/media', icon: Image, label: 'Media Library' },
   { to: '/admin/seo', icon: Search, label: 'SEO Settings' },

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useArticle, useCreateArticle, useUpdateArticle } from '@/hooks/useArticles';
 import { useCategories } from '@/hooks/useCategories';
+import { useActiveAuthors } from '@/hooks/useAuthors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,7 @@ export default function ArticleEditor() {
   const createArticle = useCreateArticle();
   const updateArticle = useUpdateArticle();
   const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
+  const { data: authorsData } = useActiveAuthors();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -274,15 +276,22 @@ export default function ArticleEditor() {
                       </Select>
                     </div>
  
-                     <div className="space-y-2">
-                       <Label htmlFor="author_name">Author Name</Label>
-                       <Input
-                         id="author_name"
-                         value={formData.author_name}
-                         onChange={(e) => setFormData({ ...formData, author_name: e.target.value })}
-                         placeholder="Author name"
-                       />
-                     </div>
+                      <div className="space-y-2">
+                        <Label>Author Name</Label>
+                        <Select
+                          value={formData.author_name}
+                          onValueChange={(value) => setFormData({ ...formData, author_name: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select author" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(authorsData || []).map((a) => (
+                              <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
  
                      <div className="space-y-2">
                        <Label htmlFor="read_time">Read Time</Label>

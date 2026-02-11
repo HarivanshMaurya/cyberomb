@@ -74,6 +74,48 @@ export type Database = {
         }
         Relationships: []
       }
+      authors: {
+        Row: {
+          bio: string | null
+          created_at: string
+          email: string | null
+          id: string
+          image: string | null
+          instagram: string | null
+          is_active: boolean
+          name: string
+          role: string | null
+          twitter: string | null
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          image?: string | null
+          instagram?: string | null
+          is_active?: boolean
+          name: string
+          role?: string | null
+          twitter?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          image?: string | null
+          instagram?: string | null
+          is_active?: boolean
+          name?: string
+          role?: string | null
+          twitter?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
