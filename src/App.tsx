@@ -37,6 +37,7 @@ import CategoryPage from "./pages/CategoryPage";
 import PageSectionsEditor from "./pages/admin/PageSectionsEditor";
 import CategoriesManager from "./pages/admin/CategoriesManager";
 import SectionCardsManager from "./pages/admin/SectionCardsManager";
+import AuthorsManager from "./pages/admin/AuthorsManager";
 
 const queryClient = new QueryClient();
 
@@ -89,6 +90,7 @@ const App = () => (
               <Route path="pages/:id" element={<PageEditor />} />
               <Route path="page-sections" element={<PageSectionsEditor />} />
               <Route path="section-cards" element={<SectionCardsManager />} />
+              <Route path="authors" element={<AuthorsManager />} />
               <Route path="sections" element={<SiteSections />} />
               <Route path="media" element={<MediaLibrary />} />
               <Route path="seo" element={<SEOSettings />} />
