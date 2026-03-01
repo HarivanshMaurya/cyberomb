@@ -1,8 +1,6 @@
 import Header from "@/components/Header";
-import ArticleCard from "@/components/ArticleCard";
 import SEOHead from "@/components/SEOHead";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useArticles } from "@/hooks/useArticles";
 import { usePageSection } from "@/hooks/usePageSections";
 import { useSectionCards } from "@/hooks/useSectionCards";
 import { Link } from "react-router-dom";
@@ -24,12 +22,8 @@ const resolveCardLink = (raw?: string) => {
 };
 
 const Wellness = () => {
-  const { data: articles } = useArticles("published");
   const { data: pageData, isLoading } = usePageSection("wellness");
   const { data: sectionCards } = useSectionCards("wellness_cards");
-
-  const wellnessArticles =
-    articles?.filter((article) => article.category.toLowerCase() === "wellness") || [];
 
   const featuredCards = sectionCards?.content?.cards || [];
   const content = pageData?.content as
@@ -135,34 +129,6 @@ const Wellness = () => {
             </div>
           </section>
         )}
-
-        {/* Articles Grid */}
-        <section>
-          <h2 className="text-2xl font-bold mb-6">Articles</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {wellnessArticles.map((article, index) => (
-              <div
-                key={article.id}
-                className={`animate-slide-up stagger-${Math.min(index + 2, 6)}`}
-              >
-                <ArticleCard
-                  id={article.slug}
-                  title={article.title}
-                  category={article.category}
-                  date={new Date(article.created_at).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                  image={
-                    article.featured_image ||
-                    "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&q=80"
-                  }
-                />
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* Featured Content */}
         <section className="mt-16 rounded-2xl bg-card p-8 md:p-12">
