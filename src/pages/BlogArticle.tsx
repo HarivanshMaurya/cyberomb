@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,12 +7,14 @@ import ArticleCard from "@/components/ArticleCard";
 import ArticleHeader from "@/components/blog/ArticleHeader";
 import CategorySidebar from "@/components/blog/CategorySidebar";
 import MobileShareButtons from "@/components/blog/MobileShareButtons";
+import LanguageToggle from "@/components/blog/LanguageToggle";
 import SEOHead, { buildArticleJsonLd, buildBreadcrumbJsonLd } from "@/components/SEOHead";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const BlogArticle = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [translated, setTranslated] = useState<{ title: string; content: string; excerpt: string } | null>(null);
   
   const { data: article, isLoading, error } = useQuery({
     queryKey: ['article', slug],
@@ -57,6 +60,13 @@ const BlogArticle = () => {
     if (normalized.includes("growth")) return "tag-growth";
     return "tag-lifestyle";
   };
+  const handleTranslated = useCallback((data: { title: string; content: string; excerpt: string }) => {
+    setTranslated(data);
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setTranslated(null);
+  }, []);
 
   if (isLoading) {
     return (
@@ -92,6 +102,10 @@ const BlogArticle = () => {
     { name: "Articles", url: "/articles" },
     { name: article.title, url: `/blog/${article.slug}` },
   ]);
+
+  const displayTitle = translated?.title || article.title;
+  const displayContent = translated?.content || article.content;
+  const displayExcerpt = translated?.excerpt || article.excerpt;
 
   return (
     <div className="min-h-screen bg-background animate-fade-in">
@@ -140,9 +154,20 @@ const BlogArticle = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Article Content */}
             <article className="lg:col-span-8">
+              {/* Language Toggle */}
+              <div className="mb-6 flex justify-end">
+                <LanguageToggle
+                  title={article.title}
+                  content={article.content || ""}
+                  excerpt={article.excerpt}
+                  onTranslated={handleTranslated}
+                  onReset={handleReset}
+                />
+              </div>
+
               <ArticleHeader
-                title={article.title}
-                excerpt={article.excerpt}
+                title={displayTitle}
+                excerpt={displayExcerpt}
                 category={article.category}
                 authorName={article.author_name}
                 formattedDate={formattedDate}
@@ -150,10 +175,10 @@ const BlogArticle = () => {
                 getCategoryClass={getCategoryClass}
               />
 
-              {article.content && (
+              {displayContent && (
                 <div 
                   className="prose prose-lg max-w-none mb-16 animate-slide-up stagger-2"
-                  dangerouslySetInnerHTML={{ __html: article.content }}
+                  dangerouslySetInnerHTML={{ __html: displayContent }}
                 />
               )}
 
