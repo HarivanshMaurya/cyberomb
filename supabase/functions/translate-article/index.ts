@@ -23,25 +23,11 @@ serve(async (req) => {
 
     const langName = targetLang === "hi" ? "Hindi" : "English";
 
-    const prompt = `You are a professional translator. Translate the following blog article content from ${targetLang === "hi" ? "English to Hindi" : "Hindi to English"}.
+    const prompt = `Translate this blog article to ${langName}. Keep ALL HTML tags intact. Only translate text content. Return JSON: {"title":"...","content":"...","excerpt":"..."}
 
-IMPORTANT RULES:
-- Keep ALL HTML tags exactly as they are. Only translate the text content inside them.
-- Maintain the same formatting, paragraph structure, and HTML markup.
-- Translate naturally, not word-by-word. Use proper ${langName} grammar and tone.
-- Do NOT add any explanation or commentary. Return ONLY the translated content.
-
-Return a JSON object with these fields:
-- "title": translated title
-- "content": translated HTML content  
-- "excerpt": translated excerpt (if provided)
-
-Article Title: ${title || ""}
-
-Article Excerpt: ${excerpt || ""}
-
-Article Content (HTML):
-${content}`;
+Title: ${title || ""}
+Excerpt: ${excerpt || ""}
+Content: ${content}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -50,7 +36,7 @@ ${content}`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-flash-lite",
         messages: [
           {
             role: "system",
