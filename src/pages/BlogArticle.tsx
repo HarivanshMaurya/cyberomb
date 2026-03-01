@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 const BlogArticle = () => {
   const { slug } = useParams<{ slug: string }>();
   const [translated, setTranslated] = useState<{ title: string; content: string; excerpt: string } | null>(null);
+  const [isTranslatingContent, setIsTranslatingContent] = useState(false);
   
   const { data: article, isLoading, error } = useQuery({
     queryKey: ['article', slug],
@@ -162,6 +163,7 @@ const BlogArticle = () => {
                   excerpt={article.excerpt}
                   onTranslated={handleTranslated}
                   onReset={handleReset}
+                  onLoadingChange={setIsTranslatingContent}
                 />
               </div>
 
@@ -175,12 +177,27 @@ const BlogArticle = () => {
                 getCategoryClass={getCategoryClass}
               />
 
-              {displayContent && (
+              {isTranslatingContent ? (
+                <div className="space-y-4 mb-16 animate-pulse">
+                  <div className="h-6 bg-muted rounded w-3/4" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="h-4 bg-muted rounded w-5/6" />
+                  <div className="h-6 bg-muted rounded w-2/3 mt-6" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="h-4 bg-muted rounded w-4/5" />
+                  <div className="h-6 bg-muted rounded w-1/2 mt-6" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="h-4 bg-muted rounded w-3/4" />
+                  <p className="text-sm text-muted-foreground text-center pt-4">Translating to Hindi… please wait</p>
+                </div>
+              ) : displayContent ? (
                 <div 
                   className="prose prose-lg max-w-none mb-16 animate-slide-up stagger-2"
                   dangerouslySetInnerHTML={{ __html: displayContent }}
                 />
-              )}
+              ) : null}
 
               <MobileShareButtons title={article.title} />
 
