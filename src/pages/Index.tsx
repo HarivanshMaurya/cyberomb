@@ -5,14 +5,12 @@ import IntroSection from "@/components/IntroSection";
 import SEOHead, { buildWebsiteJsonLd } from "@/components/SEOHead";
 import { useSiteSection } from "@/hooks/useSiteSections";
 import { useArticles } from "@/hooks/useArticles";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { articles as staticArticles } from "@/data/articles";
 
 const Index = () => {
   const { data: dbArticles } = useArticles('published');
   const { data: newsletterSection } = useSiteSection('newsletter');
   const { data: footerSection } = useSiteSection('footer');
-  const { t } = useLanguage();
 
   const featuredArticles = dbArticles?.length
     ? dbArticles.slice(0, 6).map((article) => ({
@@ -32,10 +30,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background animate-fade-in">
-      <SEOHead
-        canonical="/"
-        jsonLd={buildWebsiteJsonLd()}
-      />
+      <SEOHead canonical="/" jsonLd={buildWebsiteJsonLd()} />
       <Header />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -44,9 +39,9 @@ const Index = () => {
 
         <section id="articles" className="py-12" aria-label="Featured Articles">
           <div className="flex items-center justify-between mb-12 animate-slide-up">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{t("home.featured")}</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Featured Articles</h2>
             <a href="/articles" className="text-sm font-medium text-muted-foreground hover:text-accent transition-colors px-4 py-2 rounded-full hover:bg-muted/60">
-              {t("home.viewAll")}
+              View all →
             </a>
           </div>
 
@@ -62,20 +57,15 @@ const Index = () => {
         <section className="my-20 rounded-[2.5rem] bg-card p-12 md:p-16 text-center animate-scale-in" aria-label="Newsletter">
           <div className="max-w-2xl mx-auto space-y-8">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
-              {newsletterContent?.heading || t("home.stayInspired")}
+              {newsletterContent?.heading || 'Stay inspired.'}
             </h2>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              {newsletterContent?.description || t("home.subscribeDesc")}
+              {newsletterContent?.description || 'Subscribe to receive our latest articles and insights directly in your inbox.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder={t("home.emailPlaceholder")}
-                aria-label="Email address"
-                className="flex-1 px-6 py-4 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-              />
+              <input type="email" placeholder="Your email" aria-label="Email address" className="flex-1 px-6 py-4 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-all" />
               <button className="px-10 py-4 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 hover:scale-105 transition-all">
-                {newsletterContent?.button_text || t("home.subscribe")}
+                {newsletterContent?.button_text || 'Subscribe'}
               </button>
             </div>
           </div>
@@ -86,34 +76,34 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <nav className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8" aria-label="Footer navigation">
             <div>
-              <h3 className="font-semibold mb-4">{t("footer.explore")}</h3>
+              <h3 className="font-semibold mb-4">Explore</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/wellness" className="hover:text-accent transition-colors">{t("nav.wellness")}</a></li>
-                <li><a href="/travel" className="hover:text-accent transition-colors">{t("nav.travel")}</a></li>
+                <li><a href="/wellness" className="hover:text-accent transition-colors">Wellness</a></li>
+                <li><a href="/travel" className="hover:text-accent transition-colors">Travel</a></li>
                 <li><a href="/creativity" className="hover:text-accent transition-colors">Creativity</a></li>
                 <li><a href="/growth" className="hover:text-accent transition-colors">Growth</a></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">{t("footer.about")}</h3>
+              <h3 className="font-semibold mb-4">About</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/about" className="hover:text-accent transition-colors">{t("footer.ourStory")}</a></li>
-                <li><a href="/authors" className="hover:text-accent transition-colors">{t("footer.authors")}</a></li>
-                <li><a href="/contact" className="hover:text-accent transition-colors">{t("footer.contact")}</a></li>
+                <li><a href="/about" className="hover:text-accent transition-colors">Our Story</a></li>
+                <li><a href="/authors" className="hover:text-accent transition-colors">Authors</a></li>
+                <li><a href="/contact" className="hover:text-accent transition-colors">Contact</a></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">{t("footer.resources")}</h3>
+              <h3 className="font-semibold mb-4">Resources</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/style-guide" className="hover:text-accent transition-colors">{t("footer.styleGuide")}</a></li>
-                <li><a href="/#newsletter" className="hover:text-accent transition-colors">{t("footer.newsletter")}</a></li>
+                <li><a href="/style-guide" className="hover:text-accent transition-colors">Style Guide</a></li>
+                <li><a href="/#newsletter" className="hover:text-accent transition-colors">Newsletter</a></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">{t("footer.legal")}</h3>
+              <h3 className="font-semibold mb-4">Legal</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/privacy" className="hover:text-accent transition-colors">{t("footer.privacy")}</a></li>
-                <li><a href="/terms" className="hover:text-accent transition-colors">{t("footer.terms")}</a></li>
+                <li><a href="/privacy" className="hover:text-accent transition-colors">Privacy Policy</a></li>
+                <li><a href="/terms" className="hover:text-accent transition-colors">Terms of Service</a></li>
               </ul>
             </div>
           </nav>

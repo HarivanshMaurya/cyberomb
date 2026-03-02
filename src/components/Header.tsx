@@ -3,15 +3,12 @@ import { Menu, X, Moon, Sun, LogIn, LogOut, LayoutDashboard } from "lucide-react
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLanguage } from "@/contexts/LanguageContext";
-import GlobalLanguageToggle from "@/components/GlobalLanguageToggle";
 import cyberomLogo from "@/assets/cyberom-logo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
-  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -44,57 +41,30 @@ const Header = () => {
     navigate('/');
   };
 
-  // Don't show login/admin buttons on admin pages
   const isAdminPage = location.pathname.startsWith('/admin');
 
   return (
     <header className="sticky top-0 z-50 py-2 sm:py-4">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16 pill-nav px-4 sm:px-6">
-          {/* Logo */}
           <div className="flex items-center min-w-0">
             <a href="/" className="flex items-center gap-1.5 sm:gap-2">
-              <img 
-                src={cyberomLogo} 
-                alt="Cyberom" 
-                className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-contain flex-shrink-0"
-              />
+              <img src={cyberomLogo} alt="Cyberom" className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-contain flex-shrink-0" />
               <span className="text-base sm:text-xl font-bold font-serif truncate">Cyberom</span>
             </a>
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-2">
-            <a href="/" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
-              {t("nav.home")}
-            </a>
-            <a href="/articles" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
-              {t("nav.articles")}
-            </a>
-            <a href="/wellness" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
-              {t("nav.wellness")}
-            </a>
-            <a href="/travel" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
-              {t("nav.travel")}
-            </a>
-            <a href="/about" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
-              {t("nav.about")}
-            </a>
+            <a href="/" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">Home</a>
+            <a href="/articles" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">Articles</a>
+            <a href="/wellness" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">Wellness</a>
+            <a href="/travel" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">Travel</a>
+            <a href="/about" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">About</a>
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            <GlobalLanguageToggle />
-            <button
-              onClick={toggleTheme}
-              className="p-1.5 sm:p-2 rounded-full hover:bg-muted/60 transition-all"
-              aria-label="Toggle theme"
-            >
-              {isDark ? (
-                <Sun className="h-4 w-4 sm:h-5 sm:w-5" />
-              ) : (
-                <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
-              )}
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+            <button onClick={toggleTheme} className="p-1.5 sm:p-2 rounded-full hover:bg-muted/60 transition-all" aria-label="Toggle theme">
+              {isDark ? <Sun className="h-4 w-4 sm:h-5 sm:w-5" /> : <Moon className="h-4 w-4 sm:h-5 sm:w-5" />}
             </button>
             
             {!isAdminPage && (
@@ -102,105 +72,52 @@ const Header = () => {
                 {user ? (
                   <div className="hidden md:flex items-center gap-2">
                     {isAdmin && (
-                      <Button
-                        variant="ghost"
-                        className="rounded-full px-4 py-2"
-                        onClick={() => navigate('/admin')}
-                      >
-                        <LayoutDashboard className="h-4 w-4 mr-2" />
-                        {t("nav.dashboard")}
+                      <Button variant="ghost" className="rounded-full px-4 py-2" onClick={() => navigate('/admin')}>
+                        <LayoutDashboard className="h-4 w-4 mr-2" />Dashboard
                       </Button>
                     )}
-                    <Button
-                      variant="outline"
-                      className="rounded-full px-4 py-2"
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      {t("nav.logout")}
+                    <Button variant="outline" className="rounded-full px-4 py-2" onClick={handleLogout}>
+                      <LogOut className="h-4 w-4 mr-2" />Logout
                     </Button>
                   </div>
                 ) : (
-                  <Button
-                    className="hidden md:flex bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6 py-2 hover:scale-105 transition-all"
-                    onClick={() => navigate('/login')}
-                  >
-                    <LogIn className="h-4 w-4 mr-2" />
-                    {t("nav.login")}
+                  <Button className="hidden md:flex bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-6 py-2 hover:scale-105 transition-all" onClick={() => navigate('/login')}>
+                    <LogIn className="h-4 w-4 mr-2" />Login
                   </Button>
                 )}
               </>
             )}
 
-            {/* Mobile Menu Button */}
-            <button
-              className="md:hidden p-1.5 sm:p-2"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-            >
+            <button className="md:hidden p-1.5 sm:p-2" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
               {isMenuOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
             <nav className="flex flex-col gap-4">
-              <a href="/" className="text-sm font-medium hover:text-accent transition-colors">
-                {t("nav.home")}
-              </a>
-              <a href="/articles" className="text-sm font-medium hover:text-accent transition-colors">
-                {t("nav.articles")}
-              </a>
-              <a href="/wellness" className="text-sm font-medium hover:text-accent transition-colors">
-                {t("nav.wellness")}
-              </a>
-              <a href="/travel" className="text-sm font-medium hover:text-accent transition-colors">
-                {t("nav.travel")}
-              </a>
-              <a href="/about" className="text-sm font-medium hover:text-accent transition-colors">
-                {t("nav.about")}
-              </a>
+              <a href="/" className="text-sm font-medium hover:text-accent transition-colors">Home</a>
+              <a href="/articles" className="text-sm font-medium hover:text-accent transition-colors">Articles</a>
+              <a href="/wellness" className="text-sm font-medium hover:text-accent transition-colors">Wellness</a>
+              <a href="/travel" className="text-sm font-medium hover:text-accent transition-colors">Travel</a>
+              <a href="/about" className="text-sm font-medium hover:text-accent transition-colors">About</a>
               {!isAdminPage && (
                 <>
                   {user ? (
                     <>
                       {isAdmin && (
-                        <Button
-                          variant="ghost"
-                          className="rounded-full w-full justify-start"
-                          onClick={() => {
-                            navigate('/admin');
-                            setIsMenuOpen(false);
-                          }}
-                        >
-                          <LayoutDashboard className="h-4 w-4 mr-2" />
-                          {t("nav.dashboard")}
+                        <Button variant="ghost" className="rounded-full w-full justify-start" onClick={() => { navigate('/admin'); setIsMenuOpen(false); }}>
+                          <LayoutDashboard className="h-4 w-4 mr-2" />Dashboard
                         </Button>
                       )}
-                      <Button
-                        variant="outline"
-                        className="rounded-full w-full"
-                        onClick={() => {
-                          handleLogout();
-                          setIsMenuOpen(false);
-                        }}
-                      >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        {t("nav.logout")}
+                      <Button variant="outline" className="rounded-full w-full" onClick={() => { handleLogout(); setIsMenuOpen(false); }}>
+                        <LogOut className="h-4 w-4 mr-2" />Logout
                       </Button>
                     </>
                   ) : (
-                    <Button
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-full"
-                      onClick={() => {
-                        navigate('/login');
-                        setIsMenuOpen(false);
-                      }}
-                    >
-                      <LogIn className="h-4 w-4 mr-2" />
-                      {t("nav.login")}
+                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-full" onClick={() => { navigate('/login'); setIsMenuOpen(false); }}>
+                      <LogIn className="h-4 w-4 mr-2" />Login
                     </Button>
                   )}
                 </>
