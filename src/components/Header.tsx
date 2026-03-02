@@ -3,12 +3,15 @@ import { Menu, X, Moon, Sun, LogIn, LogOut, LayoutDashboard } from "lucide-react
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import GlobalLanguageToggle from "@/components/GlobalLanguageToggle";
 import cyberomLogo from "@/assets/cyberom-logo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -63,24 +66,25 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-2">
             <a href="/" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
-              Home
+              {t("nav.home")}
             </a>
             <a href="/articles" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
-              Articles
+              {t("nav.articles")}
             </a>
             <a href="/wellness" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
-              Wellness
+              {t("nav.wellness")}
             </a>
             <a href="/travel" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
-              Travel
+              {t("nav.travel")}
             </a>
             <a href="/about" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
-              About
+              {t("nav.about")}
             </a>
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            <GlobalLanguageToggle />
             <button
               onClick={toggleTheme}
               className="p-1.5 sm:p-2 rounded-full hover:bg-muted/60 transition-all"
@@ -104,7 +108,7 @@ const Header = () => {
                         onClick={() => navigate('/admin')}
                       >
                         <LayoutDashboard className="h-4 w-4 mr-2" />
-                        Dashboard
+                        {t("nav.dashboard")}
                       </Button>
                     )}
                     <Button
@@ -113,7 +117,7 @@ const Header = () => {
                       onClick={handleLogout}
                     >
                       <LogOut className="h-4 w-4 mr-2" />
-                      Logout
+                      {t("nav.logout")}
                     </Button>
                   </div>
                 ) : (
@@ -122,7 +126,7 @@ const Header = () => {
                     onClick={() => navigate('/login')}
                   >
                     <LogIn className="h-4 w-4 mr-2" />
-                    Login
+                    {t("nav.login")}
                   </Button>
                 )}
               </>
@@ -144,19 +148,19 @@ const Header = () => {
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
             <nav className="flex flex-col gap-4">
               <a href="/" className="text-sm font-medium hover:text-accent transition-colors">
-                Home
+                {t("nav.home")}
               </a>
               <a href="/articles" className="text-sm font-medium hover:text-accent transition-colors">
-                Articles
+                {t("nav.articles")}
               </a>
               <a href="/wellness" className="text-sm font-medium hover:text-accent transition-colors">
-                Wellness
+                {t("nav.wellness")}
               </a>
               <a href="/travel" className="text-sm font-medium hover:text-accent transition-colors">
-                Travel
+                {t("nav.travel")}
               </a>
               <a href="/about" className="text-sm font-medium hover:text-accent transition-colors">
-                About
+                {t("nav.about")}
               </a>
               {!isAdminPage && (
                 <>
@@ -172,7 +176,7 @@ const Header = () => {
                           }}
                         >
                           <LayoutDashboard className="h-4 w-4 mr-2" />
-                          Dashboard
+                          {t("nav.dashboard")}
                         </Button>
                       )}
                       <Button
@@ -184,7 +188,7 @@ const Header = () => {
                         }}
                       >
                         <LogOut className="h-4 w-4 mr-2" />
-                        Logout
+                        {t("nav.logout")}
                       </Button>
                     </>
                   ) : (
@@ -196,7 +200,7 @@ const Header = () => {
                       }}
                     >
                       <LogIn className="h-4 w-4 mr-2" />
-                      Login
+                      {t("nav.login")}
                     </Button>
                   )}
                 </>
