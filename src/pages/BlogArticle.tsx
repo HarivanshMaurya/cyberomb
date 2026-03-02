@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,15 +7,17 @@ import ArticleCard from "@/components/ArticleCard";
 import ArticleHeader from "@/components/blog/ArticleHeader";
 import CategorySidebar from "@/components/blog/CategorySidebar";
 import MobileShareButtons from "@/components/blog/MobileShareButtons";
-import LanguageToggle from "@/components/blog/LanguageToggle";
 import SEOHead, { buildArticleJsonLd, buildBreadcrumbJsonLd } from "@/components/SEOHead";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const BlogArticle = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { language, t } = useLanguage();
   const [translated, setTranslated] = useState<{ title: string; content: string; excerpt: string } | null>(null);
   const [isTranslatingContent, setIsTranslatingContent] = useState(false);
+  const cacheRef = useRef<{ title: string; content: string; excerpt: string } | null>(null);
   
   const { data: article, isLoading, error } = useQuery({
     queryKey: ['article', slug],
@@ -61,13 +63,44 @@ const BlogArticle = () => {
     if (normalized.includes("growth")) return "tag-growth";
     return "tag-lifestyle";
   };
-  const handleTranslated = useCallback((data: { title: string; content: string; excerpt: string }) => {
-    setTranslated(data);
-  }, []);
+  // Auto-translate when global language changes
+  useEffect(() => {
+    if (!article) return;
 
-  const handleReset = useCallback(() => {
-    setTranslated(null);
-  }, []);
+    if (language === "en") {
+      setTranslated(null);
+      return;
+    }
+
+    // Use cache if available
+    if (cacheRef.current) {
+      setTranslated(cacheRef.current);
+      return;
+    }
+
+    const translateArticle = async () => {
+      setIsTranslatingContent(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("translate-article", {
+          body: { title: article.title, content: article.content || "", excerpt: article.excerpt || "", targetLang: "hi" },
+        });
+        if (error) throw error;
+        const result = {
+          title: data.title || article.title,
+          content: data.content || article.content || "",
+          excerpt: data.excerpt || article.excerpt || "",
+        };
+        cacheRef.current = result;
+        setTranslated(result);
+      } catch (err) {
+        console.error("Translation failed:", err);
+      } finally {
+        setIsTranslatingContent(false);
+      }
+    };
+
+    translateArticle();
+  }, [language, article]);
 
   if (isLoading) {
     return (
@@ -134,7 +167,7 @@ const BlogArticle = () => {
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to articles
+            {t("blog.backToArticles")}
           </a>
         </nav>
 
@@ -155,17 +188,6 @@ const BlogArticle = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Article Content */}
             <article className="lg:col-span-8">
-              {/* Language Toggle */}
-              <div className="mb-6 flex justify-end">
-                <LanguageToggle
-                  title={article.title}
-                  content={article.content || ""}
-                  excerpt={article.excerpt}
-                  onTranslated={handleTranslated}
-                  onReset={handleReset}
-                  onLoadingChange={setIsTranslatingContent}
-                />
-              </div>
 
               <ArticleHeader
                 title={displayTitle}
@@ -203,19 +225,19 @@ const BlogArticle = () => {
 
               {/* Newsletter CTA */}
               <aside className="mb-16 rounded-2xl bg-card p-8 md:p-12 text-center">
-                <h3 className="text-2xl md:text-3xl font-bold mb-4">Enjoyed this article?</h3>
+                <h3 className="text-2xl md:text-3xl font-bold mb-4">{t("blog.enjoyed")}</h3>
                 <p className="text-muted-foreground mb-6">
-                  Subscribe to receive more insights like this directly in your inbox.
+                  {t("blog.subscribeMore")}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
                   <input
                     type="email"
-                    placeholder="Your email"
+                    placeholder={t("home.emailPlaceholder")}
                     aria-label="Email address"
                     className="flex-1 px-4 py-3 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                   <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8">
-                    Subscribe
+                    {t("home.subscribe")}
                   </Button>
                 </div>
               </aside>
@@ -235,7 +257,7 @@ const BlogArticle = () => {
         {relatedArticles && relatedArticles.length > 0 && (
           <section className="bg-muted py-16 animate-fade-in" aria-label="Related articles">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-3xl font-bold mb-8 animate-slide-up">You might also like</h2>
+              <h2 className="text-3xl font-bold mb-8 animate-slide-up">{t("blog.relatedArticles")}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {relatedArticles.map((relatedArticle, index) => (
                   <div key={relatedArticle.id} className={`animate-slide-up stagger-${Math.min(index + 1, 3)}`}>
