@@ -38,6 +38,7 @@ import PageSectionsEditor from "./pages/admin/PageSectionsEditor";
 import CategoriesManager from "./pages/admin/CategoriesManager";
 import SectionCardsManager from "./pages/admin/SectionCardsManager";
 import AuthorsManager from "./pages/admin/AuthorsManager";
+import NavbarEditor from "./pages/admin/NavbarEditor";
 
 const queryClient = new QueryClient();
 
@@ -81,8 +82,9 @@ const App = () => (
                  </ProtectedRoute>
                }
              >
-               <Route index element={<AdminDashboard />} />
-               <Route path="hero" element={<HeroEditor />} />
+              <Route index element={<AdminDashboard />} />
+                <Route path="navbar" element={<NavbarEditor />} />
+                <Route path="hero" element={<HeroEditor />} />
               <Route path="articles" element={<ArticlesList />} />
               <Route path="articles/:id" element={<ArticleEditor />} />
               <Route path="categories" element={<CategoriesManager />} />

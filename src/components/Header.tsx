@@ -3,6 +3,7 @@ import { Menu, X, Moon, Sun, LogIn, LogOut, LayoutDashboard } from "lucide-react
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavbarConfig } from "@/hooks/useNavbarConfig";
 import cyberomLogo from "@/assets/cyberom-logo.png";
 
 const Header = () => {
@@ -11,22 +12,27 @@ const Header = () => {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { data: navbarConfig } = useNavbarConfig();
+
+  const siteName = navbarConfig?.site_name || 'Cyberom';
+  const logoSrc = navbarConfig?.logo_url || cyberomLogo;
+  const showLogo = navbarConfig?.show_logo ?? true;
+  const showSiteName = navbarConfig?.show_site_name ?? true;
+  const navLinks = (navbarConfig?.nav_links || [])
+    .filter(l => l.visible)
+    .sort((a, b) => a.order - b.order);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const shouldBeDark = savedTheme === "dark" || (!savedTheme && prefersDark);
-    
     setIsDark(shouldBeDark);
-    if (shouldBeDark) {
-      document.documentElement.classList.add("dark");
-    }
+    if (shouldBeDark) document.documentElement.classList.add("dark");
   }, []);
 
   const toggleTheme = () => {
     const newTheme = !isDark;
     setIsDark(newTheme);
-    
     if (newTheme) {
       document.documentElement.classList.add("dark");
       localStorage.setItem("theme", "dark");
@@ -49,24 +55,28 @@ const Header = () => {
         <div className="flex items-center justify-between h-14 sm:h-16 pill-nav px-4 sm:px-6">
           <div className="flex items-center min-w-0">
             <a href="/" className="flex items-center gap-1.5 sm:gap-2">
-              <img src={cyberomLogo} alt="Cyberom" className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-contain flex-shrink-0" />
-              <span className="text-base sm:text-xl font-bold font-serif truncate">Cyberom</span>
+              {showLogo && (
+                <img src={logoSrc} alt={siteName} className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-contain flex-shrink-0" />
+              )}
+              {showSiteName && (
+                <span className="text-base sm:text-xl font-bold font-serif truncate">{siteName}</span>
+              )}
             </a>
           </div>
 
           <nav className="hidden md:flex items-center gap-2">
-            <a href="/" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">Home</a>
-            <a href="/articles" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">Articles</a>
-            <a href="/wellness" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">Wellness</a>
-            <a href="/travel" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">Travel</a>
-            <a href="/about" className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">About</a>
+            {navLinks.map((link) => (
+              <a key={link.href} href={link.href} className="text-sm font-medium hover:bg-muted/60 rounded-full px-4 py-2 transition-all">
+                {link.label}
+              </a>
+            ))}
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             <button onClick={toggleTheme} className="p-1.5 sm:p-2 rounded-full hover:bg-muted/60 transition-all" aria-label="Toggle theme">
               {isDark ? <Sun className="h-4 w-4 sm:h-5 sm:w-5" /> : <Moon className="h-4 w-4 sm:h-5 sm:w-5" />}
             </button>
-            
+
             {!isAdminPage && (
               <>
                 {user ? (
@@ -97,11 +107,11 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
             <nav className="flex flex-col gap-4">
-              <a href="/" className="text-sm font-medium hover:text-accent transition-colors">Home</a>
-              <a href="/articles" className="text-sm font-medium hover:text-accent transition-colors">Articles</a>
-              <a href="/wellness" className="text-sm font-medium hover:text-accent transition-colors">Wellness</a>
-              <a href="/travel" className="text-sm font-medium hover:text-accent transition-colors">Travel</a>
-              <a href="/about" className="text-sm font-medium hover:text-accent transition-colors">About</a>
+              {navLinks.map((link) => (
+                <a key={link.href} href={link.href} className="text-sm font-medium hover:text-accent transition-colors">
+                  {link.label}
+                </a>
+              ))}
               {!isAdminPage && (
                 <>
                   {user ? (
