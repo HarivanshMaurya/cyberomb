@@ -21,8 +21,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
+import { Navigation } from 'lucide-react';
+
 const navItems = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
+  { to: '/admin/navbar', icon: Navigation, label: 'Navbar' },
   { to: '/admin/hero', icon: Palette, label: 'Hero Section' },
   { to: '/admin/articles', icon: Newspaper, label: 'Articles' },
   { to: '/admin/categories', icon: Tags, label: 'Categories' },

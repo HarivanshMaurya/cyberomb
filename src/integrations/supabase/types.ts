@@ -212,6 +212,39 @@ export type Database = {
         }
         Relationships: []
       }
+      navbar_config: {
+        Row: {
+          created_at: string
+          id: string
+          logo_url: string | null
+          nav_links: Json
+          show_logo: boolean
+          show_site_name: boolean
+          site_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          nav_links?: Json
+          show_logo?: boolean
+          show_site_name?: boolean
+          site_name?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          nav_links?: Json
+          show_logo?: boolean
+          show_site_name?: boolean
+          site_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       page_sections: {
         Row: {
           content: Json
