@@ -1,8 +1,10 @@
 import Header from "@/components/Header";
 import SEOHead from "@/components/SEOHead";
+import ProductCard from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageSection } from "@/hooks/usePageSections";
 import { useSectionCards } from "@/hooks/useSectionCards";
+import { useActiveProducts } from "@/hooks/useProducts";
 import { Link } from "react-router-dom";
 
 const resolveCardLink = (raw?: string) => {
@@ -24,6 +26,7 @@ const resolveCardLink = (raw?: string) => {
 const Travel = () => {
   const { data: pageData, isLoading } = usePageSection("travel");
   const { data: sectionCards } = useSectionCards("travel_cards");
+  const { data: products } = useActiveProducts();
 
   const featuredCards = sectionCards?.content?.cards || [];
   const content = pageData?.content as
@@ -126,6 +129,26 @@ const Travel = () => {
                   </Link>
                 );
               })}
+            </div>
+          </section>
+        )}
+
+        {/* Products / Buying Cards */}
+        {products && products.length > 0 && (
+          <section className="mb-16">
+            <h2 className="text-2xl font-bold mb-6">Shop</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product, index) => (
+                <div key={product.id} className={`animate-slide-up stagger-${Math.min(index + 1, 6)}`}>
+                  <ProductCard
+                    title={product.title}
+                    description={product.description}
+                    image={product.image}
+                    price={product.price}
+                    buyLink={product.buy_link}
+                  />
+                </div>
+              ))}
             </div>
           </section>
         )}
