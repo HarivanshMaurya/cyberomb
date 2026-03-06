@@ -322,38 +322,59 @@ export type Database = {
       }
       products: {
         Row: {
+          author: string | null
           buy_link: string
           created_at: string
           description: string | null
+          gallery_images: Json | null
           id: string
           image: string | null
           is_active: boolean
+          language: string | null
+          long_description: string | null
+          pages_count: number | null
           price: number
+          slug: string | null
           sort_order: number
+          table_of_contents: Json | null
           title: string
           updated_at: string
         }
         Insert: {
+          author?: string | null
           buy_link?: string
           created_at?: string
           description?: string | null
+          gallery_images?: Json | null
           id?: string
           image?: string | null
           is_active?: boolean
+          language?: string | null
+          long_description?: string | null
+          pages_count?: number | null
           price?: number
+          slug?: string | null
           sort_order?: number
+          table_of_contents?: Json | null
           title: string
           updated_at?: string
         }
         Update: {
+          author?: string | null
           buy_link?: string
           created_at?: string
           description?: string | null
+          gallery_images?: Json | null
           id?: string
           image?: string | null
           is_active?: boolean
+          language?: string | null
+          long_description?: string | null
+          pages_count?: number | null
           price?: number
+          slug?: string | null
           sort_order?: number
+          table_of_contents?: Json | null
           title?: string
           updated_at?: string
         }
