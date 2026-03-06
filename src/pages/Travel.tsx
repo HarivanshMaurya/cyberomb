@@ -145,7 +145,8 @@ const Travel = () => {
                     description={product.description}
                     image={product.image}
                     price={product.price}
-                    buyLink={product.buy_link}
+                    slug={product.slug}
+                    author={product.author}
                   />
                 </div>
               ))}

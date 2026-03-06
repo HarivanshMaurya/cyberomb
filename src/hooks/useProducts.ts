@@ -6,11 +6,18 @@ export interface Product {
   id: string;
   title: string;
   description: string | null;
+  long_description: string | null;
   image: string | null;
   price: number;
   buy_link: string;
   is_active: boolean;
   sort_order: number;
+  author: string | null;
+  pages_count: number;
+  language: string | null;
+  gallery_images: string[];
+  table_of_contents: { title: string; page?: string }[];
+  slug: string | null;
   created_at: string;
   updated_at: string;
 }

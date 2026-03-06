@@ -40,6 +40,7 @@ import SectionCardsManager from "./pages/admin/SectionCardsManager";
 import AuthorsManager from "./pages/admin/AuthorsManager";
 import NavbarEditor from "./pages/admin/NavbarEditor";
 import ProductsManager from "./pages/admin/ProductsManager";
+import ProductDetail from "./pages/ProductDetail";
 
 const queryClient = new QueryClient();
 
@@ -67,7 +68,8 @@ const App = () => (
               <Route path="/terms" element={<Terms />} />
               <Route path="/page/:slug" element={<DynamicPage />} />
               <Route path="/blog/:slug" element={<BlogArticle />} />
-              <Route path="/category/:slug" element={<CategoryPage />} />
+               <Route path="/category/:slug" element={<CategoryPage />} />
+               <Route path="/product/:slug" element={<ProductDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/404" element={<NotFound />} />
  

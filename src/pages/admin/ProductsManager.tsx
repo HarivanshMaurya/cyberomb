@@ -5,20 +5,27 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, ShoppingCart } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const emptyForm = {
   title: "",
   description: "",
+  long_description: "",
   image: "",
   price: 0,
   buy_link: "#",
   is_active: true,
   sort_order: 0,
+  author: "",
+  pages_count: 0,
+  language: "Hindi",
+  gallery_images: [] as string[],
+  table_of_contents: [] as { title: string; page?: string }[],
+  slug: "",
 };
 
 const ProductsManager = () => {
@@ -30,6 +37,9 @@ const ProductsManager = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [newGalleryUrl, setNewGalleryUrl] = useState("");
+  const [newTocTitle, setNewTocTitle] = useState("");
+  const [newTocPage, setNewTocPage] = useState("");
 
   const openCreate = () => {
     setEditingId(null);
@@ -42,23 +52,58 @@ const ProductsManager = () => {
     setForm({
       title: p.title,
       description: p.description || "",
+      long_description: p.long_description || "",
       image: p.image || "",
       price: p.price,
       buy_link: p.buy_link,
       is_active: p.is_active,
       sort_order: p.sort_order,
+      author: p.author || "",
+      pages_count: p.pages_count || 0,
+      language: p.language || "Hindi",
+      gallery_images: p.gallery_images || [],
+      table_of_contents: p.table_of_contents || [],
+      slug: p.slug || "",
     });
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
     if (!form.title.trim()) return;
+    const payload = {
+      ...form,
+      slug: form.slug || form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+    };
     if (editingId) {
-      await updateProduct.mutateAsync({ id: editingId, ...form });
+      await updateProduct.mutateAsync({ id: editingId, ...payload });
     } else {
-      await createProduct.mutateAsync(form);
+      await createProduct.mutateAsync(payload);
     }
     setDialogOpen(false);
+  };
+
+  const addGalleryImage = () => {
+    if (!newGalleryUrl.trim()) return;
+    setForm({ ...form, gallery_images: [...form.gallery_images, newGalleryUrl.trim()] });
+    setNewGalleryUrl("");
+  };
+
+  const removeGalleryImage = (i: number) => {
+    setForm({ ...form, gallery_images: form.gallery_images.filter((_, idx) => idx !== i) });
+  };
+
+  const addTocItem = () => {
+    if (!newTocTitle.trim()) return;
+    setForm({
+      ...form,
+      table_of_contents: [...form.table_of_contents, { title: newTocTitle.trim(), page: newTocPage.trim() || undefined }],
+    });
+    setNewTocTitle("");
+    setNewTocPage("");
+  };
+
+  const removeTocItem = (i: number) => {
+    setForm({ ...form, table_of_contents: form.table_of_contents.filter((_, idx) => idx !== i) });
   };
 
   if (isLoading) {
@@ -77,57 +122,132 @@ const ProductsManager = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
-            <ShoppingCart className="h-8 w-8 text-primary" />
-            Products Manager
+            <BookOpen className="h-8 w-8 text-primary" />
+            eBooks Manager
           </h1>
-          <p className="text-muted-foreground mt-1">Manage buying cards shown on the Travel page</p>
+          <p className="text-muted-foreground mt-1">Manage ebooks / buying cards shown on the Travel page</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openCreate}>
-              <Plus className="h-4 w-4 mr-2" /> Add Product
+              <Plus className="h-4 w-4 mr-2" /> Add eBook
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{editingId ? "Edit Product" : "Add Product"}</DialogTitle>
+              <DialogTitle>{editingId ? "Edit eBook" : "Add eBook"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div>
-                <Label>Title *</Label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Product name" />
+              {/* Basic Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <Label>Title *</Label>
+                  <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Book name" />
+                </div>
+                <div>
+                  <Label>Author</Label>
+                  <Input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} placeholder="Author name" />
+                </div>
+                <div>
+                  <Label>Slug</Label>
+                  <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="auto-generated-from-title" />
+                </div>
               </div>
+
               <div>
-                <Label>Description</Label>
-                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Short description" rows={3} />
+                <Label>Short Description</Label>
+                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="One-liner about the book" rows={2} />
               </div>
+
               <div>
-                <Label>Image URL</Label>
+                <Label>Detailed Description</Label>
+                <Textarea value={form.long_description} onChange={(e) => setForm({ ...form, long_description: e.target.value })} placeholder="Full book description..." rows={5} />
+              </div>
+
+              {/* Cover Image */}
+              <div>
+                <Label>Cover Image URL</Label>
                 <Input value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://..." />
-                {form.image && (
-                  <img src={form.image} alt="Preview" className="mt-2 h-24 w-full object-cover rounded-lg" />
+                {form.image && <img src={form.image} alt="Cover" className="mt-2 h-32 object-cover rounded-lg" />}
+              </div>
+
+              {/* Gallery */}
+              <div>
+                <Label>Gallery Images</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input value={newGalleryUrl} onChange={(e) => setNewGalleryUrl(e.target.value)} placeholder="Image URL" className="flex-1" />
+                  <Button type="button" variant="outline" onClick={addGalleryImage}>Add</Button>
+                </div>
+                {form.gallery_images.length > 0 && (
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {form.gallery_images.map((img, i) => (
+                      <div key={i} className="relative group">
+                        <img src={img} alt="" className="w-16 h-20 object-cover rounded-lg border border-border" />
+                        <button onClick={() => removeGalleryImage(i)} className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-4">
+
+              {/* Price & Meta */}
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label>Price (₹)</Label>
-                  <Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} min={0} step={0.01} />
+                  <Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} min={0} />
+                </div>
+                <div>
+                  <Label>Pages</Label>
+                  <Input type="number" value={form.pages_count} onChange={(e) => setForm({ ...form, pages_count: Number(e.target.value) })} min={0} />
+                </div>
+                <div>
+                  <Label>Language</Label>
+                  <Input value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Buy Link</Label>
+                  <Input value={form.buy_link} onChange={(e) => setForm({ ...form, buy_link: e.target.value })} placeholder="https://..." />
                 </div>
                 <div>
                   <Label>Sort Order</Label>
                   <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })} />
                 </div>
               </div>
+
+              {/* Table of Contents */}
               <div>
-                <Label>Buy Link</Label>
-                <Input value={form.buy_link} onChange={(e) => setForm({ ...form, buy_link: e.target.value })} placeholder="https://amazon.in/..." />
+                <Label>Table of Contents</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input value={newTocTitle} onChange={(e) => setNewTocTitle(e.target.value)} placeholder="Chapter title" className="flex-1" />
+                  <Input value={newTocPage} onChange={(e) => setNewTocPage(e.target.value)} placeholder="Page" className="w-20" />
+                  <Button type="button" variant="outline" onClick={addTocItem}>Add</Button>
+                </div>
+                {form.table_of_contents.length > 0 && (
+                  <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
+                    {form.table_of_contents.map((item, i) => (
+                      <div key={i} className="flex items-center justify-between py-1.5 px-3 bg-muted rounded-lg text-sm">
+                        <span>{i + 1}. {item.title} {item.page && <span className="text-muted-foreground ml-1">(p. {item.page})</span>}</span>
+                        <button onClick={() => removeTocItem(i)} className="text-destructive hover:text-destructive/80">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+
               <div className="flex items-center gap-2">
                 <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
                 <Label>Active</Label>
               </div>
+
               <Button onClick={handleSave} className="w-full" disabled={createProduct.isPending || updateProduct.isPending}>
-                {editingId ? "Update" : "Create"} Product
+                {editingId ? "Update" : "Create"} eBook
               </Button>
             </div>
           </DialogContent>
@@ -137,7 +257,7 @@ const ProductsManager = () => {
       {!products?.length ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            No products yet. Click "Add Product" to create your first one.
+            No ebooks yet. Click "Add eBook" to create your first one.
           </CardContent>
         </Card>
       ) : (
@@ -146,15 +266,17 @@ const ProductsManager = () => {
             <Card key={p.id} className={!p.is_active ? "opacity-50" : ""}>
               <CardContent className="flex items-center gap-4 py-4">
                 {p.image ? (
-                  <img src={p.image} alt={p.title} className="w-16 h-16 rounded-lg object-cover shrink-0" />
+                  <img src={p.image} alt={p.title} className="w-14 h-18 rounded-lg object-cover shrink-0" />
                 ) : (
-                  <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                    <ShoppingCart className="w-6 h-6 text-muted-foreground" />
+                  <div className="w-14 h-18 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <BookOpen className="w-6 h-6 text-muted-foreground" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold truncate">{p.title}</h3>
-                  <p className="text-sm text-muted-foreground">₹{p.price.toLocaleString('en-IN')} • Order: {p.sort_order}</p>
+                  <p className="text-sm text-muted-foreground">
+                    ₹{p.price.toLocaleString('en-IN')} • {p.author || "No author"} • /{p.slug || "no-slug"}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Button variant="outline" size="icon" onClick={() => openEdit(p)}>
