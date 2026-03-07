@@ -262,4 +262,27 @@ All colors MUST be HSL.
   .tag-growth {
     @apply bg-[hsl(var(--tag-growth))] text-primary;
   }
+
+  /* eBook Reader page flip animations */
+  .ebook-flip-next {
+    animation: ebookFlipNext 0.4s ease-in-out;
+  }
+
+  .ebook-flip-prev {
+    animation: ebookFlipPrev 0.4s ease-in-out;
+  }
+
+  @keyframes ebookFlipNext {
+    0% { transform: rotateY(0deg); opacity: 1; }
+    30% { transform: rotateY(-8deg) scale(0.98); opacity: 0.7; }
+    70% { transform: rotateY(4deg) scale(0.99); opacity: 0.85; }
+    100% { transform: rotateY(0deg); opacity: 1; }
+  }
+
+  @keyframes ebookFlipPrev {
+    0% { transform: rotateY(0deg); opacity: 1; }
+    30% { transform: rotateY(8deg) scale(0.98); opacity: 0.7; }
+    70% { transform: rotateY(-4deg) scale(0.99); opacity: 0.85; }
+    100% { transform: rotateY(0deg); opacity: 1; }
+  }
 }
