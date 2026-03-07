@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Plus, Pencil, Trash2, BookOpen, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 const emptyForm = {
   title: "",
@@ -25,6 +27,7 @@ const emptyForm = {
   language: "Hindi",
   gallery_images: [] as string[],
   table_of_contents: [] as { title: string; page?: string }[],
+  chapters: [] as { title: string; content: string }[],
   slug: "",
 };
 
@@ -63,6 +66,7 @@ const ProductsManager = () => {
       language: p.language || "Hindi",
       gallery_images: p.gallery_images || [],
       table_of_contents: p.table_of_contents || [],
+      chapters: p.chapters || [],
       slug: p.slug || "",
     });
     setDialogOpen(true);
@@ -104,6 +108,20 @@ const ProductsManager = () => {
 
   const removeTocItem = (i: number) => {
     setForm({ ...form, table_of_contents: form.table_of_contents.filter((_, idx) => idx !== i) });
+  };
+
+  const addChapter = () => {
+    setForm({ ...form, chapters: [...form.chapters, { title: "", content: "" }] });
+  };
+
+  const updateChapter = (i: number, field: "title" | "content", value: string) => {
+    const updated = [...form.chapters];
+    updated[i] = { ...updated[i], [field]: value };
+    setForm({ ...form, chapters: updated });
+  };
+
+  const removeChapter = (i: number) => {
+    setForm({ ...form, chapters: form.chapters.filter((_, idx) => idx !== i) });
   };
 
   if (isLoading) {
@@ -237,6 +255,64 @@ const ProductsManager = () => {
                         </button>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Chapter Content Editor */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-base font-semibold">Chapter Content Editor</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={addChapter}>
+                    <Plus className="h-3.5 w-3.5 mr-1" /> Add Chapter
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Write full eBook content chapter by chapter using the rich text editor.</p>
+
+                {form.chapters.length > 0 && (
+                  <Accordion type="multiple" className="space-y-2">
+                    {form.chapters.map((chapter, i) => (
+                      <AccordionItem key={i} value={`chapter-${i}`} className="border rounded-lg px-3">
+                        <div className="flex items-center gap-2">
+                          <AccordionTrigger className="flex-1 py-3">
+                            <span className="text-sm font-medium">
+                              Chapter {i + 1}{chapter.title ? `: ${chapter.title}` : ""}
+                            </span>
+                          </AccordionTrigger>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); removeChapter(i); }}
+                            className="text-destructive hover:text-destructive/80 p-1"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <AccordionContent className="space-y-3 pb-4">
+                          <div>
+                            <Label className="text-xs">Chapter Title</Label>
+                            <Input
+                              value={chapter.title}
+                              onChange={(e) => updateChapter(i, "title", e.target.value)}
+                              placeholder={`Chapter ${i + 1} title`}
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Chapter Content</Label>
+                            <RichTextEditor
+                              content={chapter.content}
+                              onChange={(val) => updateChapter(i, "content", val)}
+                              placeholder="Write chapter content here..."
+                            />
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                )}
+
+                {form.chapters.length === 0 && (
+                  <div className="border border-dashed border-border rounded-lg p-6 text-center text-sm text-muted-foreground">
+                    No chapters added yet. Click "Add Chapter" to start writing.
                   </div>
                 )}
               </div>
