@@ -324,6 +324,7 @@ export type Database = {
         Row: {
           author: string | null
           buy_link: string
+          chapters: Json | null
           created_at: string
           description: string | null
           gallery_images: Json | null
@@ -343,6 +344,7 @@ export type Database = {
         Insert: {
           author?: string | null
           buy_link?: string
+          chapters?: Json | null
           created_at?: string
           description?: string | null
           gallery_images?: Json | null
@@ -362,6 +364,7 @@ export type Database = {
         Update: {
           author?: string | null
           buy_link?: string
+          chapters?: Json | null
           created_at?: string
           description?: string | null
           gallery_images?: Json | null
