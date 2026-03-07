@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -38,6 +38,7 @@ interface ProductDetail {
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [activeImage, setActiveImage] = useState(0);
 
   const { data: product, isLoading } = useQuery({
@@ -234,6 +235,17 @@ const ProductDetail = () => {
                 {product.buy_link !== "#" && <ExternalLink className="w-4 h-4 ml-auto opacity-60" />}
               </Button>
             </a>
+
+            {/* Read Now Button */}
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full text-base py-6 rounded-xl gap-3 transition-all hover:scale-[1.01] active:scale-[0.99]"
+              onClick={() => navigate(`/read/${product.slug}`)}
+            >
+              <BookOpen className="w-5 h-5" />
+              Read Now
+            </Button>
 
             {/* Long Description */}
             {product.long_description && (
