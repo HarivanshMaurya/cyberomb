@@ -17,6 +17,7 @@ export interface Product {
   language: string | null;
   gallery_images: string[];
   table_of_contents: { title: string; page?: string }[];
+  chapters: { title: string; content: string }[];
   slug: string | null;
   created_at: string;
   updated_at: string;
