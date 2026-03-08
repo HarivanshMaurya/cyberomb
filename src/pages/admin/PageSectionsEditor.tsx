@@ -64,7 +64,7 @@ const PageSectionsEditor = () => {
       <div>
         <h1 className="text-3xl font-bold">Page Sections</h1>
         <p className="text-muted-foreground mt-2">
-          Edit content for Wellness, Travel, and About pages
+          Edit content for Wellness, Travel, About, and Contact pages
         </p>
       </div>
 
