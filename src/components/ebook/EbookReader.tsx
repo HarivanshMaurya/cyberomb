@@ -472,15 +472,29 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     setTranslationProgress({ current: 0, total: chapters.length });
     
     try {
-      const translated: Chapter[] = [];
-      for (let i = 0; i < chapters.length; i++) {
-        setTranslationProgress({ current: i, total: chapters.length });
-        const { data, error } = await supabase.functions.invoke('translate-ebook', {
-          body: { chapters: [chapters[i]], targetLang: 'hi' },
-        });
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-        translated.push(data.chapters?.[0] || chapters[i]);
+      const translated: Chapter[] = new Array(chapters.length);
+      let completedCount = 0;
+      const BATCH_SIZE = 3;
+      
+      for (let batchStart = 0; batchStart < chapters.length; batchStart += BATCH_SIZE) {
+        const batchEnd = Math.min(batchStart + BATCH_SIZE, chapters.length);
+        const batchPromises = [];
+        
+        for (let i = batchStart; i < batchEnd; i++) {
+          batchPromises.push(
+            supabase.functions.invoke('translate-ebook', {
+              body: { chapters: [chapters[i]], targetLang: 'hi' },
+            }).then(({ data, error }) => {
+              if (error) throw error;
+              if (data?.error) throw new Error(data.error);
+              translated[i] = data.chapters?.[0] || chapters[i];
+              completedCount++;
+              setTranslationProgress({ current: completedCount, total: chapters.length });
+            })
+          );
+        }
+        
+        await Promise.all(batchPromises);
       }
       setTranslationProgress({ current: chapters.length, total: chapters.length });
       setTranslatedChapters(translated);

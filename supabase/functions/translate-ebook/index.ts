@@ -28,7 +28,6 @@ serve(async (req) => {
 
     const langName = targetLang === "hi" ? "Hindi (हिन्दी)" : "English";
 
-    // Translate chapters one by one to avoid token limits
     const translatedChapters = [];
 
     for (const chapter of chapters) {
@@ -38,9 +37,7 @@ Do NOT add any extra commentary or explanation.
 
 Chapter Title: ${chapter.title}
 Chapter Content:
-${chapter.content}
-
-Return a valid JSON object with two keys: "title" (translated title) and "content" (translated content with HTML preserved).`;
+${chapter.content}`;
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -49,16 +46,34 @@ Return a valid JSON object with two keys: "title" (translated title) and "conten
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "google/gemini-2.5-flash-lite",
           messages: [
             {
               role: "system",
-              content:
-                "You are an expert translator. Respond with valid JSON only, no markdown fences. Ensure all strings are properly escaped for JSON.",
+              content: "You are an expert translator. Use the provided tool to return the translated title and content.",
             },
             { role: "user", content: prompt },
           ],
           temperature: 0.2,
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "return_translation",
+                description: "Return the translated chapter title and content",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    title: { type: "string", description: "Translated chapter title" },
+                    content: { type: "string", description: "Translated chapter content with HTML preserved" },
+                  },
+                  required: ["title", "content"],
+                  additionalProperties: false,
+                },
+              },
+            },
+          ],
+          tool_choice: { type: "function", function: { name: "return_translation" } },
         }),
       });
 
@@ -77,38 +92,30 @@ Return a valid JSON object with two keys: "title" (translated title) and "conten
         }
         const errText = await response.text();
         console.error("AI Gateway error for chapter:", chapter.title, errText);
-        // Keep original if translation fails for this chapter
         translatedChapters.push(chapter);
         continue;
       }
 
       const data = await response.json();
-      let raw = data.choices?.[0]?.message?.content || "";
-
-      // Clean markdown fences
-      raw = raw.replace(/^```json?\s*/i, "").replace(/\s*```$/i, "").trim();
-
+      
       try {
-        // Fix unescaped newlines inside JSON strings
-        let sanitized = "";
-        let inStr = false;
-        let escaped = false;
-        for (let i = 0; i < raw.length; i++) {
-          const ch = raw[i];
-          if (escaped) { sanitized += ch; escaped = false; continue; }
-          if (ch === "\\") { sanitized += ch; escaped = true; continue; }
-          if (ch === '"') { inStr = !inStr; sanitized += ch; continue; }
-          if (inStr && ch === "\n") { sanitized += "\\n"; continue; }
-          if (inStr && ch === "\r") { sanitized += "\\r"; continue; }
-          if (inStr && ch === "\t") { sanitized += "\\t"; continue; }
-          sanitized += ch;
+        const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+        if (toolCall?.function?.arguments) {
+          const parsed = JSON.parse(toolCall.function.arguments);
+          translatedChapters.push({
+            title: parsed.title || chapter.title,
+            content: parsed.content || chapter.content,
+          });
+        } else {
+          // Fallback: try message content
+          let raw = data.choices?.[0]?.message?.content || "";
+          raw = raw.replace(/^```json?\s*/i, "").replace(/\s*```$/i, "").trim();
+          const parsed = JSON.parse(raw);
+          translatedChapters.push({
+            title: parsed.title || chapter.title,
+            content: parsed.content || chapter.content,
+          });
         }
-
-        const parsed = JSON.parse(sanitized);
-        translatedChapters.push({
-          title: parsed.title || chapter.title,
-          content: parsed.content || chapter.content,
-        });
       } catch (parseErr) {
         console.error("Parse error for chapter:", chapter.title, (parseErr as Error).message);
         translatedChapters.push(chapter);
