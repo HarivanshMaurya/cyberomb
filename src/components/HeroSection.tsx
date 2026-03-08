@@ -332,7 +332,7 @@ const HeroSection = () => {
                         ))}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-foreground">5K+ Readers</p>
+                        <p className="text-sm font-bold text-foreground tabular-nums">{readerCount.toLocaleString()}+ Readers</p>
                         <p className="text-[11px] text-muted-foreground">Join our community</p>
                       </div>
                     </div>
