@@ -203,6 +203,17 @@ const HeroSection = () => {
                     <Linkedin className="w-4 h-4 text-muted-foreground/60 group-hover/social:text-foreground transition-colors" />
                   </a>
                 )}
+                {twitterUrl && (
+                  <a
+                    href={twitterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group/social w-10 h-10 rounded-full border border-border/30 bg-card/30 backdrop-blur-sm hover:border-primary/40 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center hover:scale-110 hover:-translate-y-0.5"
+                    aria-label="Twitter / X"
+                  >
+                    <Twitter className="w-4 h-4 text-muted-foreground/60 group-hover/social:text-foreground transition-colors" />
+                  </a>
+                )}
               </div>
             )}
           </div>
