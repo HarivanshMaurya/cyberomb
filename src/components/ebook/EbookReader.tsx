@@ -458,7 +458,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     tts.stop();
   }, [tts]);
 
-  // Translation handler
+  // Translation handler - chapter by chapter with progress
   const handleToggleTranslate = useCallback(async () => {
     if (isTranslated) {
       setIsTranslated(false);
@@ -469,20 +469,29 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
       return;
     }
     setIsTranslating(true);
+    setTranslationProgress({ current: 0, total: chapters.length });
+    
     try {
-      const { data, error } = await supabase.functions.invoke('translate-ebook', {
-        body: { chapters, targetLang: 'hi' },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setTranslatedChapters(data.chapters);
+      const translated: Chapter[] = [];
+      for (let i = 0; i < chapters.length; i++) {
+        setTranslationProgress({ current: i, total: chapters.length });
+        const { data, error } = await supabase.functions.invoke('translate-ebook', {
+          body: { chapters: [chapters[i]], targetLang: 'hi' },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        translated.push(data.chapters?.[0] || chapters[i]);
+      }
+      setTranslationProgress({ current: chapters.length, total: chapters.length });
+      setTranslatedChapters(translated);
       setIsTranslated(true);
-      toast({ title: 'अनुवाद पूरा हुआ', description: 'पुस्तक हिंदी में अनुवादित हो गई है' });
+      toast({ title: 'अनुवाद पूरा हुआ ✅', description: `${chapters.length} अध्याय हिंदी में अनुवादित हो गए` });
     } catch (err: any) {
       console.error('Translation error:', err);
       toast({ title: 'Translation Failed', description: err.message || 'Could not translate', variant: 'destructive' });
     } finally {
       setIsTranslating(false);
+      setTranslationProgress({ current: 0, total: 0 });
     }
   }, [isTranslated, translatedChapters, chapters]);
 
