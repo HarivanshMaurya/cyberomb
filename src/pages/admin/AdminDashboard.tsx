@@ -83,6 +83,9 @@ export default function AdminDashboard() {
 
   const publishedArticles = articles?.filter(a => a.status === 'published') ?? [];
   const draftArticles = articles?.filter(a => a.status === 'draft') ?? [];
+  const scheduledArticles = articles?.filter(a => a.status === 'scheduled') ?? [];
+  const scheduledWellness = wellnessArticles?.filter(a => a.status === 'scheduled') ?? [];
+  const totalScheduled = scheduledArticles.length + scheduledWellness.length;
   const unreadMessages = contactMessages?.filter(m => !m.is_read) ?? [];
   const activeProducts = products?.filter(p => p.is_active) ?? [];
   const totalContent = (articles?.length ?? 0) + (wellnessArticles?.length ?? 0);
