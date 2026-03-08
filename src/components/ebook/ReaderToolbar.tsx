@@ -43,6 +43,8 @@ export function ReaderToolbar({
   isBookmarked,
   onToggleBookmark,
   onOpenToc,
+  isFullscreen,
+  onToggleFullscreen,
 }: ReaderToolbarProps) {
   const currentIdx = FONT_SIZES.indexOf(fontSize);
   const canDecrease = currentIdx > 0;
