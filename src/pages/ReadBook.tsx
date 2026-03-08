@@ -23,7 +23,7 @@ const ReadBook = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products" as any)
-        .select("title, slug, chapters")
+        .select("title, slug, chapters, image")
         .eq("slug", slug)
         .eq("is_active", true)
         .single();
