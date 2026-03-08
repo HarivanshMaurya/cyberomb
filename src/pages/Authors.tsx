@@ -8,7 +8,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const Authors = () => {
   const { data: authors, isLoading } = useActiveAuthors();
+  const location = useLocation();
 
+  useEffect(() => {
+    if (authors && location.hash) {
+      const id = location.hash.replace('#', '');
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [authors, location.hash]);
   return (
     <div className="min-h-screen bg-background animate-fade-in">
       <SEOHead title="Our Authors" description="Meet the voices behind Cyberom." canonical="/authors" />
