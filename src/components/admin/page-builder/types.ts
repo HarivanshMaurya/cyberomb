@@ -8,6 +8,23 @@ export type BlockType =
   | 'faq'
   | 'cta';
 
+export type BlockAnimation = 'none' | 'fade-in' | 'slide-up' | 'slide-left' | 'slide-right' | 'scale-in' | 'zoom-in';
+
+export interface BlockSpacing {
+  paddingTop: number;
+  paddingBottom: number;
+  marginTop: number;
+  marginBottom: number;
+}
+
+export interface BlockStyleSettings {
+  spacing: BlockSpacing;
+  animation: BlockAnimation;
+}
+
+export const DEFAULT_SPACING: BlockSpacing = { paddingTop: 0, paddingBottom: 0, marginTop: 0, marginBottom: 0 };
+export const DEFAULT_STYLE: BlockStyleSettings = { spacing: DEFAULT_SPACING, animation: 'none' };
+
 export interface HeroBlock {
   type: 'hero';
   id: string;
@@ -17,12 +34,14 @@ export interface HeroBlock {
   buttonText: string;
   buttonLink: string;
   overlay: boolean;
+  style?: BlockStyleSettings;
 }
 
 export interface RichTextBlock {
   type: 'richtext';
   id: string;
   content: string;
+  style?: BlockStyleSettings;
 }
 
 export interface TextImageBlock {
@@ -32,6 +51,7 @@ export interface TextImageBlock {
   image: string;
   imageAlt: string;
   imagePosition: 'left' | 'right';
+  style?: BlockStyleSettings;
 }
 
 export interface FeatureCard {
@@ -47,6 +67,7 @@ export interface FeatureCardsBlock {
   subtitle: string;
   columns: 2 | 3 | 4;
   cards: FeatureCard[];
+  style?: BlockStyleSettings;
 }
 
 export interface GalleryImage {
@@ -61,6 +82,7 @@ export interface ImageGalleryBlock {
   heading: string;
   columns: 2 | 3 | 4;
   images: GalleryImage[];
+  style?: BlockStyleSettings;
 }
 
 export interface Testimonial {
@@ -75,6 +97,7 @@ export interface TestimonialsBlock {
   id: string;
   heading: string;
   testimonials: Testimonial[];
+  style?: BlockStyleSettings;
 }
 
 export interface FAQItem {
@@ -88,6 +111,7 @@ export interface FAQBlock {
   heading: string;
   subtitle: string;
   items: FAQItem[];
+  style?: BlockStyleSettings;
 }
 
 export interface CTABlock {
@@ -98,6 +122,7 @@ export interface CTABlock {
   buttonText: string;
   buttonLink: string;
   variant: 'default' | 'accent' | 'dark';
+  style?: BlockStyleSettings;
 }
 
 export type PageBlock =
