@@ -85,7 +85,7 @@ export default function ResetPassword() {
             <div className="animate-spin h-7 w-7 border-[3px] border-primary border-t-transparent rounded-full" />
           </div>
           <div>
-            <p className="font-serif text-lg font-semibold text-foreground">Verifying Reset Link</p>
+            <p className="text-lg font-semibold text-foreground">Verifying Reset Link</p>
             <p className="text-sm text-muted-foreground mt-1">Please wait while we validate your request...</p>
           </div>
         </div>
