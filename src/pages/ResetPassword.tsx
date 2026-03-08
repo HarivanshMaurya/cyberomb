@@ -125,7 +125,7 @@ export default function ResetPassword() {
                         <ShieldAlert className="h-8 w-8 text-destructive" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">Link Expired</h1>
+                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">Link Expired</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">This reset link is no longer valid</p>
                   </>
                 ) : (
