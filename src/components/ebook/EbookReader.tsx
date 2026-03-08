@@ -468,7 +468,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     tts.stop();
   }, [tts]);
 
-  // Translation handler - batch translate 3 chapters at a time with real progress
+  // Translation handler - 1 chapter at a time for reliability, with real progress
   const handleTranslate = useCallback(async (langCode: string, langName?: string) => {
     if (isTranslating) return;
     
@@ -486,29 +486,25 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     
     setIsTranslating(true);
     setSelectedLang(langCode);
-    
-    const BATCH_SIZE = 3;
-    const totalBatches = Math.ceil(chapters.length / BATCH_SIZE);
     setTranslationProgress({ current: 0, total: chapters.length });
     
     try {
       const allTranslated: { title: string; content: string }[] = [];
       
-      for (let batchIdx = 0; batchIdx < totalBatches; batchIdx++) {
-        const start = batchIdx * BATCH_SIZE;
-        const batchChapters = chapters.slice(start, start + BATCH_SIZE);
-        
+      for (let i = 0; i < chapters.length; i++) {
         const { data, error } = await supabase.functions.invoke('translate-ebook', {
-          body: { chapters: batchChapters, targetLang: langCode, langName: langName || langCode },
+          body: { chapters: [chapters[i]], targetLang: langCode, langName: langName || langCode },
         });
         
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
         
-        const translated = data?.chapters || batchChapters;
-        allTranslated.push(...translated);
+        if (data?.chapters?.[0]) {
+          allTranslated.push(data.chapters[0]);
+        } else {
+          throw new Error(`Chapter ${i + 1} translation returned empty`);
+        }
         
-        // Update real progress
         setTranslationProgress({ current: allTranslated.length, total: chapters.length });
       }
       
@@ -530,7 +526,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
       }
     } catch (err: any) {
       console.error('Translation error:', err);
-      toast({ title: 'अनुवाद में समस्या', description: 'कृपया कुछ देर बाद पुनः प्रयास करें', variant: 'destructive' });
+      toast({ title: 'अनुवाद में समस्या', description: err.message || 'कृपया कुछ देर बाद पुनः प्रयास करें', variant: 'destructive' });
     } finally {
       setIsTranslating(false);
       setTranslationProgress({ current: 0, total: 0 });
