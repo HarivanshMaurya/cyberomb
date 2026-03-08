@@ -459,17 +459,32 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     tts.stop();
   }, [tts]);
 
-  // Translation handler - sequential with retry to avoid rate limits
-  const handleToggleTranslate = useCallback(async () => {
-    if (isTranslated) {
+  // Multi-language translation handler
+  const LANGUAGES: Record<string, string> = {
+    hi: "हिंदी (Hindi)",
+    mr: "मराठी (Marathi)",
+    ta: "தமிழ் (Tamil)",
+    bn: "বাংলা (Bengali)",
+  };
+
+  const handleTranslate = useCallback(async (langCode: string) => {
+    if (isTranslating) return;
+    
+    // If already showing this language, toggle back to original
+    if (isTranslated && selectedLang === langCode) {
       setIsTranslated(false);
       return;
     }
-    if (translatedChapters) {
+    
+    // If cached, switch instantly
+    if (translationCache[langCode]) {
+      setSelectedLang(langCode);
       setIsTranslated(true);
       return;
     }
+    
     setIsTranslating(true);
+    setSelectedLang(langCode);
     setTranslationProgress({ current: 0, total: chapters.length });
     
     try {
@@ -485,21 +500,18 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         while (!success && retries < MAX_RETRIES) {
           try {
             const { data, error } = await supabase.functions.invoke('translate-ebook', {
-              body: { chapters: [chapters[i]], targetLang: 'hi' },
+              body: { chapters: [chapters[i]], targetLang: langCode },
             });
             
             if (error) {
-              // Check if it's a rate limit from edge function response
               const errBody = error?.context?.body ? await error.context.text?.() : null;
               if (error.message?.includes('non-2xx') || errBody?.includes('Rate limit')) {
                 retries++;
                 if (retries < MAX_RETRIES) {
-                  // Wait longer each retry: 3s, 6s, 12s
                   await new Promise(r => setTimeout(r, 3000 * Math.pow(2, retries - 1)));
                   continue;
                 }
               }
-              // Non-rate-limit error or max retries: use original chapter silently
               translated.push(chapters[i]);
               success = true;
               continue;
@@ -529,16 +541,16 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
           }
         }
         
-        // Small delay between chapters to avoid rate limits
         if (i < chapters.length - 1) {
           await new Promise(r => setTimeout(r, 1500));
         }
       }
       
       setTranslationProgress({ current: chapters.length, total: chapters.length });
-      setTranslatedChapters(translated);
+      setTranslationCache(prev => ({ ...prev, [langCode]: translated }));
       setIsTranslated(true);
-      toast({ title: 'अनुवाद पूरा हुआ ✅', description: `${chapters.length} अध्याय हिंदी में अनुवादित हो गए` });
+      const langLabel = LANGUAGES[langCode] || langCode;
+      toast({ title: 'अनुवाद पूरा हुआ ✅', description: `${chapters.length} अध्याय ${langLabel} में अनुवादित हो गए` });
     } catch (err: any) {
       console.error('Translation error:', err);
       toast({ title: 'अनुवाद में समस्या', description: 'कृपया कुछ देर बाद पुनः प्रयास करें', variant: 'destructive' });
@@ -546,7 +558,11 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
       setIsTranslating(false);
       setTranslationProgress({ current: 0, total: 0 });
     }
-  }, [isTranslated, translatedChapters, chapters]);
+  }, [isTranslated, isTranslating, selectedLang, translationCache, chapters]);
+
+  const handleShowOriginal = useCallback(() => {
+    setIsTranslated(false);
+  }, []);
 
   // Cleanup animation frame on unmount
   useEffect(() => {
