@@ -460,15 +460,8 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     tts.stop();
   }, [tts]);
 
-  // Multi-language translation handler
-  const LANGUAGES: Record<string, string> = {
-    hi: "हिंदी (Hindi)",
-    mr: "मराठी (Marathi)",
-    ta: "தமிழ் (Tamil)",
-    bn: "বাংলা (Bengali)",
-  };
-
-  const handleTranslate = useCallback(async (langCode: string) => {
+  // Translation handler - langName passed from toolbar
+  const handleTranslate = useCallback(async (langCode: string, langName?: string) => {
     if (isTranslating) return;
     
     if (isTranslated && selectedLang === langCode) {
