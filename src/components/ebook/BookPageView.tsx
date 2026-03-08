@@ -1,5 +1,5 @@
 import { BookPage } from "./useBookPagination";
-import React from "react";
+import React, { useRef, useEffect } from "react";
 
 interface BookPageViewProps {
   page: BookPage | null;
