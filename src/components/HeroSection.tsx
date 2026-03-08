@@ -74,6 +74,7 @@ const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
+  const readerCount = useAnimatedCounter(5000, 2500, 1300);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 200);
