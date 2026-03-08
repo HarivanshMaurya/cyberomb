@@ -7,8 +7,9 @@ import { ChapterTocPanel } from "./ChapterTocPanel";
 import { BookmarksPanel, BookmarkEntry } from "./BookmarksPanel";
 import { useTextToSpeech } from "./TextToSpeech";
 import { useReadingAnalytics } from "@/hooks/useReadingAnalytics";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, BookOpen, Bookmark } from "lucide-react";
+import { ChevronLeft, ChevronRight, BookOpen, Bookmark, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Chapter {
