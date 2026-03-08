@@ -33,17 +33,21 @@ const BlogArticle = () => {
   });
 
   const { data: author } = useQuery({
-    queryKey: ['article-author', article?.author_id],
+    queryKey: ['article-author', article?.author_id, article?.author_name],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('authors')
-        .select('*')
-        .eq('id', article!.author_id!)
-        .single();
+      let query = supabase.from('authors').select('*');
+      if (article?.author_id) {
+        query = query.eq('id', article.author_id);
+      } else if (article?.author_name) {
+        query = query.eq('name', article.author_name);
+      } else {
+        return null;
+      }
+      const { data, error } = await query.maybeSingle();
       if (error) throw error;
       return data;
     },
-    enabled: !!article?.author_id,
+    enabled: !!(article?.author_id || article?.author_name),
   });
 
   const { data: relatedArticles } = useQuery({
