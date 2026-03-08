@@ -43,6 +43,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
   const [isTranslated, setIsTranslated] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [translatedChapters, setTranslatedChapters] = useState<Chapter[] | null>(null);
+  const [translationProgress, setTranslationProgress] = useState({ current: 0, total: 0 });
   const activeChapters = isTranslated && translatedChapters ? translatedChapters : chapters;
 
   // Persisted preferences
