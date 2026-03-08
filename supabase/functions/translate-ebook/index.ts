@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { chapters, targetLang } = await req.json();
+    const { chapters, targetLang, langName: providedLangName } = await req.json();
 
     if (!chapters || !Array.isArray(chapters) || !targetLang) {
       return new Response(
@@ -24,13 +24,9 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const langMap: Record<string, string> = {
-      hi: "Hindi (हिन्दी)", mr: "Marathi (मराठी)",
-      ta: "Tamil (தமிழ்)", bn: "Bengali (বাংলা)", en: "English",
-    };
-    const langName = langMap[targetLang] || "Hindi (हिन्दी)";
+    // Use the language name provided by the client (from DB), no hardcoded map needed
+    const langName = providedLangName || targetLang;
 
-    // Build a compact representation of chapters for the prompt
     const chaptersText = chapters.map((ch: any, i: number) =>
       `=== CHAPTER ${i} ===\nTITLE: ${ch.title}\nCONTENT: ${ch.content}\n=== END CHAPTER ${i} ===`
     ).join("\n\n");
@@ -41,7 +37,6 @@ Do NOT translate content inside <pre> or <code> tags.
 
 ${chaptersText}`;
 
-    // Use tool calling for structured output of ALL chapters at once
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -105,7 +100,6 @@ ${chaptersText}`;
       }
       const errText = await response.text();
       console.error("AI Gateway error:", errText);
-      // Return originals on failure
       return new Response(
         JSON.stringify({ chapters }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -120,7 +114,6 @@ ${chaptersText}`;
         const parsed = JSON.parse(toolCall.function.arguments);
         const translatedChapters = parsed.chapters || [];
         
-        // Ensure we have the right number of chapters, fill gaps with originals
         const result = chapters.map((ch: any, i: number) => ({
           title: translatedChapters[i]?.title || ch.title,
           content: translatedChapters[i]?.content || ch.content,
@@ -135,7 +128,6 @@ ${chaptersText}`;
       console.error("Parse error:", (parseErr as Error).message);
     }
 
-    // Fallback: return originals
     return new Response(
       JSON.stringify({ chapters }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
