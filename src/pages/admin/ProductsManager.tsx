@@ -51,12 +51,11 @@ const ProductsManager = () => {
   const [preTranslating, setPreTranslating] = useState<string | null>(null);
   const [preTranslateProgress, setPreTranslateProgress] = useState({ langIdx: 0, batchIdx: 0, totalBatches: 0, langName: "", totalLangs: 0 });
 
-  // Pre-translate all chapters for all active languages
+  // Pre-translate all chapters for all active languages - 1 chapter at a time for reliability
   const handlePreTranslate = async (product: Product) => {
     if (preTranslating || !product.chapters?.length || !activeLangs.length) return;
     setPreTranslating(product.id);
     
-    const BATCH_SIZE = 3;
     const allTranslations: Record<string, { title: string; content: string }[]> = {};
     
     // Load existing translations from DB
@@ -72,50 +71,95 @@ const ProductsManager = () => {
     } catch {}
     
     let failed = false;
+    const totalChapters = product.chapters.length;
     
     for (let langIdx = 0; langIdx < activeLangs.length; langIdx++) {
       const lang = activeLangs[langIdx];
       
-      // Skip if already translated
-      if (allTranslations[lang.code]?.length === product.chapters.length) continue;
+      // Skip if already fully translated for this language
+      if (allTranslations[lang.code]?.length === totalChapters) {
+        toast.info(`${lang.sublabel}: Already translated, skipping`);
+        continue;
+      }
       
-      const totalBatches = Math.ceil(product.chapters.length / BATCH_SIZE);
-      setPreTranslateProgress({ langIdx: langIdx + 1, batchIdx: 0, totalBatches, langName: lang.sublabel, totalLangs: activeLangs.length });
+      setPreTranslateProgress({ 
+        langIdx: langIdx + 1, batchIdx: 0, 
+        totalBatches: totalChapters, 
+        langName: lang.sublabel, 
+        totalLangs: activeLangs.length 
+      });
       
       const translated: { title: string; content: string }[] = [];
       
-      for (let b = 0; b < totalBatches; b++) {
-        setPreTranslateProgress(prev => ({ ...prev, batchIdx: b + 1 }));
-        const batch = product.chapters.slice(b * BATCH_SIZE, (b + 1) * BATCH_SIZE);
+      // Translate 1 chapter at a time - guaranteed complete translation
+      for (let chIdx = 0; chIdx < totalChapters; chIdx++) {
+        setPreTranslateProgress(prev => ({ ...prev, batchIdx: chIdx + 1 }));
         
-        try {
-          const { data, error } = await supabase.functions.invoke('translate-ebook', {
-            body: { chapters: batch, targetLang: lang.code, langName: `${lang.label} (${lang.sublabel})` },
-          });
-          if (error) throw error;
-          if (data?.error) throw new Error(data.error);
-          translated.push(...(data?.chapters || batch));
-        } catch (err: any) {
-          console.error(`Pre-translate failed for ${lang.code} batch ${b}:`, err);
-          toast.error(`Failed translating ${lang.sublabel}: ${err.message}`);
+        const chapter = product.chapters[chIdx];
+        let success = false;
+        
+        // Retry up to 3 times per chapter (edge function also retries internally)
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (attempt > 0) {
+            toast.info(`Retrying chapter ${chIdx + 1} (attempt ${attempt + 1})...`);
+            await new Promise(r => setTimeout(r, 2000 * attempt));
+          }
+          
+          try {
+            const { data, error } = await supabase.functions.invoke('translate-ebook', {
+              body: { 
+                chapters: [chapter], 
+                targetLang: lang.code, 
+                langName: `${lang.label} (${lang.sublabel})` 
+              },
+            });
+            
+            if (error) throw error;
+            if (data?.error) throw new Error(data.error);
+            
+            if (data?.chapters?.[0]?.title && data?.chapters?.[0]?.content) {
+              translated.push(data.chapters[0]);
+              success = true;
+              break;
+            } else {
+              throw new Error("Empty translation returned");
+            }
+          } catch (err: any) {
+            console.error(`Chapter ${chIdx + 1} attempt ${attempt + 1} failed:`, err.message);
+            if (attempt === 2) {
+              toast.error(`Failed: Chapter ${chIdx + 1} "${chapter.title}" in ${lang.sublabel}`);
+            }
+          }
+        }
+        
+        if (!success) {
           failed = true;
+          toast.error(`Stopping: Could not translate chapter ${chIdx + 1} in ${lang.sublabel} after 3 attempts`);
           break;
         }
       }
       
       if (failed) break;
+      
       allTranslations[lang.code] = translated;
       
       // Save after each language completes
-      await supabase
+      const { error: saveErr } = await supabase
         .from("products" as any)
         .update({ translations: allTranslations } as any)
         .eq("id", product.id);
+        
+      if (saveErr) {
+        console.error("Save error:", saveErr);
+        toast.error(`Failed to save ${lang.sublabel} translations to database`);
+      } else {
+        toast.success(`✅ ${lang.sublabel}: All ${totalChapters} chapters translated & saved!`);
+      }
     }
     
     setPreTranslating(null);
     if (!failed) {
-      toast.success(`All ${activeLangs.length} languages pre-translated & saved! Users will get instant translation now.`);
+      toast.success(`🎉 All ${activeLangs.length} languages done! Users get instant translation now.`);
       refetch();
     }
   };
@@ -434,7 +478,7 @@ const ProductsManager = () => {
                     <div className="mt-2 space-y-1">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Loader2 className="w-3 h-3 animate-spin" />
-                        <span>Translating {preTranslateProgress.langName} ({preTranslateProgress.langIdx}/{preTranslateProgress.totalLangs}) — batch {preTranslateProgress.batchIdx}/{preTranslateProgress.totalBatches}</span>
+                        <span>Translating {preTranslateProgress.langName} ({preTranslateProgress.langIdx}/{preTranslateProgress.totalLangs}) — chapter {preTranslateProgress.batchIdx}/{preTranslateProgress.totalBatches}</span>
                       </div>
                       <Progress value={preTranslateProgress.totalBatches > 0 ? (preTranslateProgress.batchIdx / preTranslateProgress.totalBatches) * 100 : 0} className="h-1.5" />
                     </div>
