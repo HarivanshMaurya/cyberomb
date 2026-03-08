@@ -93,10 +93,11 @@ const Index = () => {
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Resources</h3>
+              <h3 className="font-semibold mb-4">Connect</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/style-guide" className="hover:text-accent transition-colors">Style Guide</a></li>
                 <li><a href="/newsletter" className="hover:text-accent transition-colors">Newsletter</a></li>
+                <li><a href="/travel" className="hover:text-accent transition-colors">Shop</a></li>
+                <li><a href="/articles" className="hover:text-accent transition-colors">All Articles</a></li>
               </ul>
             </div>
             <div>
