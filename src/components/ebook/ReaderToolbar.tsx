@@ -58,13 +58,11 @@ export function ReaderToolbar({
   ttsPlaying,
   ttsPaused,
   ttsSpeed,
-  ttsLangLabel,
   onTtsPlay,
   onTtsPause,
   onTtsResume,
   onTtsStop,
   onTtsCycleSpeed,
-  onTtsCycleLang,
 }: ReaderToolbarProps) {
   const currentIdx = FONT_SIZES.indexOf(fontSize);
   const canDecrease = currentIdx > 0;
