@@ -320,4 +320,19 @@ All colors MUST be HSL.
     70% { opacity: 1; }
     100% { opacity: 0; }
   }
+
+  /* eBook content protection */
+  .ebook-protected {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .ebook-protected * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
 }
