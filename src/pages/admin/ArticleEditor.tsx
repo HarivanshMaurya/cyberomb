@@ -44,12 +44,14 @@ export default function ArticleEditor() {
     featured_image: '',
     category: 'uncategorized',
     author_name: '',
-    status: 'draft' as 'draft' | 'published' | 'archived',
+    status: 'draft' as 'draft' | 'published' | 'archived' | 'scheduled',
     read_time: '5 min read',
     meta_title: '',
     meta_description: '',
     og_image: '',
   });
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>(undefined);
+  const [scheduledTime, setScheduledTime] = useState('09:00');
 
   const categoryOptions = (() => {
     const opts = new Map<string, string>();
