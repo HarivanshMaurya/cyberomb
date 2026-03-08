@@ -1,8 +1,34 @@
-import { useState, useEffect, useRef } from "react";
-import { Instagram, Facebook, Linkedin, Twitter, ArrowRight, Sparkles, MousePointer2 } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Instagram, Facebook, Linkedin, Twitter, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeroContent } from "@/hooks/useHeroContent";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const useAnimatedCounter = (target: number, duration = 2000, startDelay = 1000) => {
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const delayTimer = setTimeout(() => setStarted(true), startDelay);
+    return () => clearTimeout(delayTimer);
+  }, [startDelay]);
+
+  useEffect(() => {
+    if (!started) return;
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * target));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [started, target, duration]);
+
+  return count;
+};
 
 const AnimatedWord = ({ word, index, isVisible }: { word: string; index: number; isVisible: boolean }) => (
   <span
