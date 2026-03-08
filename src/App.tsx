@@ -52,6 +52,7 @@ import ResetPassword from "./pages/ResetPassword";
 import WellnessArticlesList from "./pages/admin/WellnessArticlesList";
 import WellnessArticleEditor from "./pages/admin/WellnessArticleEditor";
 import WellnessArticlePage from "./pages/WellnessArticle";
+import ContactMessages from "./pages/admin/ContactMessages";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -115,6 +116,7 @@ const App = () => (
               <Route path="seo" element={<SEOSettings />} />
               <Route path="products" element={<ProductsManager />} />
                <Route path="subscribers" element={<SubscribersManager />} />
+               <Route path="contact-messages" element={<ContactMessages />} />
               <Route path="database" element={<DatabaseBrowser />} />
                <Route path="users" element={<UserManagement />} />
                <Route path="analytics" element={<AnalyticsDashboard />} />
