@@ -178,7 +178,7 @@ export default function Login() {
                         <Sparkles className="h-8 w-8 text-accent" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">Join Us</h1>
+                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">Join Us</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">Create your account in seconds</p>
                   </>
                 )}
