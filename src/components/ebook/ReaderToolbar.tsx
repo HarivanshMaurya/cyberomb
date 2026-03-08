@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { TTSControls } from "./TextToSpeech";
+import { useActiveTranslationLanguages } from "@/hooks/useTranslationLanguages";
 import {
   BookOpen,
   X,
