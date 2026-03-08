@@ -67,21 +67,6 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
   // TTS with sentence highlighting
   const tts = useTextToSpeech();
 
-  // Sync TTS language with content language
-  useEffect(() => {
-    const ttsLang = contentLang === "hi" ? "hi-IN" : "en-US";
-    if (tts.lang !== ttsLang) {
-      // Set TTS language to match content language
-      tts.setLang(ttsLang);
-    }
-  }, [contentLang]);
-
-  // Handle language toggle — changes both content and TTS
-  const handleCycleLang = useCallback(() => {
-    tts.stop(); // Stop any ongoing TTS
-    setContentLang((prev) => (prev === "en" ? "hi" : "en"));
-  }, [tts]);
-
   // Resume reading position
   useEffect(() => {
     if (hasResumed || pages.length === 0) return;
