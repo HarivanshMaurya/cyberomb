@@ -83,7 +83,7 @@ import { getPublicOrigin } from '@/lib/redirectUrl';
        email,
        password,
        options: {
-         emailRedirectTo: window.location.origin,
+         emailRedirectTo: getPublicOrigin(),
          data: {
            full_name: fullName,
          },
