@@ -216,18 +216,65 @@ const ANIMATION_OPTIONS: { value: BlockAnimation; label: string }[] = [
   { value: 'zoom-in', label: 'Zoom In' },
 ];
 
+const BG_PRESETS = [
+  { value: '', label: 'Default', color: '' },
+  { value: '#ffffff', label: 'White', color: '#ffffff' },
+  { value: '#f8f9fa', label: 'Light Gray', color: '#f8f9fa' },
+  { value: '#f1f5f9', label: 'Slate 100', color: '#f1f5f9' },
+  { value: '#fef3c7', label: 'Warm Yellow', color: '#fef3c7' },
+  { value: '#ecfdf5', label: 'Mint', color: '#ecfdf5' },
+  { value: '#eff6ff', label: 'Sky Blue', color: '#eff6ff' },
+  { value: '#fdf2f8', label: 'Pink', color: '#fdf2f8' },
+  { value: '#1e293b', label: 'Dark Slate', color: '#1e293b' },
+  { value: '#0f172a', label: 'Dark Navy', color: '#0f172a' },
+  { value: '#18181b', label: 'Near Black', color: '#18181b' },
+];
+
 function StyleSettingsEditor({ style, onChange }: { style: BlockStyleSettings; onChange: (s: BlockStyleSettings) => void }) {
   const [open, setOpen] = useState(false);
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="mt-4 border border-border rounded-lg">
       <CollapsibleTrigger asChild>
         <Button type="button" variant="ghost" size="sm" className="w-full justify-between gap-2 px-3 py-2">
-          <span className="flex items-center gap-2 text-sm font-medium"><Settings2 className="h-4 w-4" />Spacing & Animation</span>
+          <span className="flex items-center gap-2 text-sm font-medium"><Settings2 className="h-4 w-4" />Style Settings</span>
           <span className="text-xs text-muted-foreground">{open ? '▲' : '▼'}</span>
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent className="px-3 pb-3 space-y-4">
-        <div className="space-y-3 pt-2">
+        {/* Background Color */}
+        <div className="space-y-2 pt-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Background Color</p>
+          <div className="flex flex-wrap gap-2">
+            {BG_PRESETS.map((preset) => (
+              <button
+                key={preset.value}
+                type="button"
+                className={`w-7 h-7 rounded-full border-2 transition-all ${style.backgroundColor === preset.value ? 'border-primary scale-110 ring-2 ring-primary/30' : 'border-border hover:border-foreground/40'}`}
+                style={{ backgroundColor: preset.color || 'transparent', backgroundImage: !preset.color ? 'linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%), linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%)' : undefined, backgroundSize: !preset.color ? '8px 8px' : undefined, backgroundPosition: !preset.color ? '0 0, 4px 4px' : undefined }}
+                onClick={() => onChange({ ...style, backgroundColor: preset.value })}
+                title={preset.label}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <Label className="text-xs shrink-0">Custom:</Label>
+            <input
+              type="color"
+              value={style.backgroundColor || '#ffffff'}
+              onChange={(e) => onChange({ ...style, backgroundColor: e.target.value })}
+              className="w-8 h-8 rounded cursor-pointer border border-border"
+            />
+            <Input
+              value={style.backgroundColor || ''}
+              onChange={(e) => onChange({ ...style, backgroundColor: e.target.value })}
+              placeholder="e.g. #ff5500"
+              className="h-8 text-xs flex-1"
+            />
+          </div>
+        </div>
+
+        {/* Spacing */}
+        <div className="space-y-3">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Spacing (px)</p>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -248,6 +295,8 @@ function StyleSettingsEditor({ style, onChange }: { style: BlockStyleSettings; o
             </div>
           </div>
         </div>
+
+        {/* Animation */}
         <div className="space-y-1.5">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Animation</p>
           <Select value={style.animation} onValueChange={(v) => onChange({ ...style, animation: v as BlockAnimation })}>

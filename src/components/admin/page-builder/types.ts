@@ -20,10 +20,11 @@ export interface BlockSpacing {
 export interface BlockStyleSettings {
   spacing: BlockSpacing;
   animation: BlockAnimation;
+  backgroundColor?: string;
 }
 
 export const DEFAULT_SPACING: BlockSpacing = { paddingTop: 0, paddingBottom: 0, marginTop: 0, marginBottom: 0 };
-export const DEFAULT_STYLE: BlockStyleSettings = { spacing: DEFAULT_SPACING, animation: 'none' };
+export const DEFAULT_STYLE: BlockStyleSettings = { spacing: DEFAULT_SPACING, animation: 'none', backgroundColor: '' };
 
 export interface HeroBlock {
   type: 'hero';

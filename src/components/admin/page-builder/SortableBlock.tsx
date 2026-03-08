@@ -3,7 +3,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { PageBlock, BLOCK_LABELS, BLOCK_ICONS } from './types';
 import { BlockEditor } from './BlockEditor';
 import { Button } from '@/components/ui/button';
-import { GripVertical, ChevronDown, ChevronRight, Trash2, Copy } from 'lucide-react';
+import { GripVertical, ChevronDown, ChevronRight, Trash2, Copy, ClipboardPaste, Clipboard, ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SortableBlockProps {
@@ -13,9 +13,14 @@ interface SortableBlockProps {
   onChange: (block: PageBlock) => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  onCopy: () => void;
+  onPaste: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  hasClipboard: boolean;
 }
 
-export function SortableBlock({ block, isExpanded, onToggle, onChange, onDelete, onDuplicate }: SortableBlockProps) {
+export function SortableBlock({ block, isExpanded, onToggle, onChange, onDelete, onDuplicate, onCopy, onPaste, onMoveUp, onMoveDown, hasClipboard }: SortableBlockProps) {
   const {
     attributes,
     listeners,
@@ -42,7 +47,7 @@ export function SortableBlock({ block, isExpanded, onToggle, onChange, onDelete,
       )}
     >
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2.5 bg-muted/40 cursor-pointer" onClick={onToggle}>
+      <div className="flex items-center gap-1.5 px-3 py-2.5 bg-muted/40 cursor-pointer" onClick={onToggle}>
         <button
           className="cursor-grab active:cursor-grabbing p-1 text-muted-foreground hover:text-foreground touch-none"
           {...attributes}
@@ -55,6 +60,26 @@ export function SortableBlock({ block, isExpanded, onToggle, onChange, onDelete,
         <span className="text-lg">{BLOCK_ICONS[block.type]}</span>
         <span className="font-medium text-sm flex-1">{BLOCK_LABELS[block.type]}</span>
 
+        {/* Move buttons */}
+        {onMoveUp && (
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); onMoveUp(); }} title="Move Up">
+            <ArrowUp className="h-3.5 w-3.5" />
+          </Button>
+        )}
+        {onMoveDown && (
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); onMoveDown(); }} title="Move Down">
+            <ArrowDown className="h-3.5 w-3.5" />
+          </Button>
+        )}
+
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); onCopy(); }} title="Copy">
+          <Clipboard className="h-3.5 w-3.5" />
+        </Button>
+        {hasClipboard && (
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); onPaste(); }} title="Paste After">
+            <ClipboardPaste className="h-3.5 w-3.5" />
+          </Button>
+        )}
         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); onDuplicate(); }} title="Duplicate">
           <Copy className="h-3.5 w-3.5" />
         </Button>
