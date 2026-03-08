@@ -28,6 +28,9 @@ const HeroSection = () => {
   const backgroundImage = hero?.background_image || "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=1920&q=80";
   const buttonText = hero?.button_text || "Explore";
   const buttonLink = hero?.button_link || "#articles";
+  const instagramUrl = hero?.instagram_url || "";
+  const facebookUrl = hero?.facebook_url || "";
+  const linkedinUrl = hero?.linkedin_url || "";
 
   return (
     <section className="relative rounded-[2.5rem] overflow-hidden bg-muted my-12 animate-fade-in">
