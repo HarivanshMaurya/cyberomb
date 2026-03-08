@@ -93,7 +93,7 @@ function LanguageDropdown({
   isTranslated: boolean;
   isTranslating: boolean;
   selectedLang: string;
-  onTranslate: (code: string) => void;
+  onTranslate: (code: string, langName?: string) => void;
   onShowOriginal: () => void;
 }) {
   const [open, setOpen] = useState(false);
