@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Loader2, LogIn, UserPlus, KeyRound, ArrowLeft, Mail, Lock, Eye, EyeOff, CheckCircle2, Sparkles, Shield, Fingerprint } from 'lucide-react';
+import { lovable } from '@/integrations/lovable/index';
 
 type ViewMode = 'signin' | 'signup' | 'forgot' | 'forgot-sent';
 
