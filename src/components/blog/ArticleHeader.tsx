@@ -12,15 +12,16 @@ interface ArticleHeaderProps {
   getCategoryClass: (cat: string) => string;
 }
  
- const ArticleHeader = ({
-   title,
-   excerpt,
-   category,
-   authorName,
-   formattedDate,
-   readTime,
-   getCategoryClass,
- }: ArticleHeaderProps) => {
+const ArticleHeader = ({
+  title,
+  excerpt,
+  category,
+  authorName,
+  authorImage,
+  formattedDate,
+  readTime,
+  getCategoryClass,
+}: ArticleHeaderProps) => {
    const handleCopyLink = () => {
      navigator.clipboard.writeText(window.location.href);
      toast.success("Link copied to clipboard!");
