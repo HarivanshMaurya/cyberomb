@@ -52,6 +52,7 @@ import ResetPassword from "./pages/ResetPassword";
 import WellnessArticlesList from "./pages/admin/WellnessArticlesList";
 import WellnessArticleEditor from "./pages/admin/WellnessArticleEditor";
 import WellnessArticlePage from "./pages/WellnessArticle";
+import ContactMessages from "./pages/admin/ContactMessages";
 const queryClient = new QueryClient();
 
 const App = () => (
