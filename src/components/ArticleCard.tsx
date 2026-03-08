@@ -56,7 +56,7 @@ const ArticleCard = ({ id, title, category, date, image, size = "small" }: Artic
           {/* Bottom section - Title and Arrow */}
           <div className="flex items-end justify-between gap-4">
             <div className="flex-1">
-              <span className="text-white/50 text-xs font-medium tracking-wider block mb-3">{id}</span>
+              <span className="text-white/50 text-xs font-medium tracking-wider block mb-3">{category}</span>
               <h3 className="text-white text-xl md:text-2xl lg:text-3xl font-bold leading-tight tracking-tight">
                 {title}
               </h3>
