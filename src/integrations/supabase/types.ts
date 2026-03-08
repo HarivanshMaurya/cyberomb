@@ -413,6 +413,51 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_analytics: {
+        Row: {
+          completion_percent: number
+          created_at: string
+          id: string
+          last_page_read: number
+          last_read_at: string
+          pages_read: number
+          product_id: string
+          product_slug: string | null
+          total_pages: number
+          total_reading_time_seconds: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completion_percent?: number
+          created_at?: string
+          id?: string
+          last_page_read?: number
+          last_read_at?: string
+          pages_read?: number
+          product_id: string
+          product_slug?: string | null
+          total_pages?: number
+          total_reading_time_seconds?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completion_percent?: number
+          created_at?: string
+          id?: string
+          last_page_read?: number
+          last_read_at?: string
+          pages_read?: number
+          product_id?: string
+          product_slug?: string | null
+          total_pages?: number
+          total_reading_time_seconds?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       site_sections: {
         Row: {
           content: Json
