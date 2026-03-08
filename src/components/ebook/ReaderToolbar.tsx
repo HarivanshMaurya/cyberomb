@@ -33,13 +33,11 @@ interface ReaderToolbarProps {
   ttsPlaying: boolean;
   ttsPaused: boolean;
   ttsSpeed: number;
-  ttsLangLabel: string;
   onTtsPlay: () => void;
   onTtsPause: () => void;
   onTtsResume: () => void;
   onTtsStop: () => void;
   onTtsCycleSpeed: () => void;
-  onTtsCycleLang: () => void;
 }
 
 const FONT_SIZES = [14, 16, 18, 20, 22];
@@ -60,13 +58,11 @@ export function ReaderToolbar({
   ttsPlaying,
   ttsPaused,
   ttsSpeed,
-  ttsLangLabel,
   onTtsPlay,
   onTtsPause,
   onTtsResume,
   onTtsStop,
   onTtsCycleSpeed,
-  onTtsCycleLang,
 }: ReaderToolbarProps) {
   const currentIdx = FONT_SIZES.indexOf(fontSize);
   const canDecrease = currentIdx > 0;
@@ -137,13 +133,11 @@ export function ReaderToolbar({
           isPlaying={ttsPlaying}
           isPaused={ttsPaused}
           speed={ttsSpeed}
-          langLabel={ttsLangLabel}
           onPlay={onTtsPlay}
           onPause={onTtsPause}
           onResume={onTtsResume}
           onStop={onTtsStop}
           onCycleSpeed={onTtsCycleSpeed}
-          onCycleLang={onTtsCycleLang}
           darkMode={darkMode}
         />
 

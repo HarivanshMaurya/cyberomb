@@ -7,9 +7,8 @@ import { ChapterTocPanel } from "./ChapterTocPanel";
 import { BookmarksPanel, BookmarkEntry } from "./BookmarksPanel";
 import { useTextToSpeech } from "./TextToSpeech";
 import { useReadingAnalytics } from "@/hooks/useReadingAnalytics";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, BookOpen, Bookmark, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, BookOpen, Bookmark } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Chapter {
@@ -35,12 +34,6 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
   const isMobile = useIsMobile();
   const [showCover, setShowCover] = useState(true);
 
-  // Language state — controls both content translation and TTS
-  const [contentLang, setContentLang] = useState<"en" | "hi">("hi");
-  const [translatedChapters, setTranslatedChapters] = useState<Chapter[] | null>(null);
-  const [isTranslating, setIsTranslating] = useState(false);
-  const translationCacheRef = useRef<Record<string, Chapter[]>>({});
-
   // Persisted preferences
   const [darkMode, setDarkMode] = useState(() => {
     try { return localStorage.getItem(getStorageKey(bookSlug, "dark")) === "true"; } catch { return false; }
@@ -52,55 +45,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     try { return JSON.parse(localStorage.getItem(getStorageKey(bookSlug, "bookmarks")) || "[]"); } catch { return []; }
   });
 
-  // Translate chapters when Hindi is selected
-  useEffect(() => {
-    if (contentLang === "en") {
-      setTranslatedChapters(null);
-      return;
-    }
-    // Check cache
-    if (translationCacheRef.current[contentLang]) {
-      setTranslatedChapters(translationCacheRef.current[contentLang]);
-      return;
-    }
-    // Translate all chapters in parallel
-    let cancelled = false;
-    (async () => {
-      setIsTranslating(true);
-      try {
-        const translationPromises = chapters.map(async (chapter) => {
-          const { data, error } = await supabase.functions.invoke("translate-article", {
-            body: {
-              title: chapter.title,
-              content: chapter.content,
-              excerpt: "",
-              targetLang: contentLang,
-            },
-          });
-          if (error) throw error;
-          return {
-            title: data.title || chapter.title,
-            content: data.content || chapter.content,
-          } as Chapter;
-        });
-        const translated = await Promise.all(translationPromises);
-        if (!cancelled) {
-          translationCacheRef.current[contentLang] = translated;
-          setTranslatedChapters(translated);
-        }
-      } catch (err) {
-        console.error("Translation error:", err);
-        if (!cancelled) setTranslatedChapters(null);
-      } finally {
-        if (!cancelled) setIsTranslating(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [contentLang, chapters]);
-
-  // Active chapters based on language
-  const activeChapters = contentLang === "en" ? chapters : (translatedChapters || chapters);
-  const pages = useBookPagination(activeChapters, fontSize);
+  const pages = useBookPagination(chapters, fontSize);
   const pagesPerSpread = isMobile ? 1 : 2;
   const totalSpreads = Math.ceil(pages.length / pagesPerSpread);
 
@@ -120,21 +65,6 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
 
   // TTS with sentence highlighting
   const tts = useTextToSpeech();
-
-  // Sync TTS language with content language
-  useEffect(() => {
-    const ttsLang = contentLang === "hi" ? "hi-IN" : "en-US";
-    if (tts.lang !== ttsLang) {
-      // Set TTS language to match content language
-      tts.setLang(ttsLang);
-    }
-  }, [contentLang]);
-
-  // Handle language toggle — changes both content and TTS
-  const handleCycleLang = useCallback(() => {
-    tts.stop(); // Stop any ongoing TTS
-    setContentLang((prev) => (prev === "en" ? "hi" : "en"));
-  }, [tts]);
 
   // Resume reading position
   useEffect(() => {
@@ -405,13 +335,11 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         ttsPlaying={tts.isPlaying}
         ttsPaused={tts.isPaused}
         ttsSpeed={tts.speed}
-        ttsLangLabel={contentLang === "hi" ? "हिंदी" : "EN"}
         onTtsPlay={handleTtsPlay}
         onTtsPause={tts.pause}
         onTtsResume={tts.resume}
         onTtsStop={handleTtsStop}
         onTtsCycleSpeed={tts.cycleSpeed}
-        onTtsCycleLang={handleCycleLang}
       />
 
       {/* Reading progress bar */}
@@ -422,17 +350,6 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         />
       </div>
 
-      {/* Translating overlay */}
-      {isTranslating && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center" style={{ background: darkMode ? "hsl(0 0% 8% / 0.85)" : "hsl(var(--background) / 0.85)" }}>
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin" style={{ color: darkMode ? "hsl(36 44% 70%)" : "hsl(var(--primary))" }} />
-            <span className="text-sm font-serif" style={{ color: darkMode ? "hsl(36 44% 85%)" : "hsl(var(--foreground))" }}>
-              {contentLang === "hi" ? "हिंदी में अनुवाद हो रहा है..." : "Translating..."}
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Book container */}
       <div
@@ -591,7 +508,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
 
       {showToc && (
         <ChapterTocPanel
-          chapters={activeChapters}
+          chapters={chapters}
           pages={pages}
           currentPage={currentPageNum}
           onJumpToChapter={jumpToChapter}
