@@ -18,7 +18,11 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
-import { Loader2, Save, ArrowLeft, Eye } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Loader2, Save, ArrowLeft, Eye, CalendarIcon, Clock, Timer } from 'lucide-react';
+import { format, isFuture, isPast } from 'date-fns';
+import { cn } from '@/lib/utils';
  
 export default function ArticleEditor() {
   const { id } = useParams();
@@ -40,12 +44,14 @@ export default function ArticleEditor() {
     featured_image: '',
     category: 'uncategorized',
     author_name: '',
-    status: 'draft' as 'draft' | 'published' | 'archived',
+    status: 'draft' as 'draft' | 'published' | 'archived' | 'scheduled',
     read_time: '5 min read',
     meta_title: '',
     meta_description: '',
     og_image: '',
   });
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>(undefined);
+  const [scheduledTime, setScheduledTime] = useState('09:00');
 
   const categoryOptions = (() => {
     const opts = new Map<string, string>();
@@ -61,21 +67,27 @@ export default function ArticleEditor() {
  
    useEffect(() => {
      if (article && !isNew) {
-       setFormData({
-         title: article.title,
-         slug: article.slug,
-         excerpt: article.excerpt || '',
-         content: article.content || '',
-         featured_image: article.featured_image || '',
-         category: article.category,
-         author_name: article.author_name || '',
-         status: article.status as 'draft' | 'published' | 'archived',
-         read_time: article.read_time || '5 min read',
-         meta_title: article.meta_title || '',
-         meta_description: article.meta_description || '',
-         og_image: article.og_image || '',
-       });
-     }
+        setFormData({
+          title: article.title,
+          slug: article.slug,
+          excerpt: article.excerpt || '',
+          content: article.content || '',
+          featured_image: article.featured_image || '',
+          category: article.category,
+          author_name: article.author_name || '',
+          status: article.status as 'draft' | 'published' | 'archived' | 'scheduled',
+          read_time: article.read_time || '5 min read',
+          meta_title: article.meta_title || '',
+          meta_description: article.meta_description || '',
+          og_image: article.og_image || '',
+        });
+        // Load scheduled date if status is scheduled
+        if (article.status === 'scheduled' && article.published_at) {
+          const d = new Date(article.published_at);
+          setScheduledDate(d);
+          setScheduledTime(format(d, 'HH:mm'));
+        }
+      }
    }, [article, isNew]);
  
    const generateSlug = (title: string) => {
@@ -96,10 +108,20 @@ export default function ArticleEditor() {
    const handleSubmit = async (e: React.FormEvent) => {
      e.preventDefault();
  
-     const articleData = {
-       ...formData,
-       published_at: formData.status === 'published' ? new Date().toISOString() : null,
-     };
+      let publishedAt: string | null = null;
+      if (formData.status === 'published') {
+        publishedAt = new Date().toISOString();
+      } else if (formData.status === 'scheduled' && scheduledDate) {
+        const [hours, minutes] = scheduledTime.split(':').map(Number);
+        const scheduled = new Date(scheduledDate);
+        scheduled.setHours(hours, minutes, 0, 0);
+        publishedAt = scheduled.toISOString();
+      }
+
+      const articleData = {
+        ...formData,
+        published_at: publishedAt,
+      };
  
      if (isNew) {
        createArticle.mutate(articleData, {
@@ -210,47 +232,123 @@ export default function ArticleEditor() {
  
                {/* Sidebar */}
                <div className="space-y-6">
-                 <Card>
-                   <CardHeader>
-                     <CardTitle>Publish</CardTitle>
-                   </CardHeader>
-                   <CardContent className="space-y-4">
-                     <div className="space-y-2">
-                       <Label>Status</Label>
-                       <Select
-                         value={formData.status}
-                       onValueChange={(value: 'draft' | 'published' | 'archived') => setFormData({ ...formData, status: value })}
-                       >
-                         <SelectTrigger>
-                           <SelectValue />
-                         </SelectTrigger>
-                         <SelectContent>
-                           <SelectItem value="draft">Draft</SelectItem>
-                           <SelectItem value="published">Published</SelectItem>
-                           <SelectItem value="archived">Archived</SelectItem>
-                         </SelectContent>
-                       </Select>
-                     </div>
- 
-                     <Button
-                       type="submit"
-                       className="w-full"
-                       disabled={createArticle.isPending || updateArticle.isPending}
-                     >
-                       {createArticle.isPending || updateArticle.isPending ? (
-                         <>
-                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                           Saving...
-                         </>
-                       ) : (
-                         <>
-                           <Save className="mr-2 h-4 w-4" />
-                           {isNew ? 'Create Article' : 'Save Changes'}
-                         </>
-                       )}
-                     </Button>
-                   </CardContent>
-                 </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Timer className="h-4 w-4 text-primary" />
+                        Publish
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select
+                          value={formData.status}
+                          onValueChange={(value: 'draft' | 'published' | 'archived' | 'scheduled') => {
+                            setFormData({ ...formData, status: value });
+                            if (value === 'scheduled' && !scheduledDate) {
+                              const tomorrow = new Date();
+                              tomorrow.setDate(tomorrow.getDate() + 1);
+                              setScheduledDate(tomorrow);
+                            }
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="draft">📝 Draft</SelectItem>
+                            <SelectItem value="published">✅ Published</SelectItem>
+                            <SelectItem value="scheduled">📅 Scheduled</SelectItem>
+                            <SelectItem value="archived">📦 Archived</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Schedule Date/Time Picker */}
+                      {formData.status === 'scheduled' && (
+                        <div className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                          <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                            <CalendarIcon className="h-4 w-4" />
+                            Schedule Publication
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">Date</Label>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !scheduledDate && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {scheduledDate ? format(scheduledDate, 'PPP') : 'Pick a date'}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={scheduledDate}
+                                  onSelect={setScheduledDate}
+                                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                                  initialFocus
+                                  className={cn("p-3 pointer-events-auto")}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">Time</Label>
+                            <div className="relative">
+                              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                type="time"
+                                value={scheduledTime}
+                                onChange={(e) => setScheduledTime(e.target.value)}
+                                className="pl-10"
+                              />
+                            </div>
+                          </div>
+
+                          {scheduledDate && (
+                            <div className="text-xs text-muted-foreground bg-background rounded-md p-2 border">
+                              Will publish on{' '}
+                              <span className="font-semibold text-foreground">
+                                {format(scheduledDate, 'MMM dd, yyyy')} at {scheduledTime}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+  
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={createArticle.isPending || updateArticle.isPending || (formData.status === 'scheduled' && !scheduledDate)}
+                      >
+                        {createArticle.isPending || updateArticle.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : formData.status === 'scheduled' ? (
+                          <>
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            Schedule Article
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            {isNew ? 'Create Article' : 'Save Changes'}
+                          </>
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
  
                  <Card>
                    <CardHeader>

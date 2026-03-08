@@ -10,7 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
-import { Loader2, Save, ArrowLeft, Eye } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Loader2, Save, ArrowLeft, Eye, CalendarIcon, Clock, Timer } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 export default function WellnessArticleEditor() {
   const { id } = useParams();
@@ -35,6 +39,8 @@ export default function WellnessArticleEditor() {
     meta_description: '',
     og_image: '',
   });
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>(undefined);
+  const [scheduledTime, setScheduledTime] = useState('09:00');
 
   useEffect(() => {
     if (article && !isNew) {
@@ -51,6 +57,11 @@ export default function WellnessArticleEditor() {
         meta_description: article.meta_description || '',
         og_image: article.og_image || '',
       });
+      if (article.status === 'scheduled' && article.published_at) {
+        const d = new Date(article.published_at);
+        setScheduledDate(d);
+        setScheduledTime(format(d, 'HH:mm'));
+      }
     }
   }, [article, isNew]);
 
@@ -63,9 +74,18 @@ export default function WellnessArticleEditor() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    let publishedAt: string | null = null;
+    if (formData.status === 'published') {
+      publishedAt = new Date().toISOString();
+    } else if (formData.status === 'scheduled' && scheduledDate) {
+      const [hours, minutes] = scheduledTime.split(':').map(Number);
+      const scheduled = new Date(scheduledDate);
+      scheduled.setHours(hours, minutes, 0, 0);
+      publishedAt = scheduled.toISOString();
+    }
     const data = {
       ...formData,
-      published_at: formData.status === 'published' ? new Date().toISOString() : null,
+      published_at: publishedAt,
     };
 
     if (isNew) {
@@ -142,22 +162,69 @@ export default function WellnessArticleEditor() {
 
               <div className="space-y-6">
                 <Card>
-                  <CardHeader><CardTitle>Publish</CardTitle></CardHeader>
+                  <CardHeader><CardTitle className="flex items-center gap-2"><Timer className="h-4 w-4 text-primary" />Publish</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
                       <Label>Status</Label>
-                      <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
+                      <Select value={formData.status} onValueChange={(v) => {
+                        setFormData({ ...formData, status: v });
+                        if (v === 'scheduled' && !scheduledDate) {
+                          const tomorrow = new Date();
+                          tomorrow.setDate(tomorrow.getDate() + 1);
+                          setScheduledDate(tomorrow);
+                        }
+                      }}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="draft">Draft</SelectItem>
-                          <SelectItem value="published">Published</SelectItem>
-                          <SelectItem value="archived">Archived</SelectItem>
+                          <SelectItem value="draft">📝 Draft</SelectItem>
+                          <SelectItem value="published">✅ Published</SelectItem>
+                          <SelectItem value="scheduled">📅 Scheduled</SelectItem>
+                          <SelectItem value="archived">📦 Archived</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                    <Button type="submit" className="w-full" disabled={createArticle.isPending || updateArticle.isPending}>
+
+                    {formData.status === 'scheduled' && (
+                      <div className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                        <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                          <CalendarIcon className="h-4 w-4" />
+                          Schedule Publication
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">Date</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !scheduledDate && "text-muted-foreground")}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {scheduledDate ? format(scheduledDate, 'PPP') : 'Pick a date'}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar mode="single" selected={scheduledDate} onSelect={setScheduledDate} disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))} initialFocus className={cn("p-3 pointer-events-auto")} />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">Time</Label>
+                          <div className="relative">
+                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input type="time" value={scheduledTime} onChange={(e) => setScheduledTime(e.target.value)} className="pl-10" />
+                          </div>
+                        </div>
+                        {scheduledDate && (
+                          <div className="text-xs text-muted-foreground bg-background rounded-md p-2 border">
+                            Will publish on{' '}
+                            <span className="font-semibold text-foreground">{format(scheduledDate, 'MMM dd, yyyy')} at {scheduledTime}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <Button type="submit" className="w-full" disabled={createArticle.isPending || updateArticle.isPending || (formData.status === 'scheduled' && !scheduledDate)}>
                       {createArticle.isPending || updateArticle.isPending ? (
                         <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>
+                      ) : formData.status === 'scheduled' ? (
+                        <><CalendarIcon className="mr-2 h-4 w-4" />Schedule Article</>
                       ) : (
                         <><Save className="mr-2 h-4 w-4" />{isNew ? 'Create Article' : 'Save Changes'}</>
                       )}
