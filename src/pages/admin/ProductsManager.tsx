@@ -36,7 +36,8 @@ const emptyForm = {
 };
 
 const ProductsManager = () => {
-  const { data: products, isLoading } = useProducts();
+  const { data: products, isLoading, refetch } = useProducts();
+  const { data: activeLangs = [] } = useActiveTranslationLanguages();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
@@ -47,6 +48,8 @@ const ProductsManager = () => {
   const [newGalleryUrl, setNewGalleryUrl] = useState("");
   const [newTocTitle, setNewTocTitle] = useState("");
   const [newTocPage, setNewTocPage] = useState("");
+  const [preTranslating, setPreTranslating] = useState<string | null>(null);
+  const [preTranslateProgress, setPreTranslateProgress] = useState({ langIdx: 0, batchIdx: 0, totalBatches: 0, langName: "", totalLangs: 0 });
 
   const openCreate = () => {
     setEditingId(null);
