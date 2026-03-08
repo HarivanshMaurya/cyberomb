@@ -159,7 +159,7 @@ function LanguageDropdown({
           {languages.map((lang) => (
             <button
               key={lang.code}
-              onClick={() => { onTranslate(lang.code); setOpen(false); }}
+              onClick={() => { onTranslate(lang.code, `${lang.label} (${lang.sublabel})`); setOpen(false); }}
               className="w-full flex items-center justify-between px-3 py-2.5 text-left text-sm transition-colors"
               style={{
                 color: isTranslated && selectedLang === lang.code
