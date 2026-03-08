@@ -1,38 +1,77 @@
 import { useState, useEffect, useRef } from "react";
-import { Instagram, Facebook, Linkedin, Twitter, ArrowRight, Sparkles } from "lucide-react";
+import { Instagram, Facebook, Linkedin, Twitter, ArrowRight, Sparkles, MousePointer2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeroContent } from "@/hooks/useHeroContent";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const AnimatedWord = ({ word, index, isVisible }: { word: string; index: number; isVisible: boolean }) => (
+  <span
+    className="inline-block mr-[0.3em] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-accent hover:-translate-y-1 cursor-default"
+    style={{
+      transitionDelay: `${300 + index * 100}ms`,
+      opacity: isVisible ? 1 : 0,
+      transform: isVisible ? 'translateY(0) rotateX(0)' : 'translateY(40px) rotateX(20deg)',
+      filter: isVisible ? 'blur(0px)' : 'blur(8px)',
+    }}
+  >
+    {word}
+  </span>
+);
+
+const FloatingOrb = ({ className, mousePos, factor, delay }: { 
+  className: string; mousePos: { x: number; y: number }; factor: number; delay: string 
+}) => (
+  <div
+    className={`absolute rounded-full blur-[100px] transition-transform ${className}`}
+    style={{
+      transform: `translate(${mousePos.x * factor}px, ${mousePos.y * factor}px)`,
+      transitionDuration: delay,
+      transitionTimingFunction: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+    }}
+  />
+);
+
+const SocialLink = ({ url, icon: Icon, label }: { url: string; icon: typeof Instagram; label: string }) => (
+  <a
+    href={url}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="group/social relative w-10 h-10 rounded-xl border border-border/30 hover:border-accent/40 bg-card/30 backdrop-blur-sm transition-all duration-500 flex items-center justify-center hover:scale-110 hover:-translate-y-1 hover:shadow-lg hover:shadow-accent/10"
+    aria-label={label}
+  >
+    <Icon className="w-4 h-4 text-muted-foreground/50 group-hover/social:text-accent transition-colors duration-300" />
+  </a>
+);
 
 const HeroSection = () => {
   const { data: hero, isLoading } = useHeroContent();
   const [isVisible, setIsVisible] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const sectionRef = useRef<HTMLElement>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 150);
+    const timer = setTimeout(() => setIsVisible(true), 200);
     return () => clearTimeout(timer);
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setMousePos({
-      x: ((e.clientX - rect.left) / rect.width - 0.5) * 2,
-      y: ((e.clientY - rect.top) / rect.height - 0.5) * 2,
+      x: ((e.clientX - rect.left) / rect.width - 0.5) * 30,
+      y: ((e.clientY - rect.top) / rect.height - 0.5) * 30,
     });
   };
 
   if (isLoading) {
     return (
       <section className="relative overflow-hidden my-6 md:my-10">
-        <div className="min-h-[85vh] p-6 md:p-12 lg:p-16">
-          <div className="grid md:grid-cols-2 gap-8 h-full items-center">
+        <div className="min-h-[90vh] p-6 md:p-12 lg:p-16 flex items-center">
+          <div className="w-full grid md:grid-cols-2 gap-8 items-center">
             <div className="flex flex-col justify-center space-y-6">
               <Skeleton className="h-6 w-32 rounded-full" />
-              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-24 w-full" />
               <Skeleton className="h-16 w-3/4" />
-              <Skeleton className="h-12 w-48 rounded-full" />
+              <Skeleton className="h-14 w-48 rounded-full" />
             </div>
             <Skeleton className="aspect-square rounded-[2rem]" />
           </div>
@@ -61,213 +100,205 @@ const HeroSection = () => {
 
   return (
     <section
-      ref={sectionRef}
-      className="relative overflow-hidden my-6 md:my-10"
+      className="relative overflow-hidden my-4 md:my-8"
       onMouseMove={handleMouseMove}
     >
-      {/* ─── Background Layer ─── */}
-      <div className="absolute inset-0 -z-10">
-        {/* Gradient mesh background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.08] via-background to-secondary/[0.12]" />
-        
-        {/* Animated blobs */}
-        <div
-          className="absolute w-[600px] h-[600px] rounded-full blur-[120px] opacity-20 bg-accent/30"
-          style={{
-            top: '10%',
-            right: '5%',
-            transform: `translate(${mousePos.x * -15}px, ${mousePos.y * -15}px)`,
-            transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
-          }}
+      {/* ─── Ambient Background ─── */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <FloatingOrb
+          className="w-[500px] h-[500px] opacity-[0.07] bg-accent top-[-10%] right-[-5%]"
+          mousePos={mousePos}
+          factor={-12}
+          delay="1.2s"
         />
-        <div
-          className="absolute w-[400px] h-[400px] rounded-full blur-[100px] opacity-15 bg-secondary/40"
-          style={{
-            bottom: '5%',
-            left: '10%',
-            transform: `translate(${mousePos.x * 10}px, ${mousePos.y * 10}px)`,
-            transition: 'transform 1s cubic-bezier(0.25, 0.1, 0.25, 1)',
-          }}
+        <FloatingOrb
+          className="w-[400px] h-[400px] opacity-[0.05] bg-secondary bottom-[0%] left-[5%]"
+          mousePos={mousePos}
+          factor={8}
+          delay="1.5s"
         />
-        <div
-          className="absolute w-[300px] h-[300px] rounded-full blur-[80px] opacity-10 bg-primary/20"
-          style={{
-            top: '50%',
-            left: '40%',
-            transform: `translate(${mousePos.x * 8}px, ${mousePos.y * -8}px)`,
-            transition: 'transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1)',
-          }}
+        <FloatingOrb
+          className="w-[250px] h-[250px] opacity-[0.04] bg-primary top-[40%] left-[35%]"
+          mousePos={mousePos}
+          factor={-6}
+          delay="1.8s"
         />
 
-        {/* Subtle dot grid */}
+        {/* Grid pattern */}
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.015]"
           style={{
-            backgroundImage: 'radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
+            backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
+            backgroundSize: '60px 60px',
           }}
         />
       </div>
 
-      {/* ─── Main Content ─── */}
-      <div className="min-h-[85vh] md:min-h-[90vh] flex items-center">
-        <div className="w-full max-w-7xl mx-auto px-5 md:px-8 lg:px-12 py-12 md:py-16">
-          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      {/* ─── Content ─── */}
+      <div className="min-h-[90vh] md:min-h-[92vh] flex items-center">
+        <div className="w-full max-w-7xl mx-auto px-5 md:px-8 lg:px-12 py-16 md:py-20">
+          <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
 
-            {/* ─── Left: Text Content ─── */}
-            <div className="lg:col-span-6 xl:col-span-7 space-y-8 md:space-y-10">
+            {/* ─── Left Column ─── */}
+            <div className="lg:col-span-7 space-y-8 md:space-y-12">
 
-              {/* Animated badge */}
+              {/* Badge */}
               <div
-                className={`transition-all duration-700 ease-out ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  isVisible ? 'opacity-100 translate-y-0 blur-0' : 'opacity-0 translate-y-8 blur-sm'
                 }`}
               >
-                <span className="inline-flex items-center gap-2.5 bg-accent/10 border border-accent/20 rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] text-accent">
-                  <Sparkles className="w-3.5 h-3.5" />
+                <span className="inline-flex items-center gap-2.5 bg-accent/8 border border-accent/15 rounded-full px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.25em] text-accent">
+                  <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                   Featured Story
                 </span>
               </div>
 
-              {/* Title - each line animates separately */}
+              {/* Title */}
+              <h1 className="text-[2.75rem] sm:text-5xl md:text-6xl lg:text-[4.5rem] xl:text-[5.5rem] font-bold font-serif leading-[1.02] tracking-[-0.02em] text-foreground"
+                style={{ perspective: '600px' }}
+              >
+                {title.split(' ').map((word, i) => (
+                  <AnimatedWord key={i} word={word} index={i} isVisible={isVisible} />
+                ))}
+              </h1>
+
+              {/* Subtitle */}
               <div
-                className={`transition-all duration-1000 delay-200 ease-out ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                className={`transition-all duration-1000 delay-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  isVisible ? 'opacity-100 translate-y-0 blur-0' : 'opacity-0 translate-y-8 blur-sm'
                 }`}
               >
-                <h1 className="text-[2.75rem] sm:text-5xl md:text-6xl lg:text-[4.25rem] xl:text-7xl font-bold font-serif leading-[1.05] tracking-tight text-foreground">
-                  {title.split(' ').map((word, i) => (
-                    <span
-                      key={i}
-                      className="inline-block mr-[0.3em] transition-all duration-500 hover:text-accent cursor-default"
-                      style={{
-                        transitionDelay: `${200 + i * 80}ms`,
-                        opacity: isVisible ? 1 : 0,
-                        transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-                      }}
-                    >
-                      {word}
-                    </span>
-                  ))}
-                </h1>
+                <div className="flex gap-5 items-start">
+                  <div className="w-[3px] rounded-full bg-gradient-to-b from-accent via-accent/40 to-transparent flex-shrink-0 min-h-[60px] self-stretch" />
+                  <p className="text-base sm:text-lg md:text-xl text-muted-foreground/80 leading-[1.7] max-w-lg font-light">
+                    {subtitle}
+                  </p>
+                </div>
               </div>
 
-              {/* Subtitle with accent bar */}
+              {/* CTA */}
               <div
-                className={`flex gap-4 transition-all duration-1000 delay-500 ease-out ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
-              >
-                <div className="w-1 rounded-full bg-gradient-to-b from-accent via-accent/50 to-transparent flex-shrink-0" />
-                <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-md">
-                  {subtitle}
-                </p>
-              </div>
-
-              {/* CTA Buttons */}
-              <div
-                className={`flex flex-wrap items-center gap-4 transition-all duration-1000 delay-700 ease-out ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                className={`flex flex-wrap items-center gap-5 transition-all duration-1000 delay-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  isVisible ? 'opacity-100 translate-y-0 blur-0' : 'opacity-0 translate-y-8 blur-sm'
                 }`}
               >
                 <Button
-                  className="group/btn relative bg-foreground hover:bg-foreground/90 text-background rounded-full px-8 py-6 md:px-10 md:py-7 text-sm md:text-base font-semibold transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_20px_60px_-15px_hsl(var(--foreground)/0.3)] overflow-hidden"
+                  className="group/btn relative bg-foreground hover:bg-foreground/90 text-background rounded-full px-9 py-7 text-[15px] font-semibold transition-all duration-500 hover:scale-[1.04] hover:shadow-[0_25px_60px_-15px_hsl(var(--foreground)/0.35)] active:scale-[0.98] overflow-hidden"
                   asChild
                 >
                   <a href={buttonLink}>
-                    <span className="relative z-10 flex items-center gap-2.5">
+                    <span className="relative z-10 flex items-center gap-3">
                       {buttonText}
-                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1.5 transition-transform duration-300" />
+                      <ArrowRight className="w-4 h-4 transition-all duration-500 group-hover/btn:translate-x-2" />
                     </span>
+                    {/* Shine effect */}
+                    <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-700">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/10 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
+                    </div>
                   </a>
                 </Button>
 
                 <a
                   href="#articles"
-                  className="group/link flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 px-4 py-3"
+                  className="group/link flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-500 px-4 py-3 rounded-full hover:bg-card/50"
                 >
-                  <span className="underline underline-offset-4 decoration-border group-hover/link:decoration-foreground transition-colors">
+                  <span className="relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-foreground after:transition-all after:duration-500 group-hover/link:after:w-full">
                     Browse Articles
                   </span>
-                  <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-2 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all duration-300" />
+                  <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-2 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all duration-500" />
                 </a>
               </div>
 
               {/* Social links */}
               {hasSocials && (
                 <div
-                  className={`flex items-center gap-2 transition-all duration-1000 delay-[900ms] ease-out ${
+                  className={`flex items-center gap-3 transition-all duration-1000 delay-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                   }`}
                 >
-                  <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground/50 font-semibold mr-1">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/40 font-semibold">
                     Follow
                   </span>
-                  <div className="w-6 h-px bg-border/60 mr-1" />
-                  {socialLinks.map(({ url, icon: Icon, label }) => (
-                    <a
-                      key={label}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group/social w-9 h-9 rounded-full border border-border/40 hover:border-accent/50 hover:bg-accent/10 transition-all duration-300 flex items-center justify-center hover:scale-110"
-                      aria-label={label}
-                    >
-                      <Icon className="w-3.5 h-3.5 text-muted-foreground/50 group-hover/social:text-accent transition-colors duration-300" />
-                    </a>
+                  <div className="w-8 h-px bg-gradient-to-r from-border/60 to-transparent" />
+                  {socialLinks.map(link => (
+                    <SocialLink key={link.label} {...link} />
                   ))}
                 </div>
               )}
             </div>
 
-            {/* ─── Right: Image Composition ─── */}
-            <div className="lg:col-span-6 xl:col-span-5 hidden lg:flex items-center justify-center">
+            {/* ─── Right Column: Image ─── */}
+            <div className="lg:col-span-5 hidden lg:flex items-center justify-center">
               <div
-                className={`relative w-full max-w-md transition-all duration-1000 delay-400 ease-out ${
-                  isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95'
+                className={`relative w-full transition-all duration-[1.2s] delay-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-16 scale-90'
                 }`}
               >
-                {/* Decorative ring */}
+                {/* Parallax decorative rings */}
                 <div
-                  className="absolute -inset-6 rounded-[2.5rem] border border-border/15"
+                  className="absolute -inset-5 rounded-[2.5rem] border border-border/10 transition-transform"
                   style={{
-                    transform: `translate(${mousePos.x * 4}px, ${mousePos.y * 4}px)`,
-                    transition: 'transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                    transform: `translate(${mousePos.x * 0.15}px, ${mousePos.y * 0.15}px) rotate(2deg)`,
+                    transitionDuration: '0.8s',
                   }}
                 />
                 <div
-                  className="absolute -inset-12 rounded-[3rem] border border-border/8"
+                  className="absolute -inset-10 rounded-[3rem] border border-border/5 transition-transform"
                   style={{
-                    transform: `translate(${mousePos.x * 7}px, ${mousePos.y * 7}px)`,
-                    transition: 'transform 0.9s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                    transform: `translate(${mousePos.x * 0.25}px, ${mousePos.y * 0.25}px) rotate(-1deg)`,
+                    transitionDuration: '1.1s',
                   }}
                 />
 
-                {/* Main image container */}
+                {/* Image card */}
                 <div
-                  className="relative rounded-[2rem] overflow-hidden shadow-2xl"
+                  className="relative rounded-[2rem] overflow-hidden"
                   style={{
-                    transform: `perspective(800px) rotateY(${mousePos.x * -2}deg) rotateX(${mousePos.y * 2}deg)`,
-                    transition: 'transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                    transform: `perspective(1000px) rotateY(${mousePos.x * -0.12}deg) rotateX(${mousePos.y * 0.12}deg)`,
+                    transition: 'transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                    boxShadow: `
+                      0 30px 60px -15px hsl(var(--foreground) / 0.12),
+                      0 0 0 1px hsl(var(--border) / 0.1),
+                      ${mousePos.x * 0.3}px ${mousePos.y * 0.3}px 40px -10px hsl(var(--accent) / 0.06)
+                    `,
                   }}
                 >
+                  {/* Image loading skeleton */}
+                  {!imageLoaded && (
+                    <div className="absolute inset-0 bg-muted animate-pulse rounded-[2rem]" />
+                  )}
+                  
                   <img
                     src={backgroundImage}
                     alt="Hero"
-                    className="w-full aspect-[4/5] object-cover"
+                    className={`w-full aspect-[4/5] object-cover transition-all duration-[1.5s] ease-out ${
+                      imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+                    }`}
+                    onLoad={() => setImageLoaded(true)}
                   />
-                  
-                  {/* Subtle gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/30 via-transparent to-foreground/5" />
 
-                  {/* Floating glass card at bottom */}
-                  <div className="absolute bottom-5 left-5 right-5">
-                    <div className="bg-background/70 dark:bg-background/60 backdrop-blur-xl rounded-2xl border border-border/30 p-4 flex items-center gap-4">
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/25 via-transparent to-foreground/5 pointer-events-none" />
+
+                  {/* Glass stats card */}
+                  <div
+                    className={`absolute bottom-5 left-5 right-5 transition-all duration-1000 delay-[1.3s] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      isVisible && imageLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                    }`}
+                  >
+                    <div className="bg-background/60 dark:bg-background/50 backdrop-blur-2xl rounded-2xl border border-border/20 p-4 flex items-center gap-4 shadow-xl">
                       <div className="flex -space-x-2.5">
                         {['🌍', '✨', '📖'].map((emoji, i) => (
                           <div
                             key={i}
-                            className="w-9 h-9 rounded-full bg-accent/15 border-2 border-background flex items-center justify-center text-sm"
+                            className="w-9 h-9 rounded-full bg-accent/10 border-2 border-background flex items-center justify-center text-sm shadow-sm"
+                            style={{
+                              transitionDelay: `${1400 + i * 100}ms`,
+                              opacity: isVisible ? 1 : 0,
+                              transform: isVisible ? 'scale(1)' : 'scale(0)',
+                              transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                            }}
                           >
                             {emoji}
                           </div>
@@ -281,12 +312,19 @@ const HeroSection = () => {
                   </div>
                 </div>
 
-                {/* Floating accent dot */}
+                {/* Floating accent orb */}
                 <div
-                  className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-accent shadow-lg shadow-accent/30"
+                  className="absolute -top-3 -right-3 w-5 h-5 rounded-full bg-accent shadow-lg shadow-accent/40 transition-transform"
                   style={{
-                    transform: `translate(${mousePos.x * -10}px, ${mousePos.y * -10}px)`,
-                    transition: 'transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                    transform: `translate(${mousePos.x * -0.4}px, ${mousePos.y * -0.4}px)`,
+                    transitionDuration: '0.6s',
+                  }}
+                />
+                <div
+                  className="absolute bottom-10 -left-4 w-3 h-3 rounded-full bg-secondary/60 shadow-md transition-transform"
+                  style={{
+                    transform: `translate(${mousePos.x * 0.3}px, ${mousePos.y * 0.3}px)`,
+                    transitionDuration: '0.9s',
                   }}
                 />
               </div>
@@ -295,8 +333,8 @@ const HeroSection = () => {
             {/* ─── Mobile Image ─── */}
             <div className="lg:hidden">
               <div
-                className={`relative rounded-2xl overflow-hidden transition-all duration-1000 delay-300 ease-out ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                className={`relative rounded-2xl overflow-hidden transition-all duration-1000 delay-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  isVisible ? 'opacity-100 translate-y-0 blur-0' : 'opacity-0 translate-y-10 blur-sm'
                 }`}
               >
                 <img
@@ -304,15 +342,29 @@ const HeroSection = () => {
                   alt="Hero"
                   className="w-full aspect-[16/9] object-cover rounded-2xl"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 via-transparent to-transparent rounded-2xl" />
+                <div className="absolute inset-0 bg-gradient-to-t from-foreground/15 via-transparent to-transparent rounded-2xl" />
+                
+                {/* Mobile glass card */}
+                <div className="absolute bottom-3 left-3 right-3">
+                  <div className="bg-background/60 backdrop-blur-xl rounded-xl border border-border/20 p-3 flex items-center gap-3">
+                    <div className="flex -space-x-2">
+                      {['🌍', '✨', '📖'].map((emoji, i) => (
+                        <div key={i} className="w-7 h-7 rounded-full bg-accent/10 border-2 border-background flex items-center justify-center text-xs">
+                          {emoji}
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-foreground">5K+ Readers</p>
+                      <p className="text-[10px] text-muted-foreground">Join our community</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* ─── Bottom edge fade ─── */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
     </section>
   );
 };
