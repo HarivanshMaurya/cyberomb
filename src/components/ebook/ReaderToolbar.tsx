@@ -11,6 +11,8 @@ import {
   Plus,
   List,
   Type,
+  Maximize,
+  Minimize,
 } from "lucide-react";
 
 interface ReaderToolbarProps {
