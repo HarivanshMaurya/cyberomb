@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { useState, useRef, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { TTSControls } from "./TextToSpeech";
 import {
@@ -16,6 +16,8 @@ import {
   Minimize,
   Languages,
   Loader2,
+  ChevronDown,
+  Undo2,
 } from "lucide-react";
 
 interface ReaderToolbarProps {
@@ -41,10 +43,19 @@ interface ReaderToolbarProps {
   onTtsCycleSpeed: () => void;
   isTranslated: boolean;
   isTranslating: boolean;
-  onToggleTranslate: () => void;
+  selectedLang: string;
+  onTranslate: (langCode: string) => void;
+  onShowOriginal: () => void;
 }
 
 const FONT_SIZES = [14, 16, 18, 20, 22];
+
+const LANGUAGES = [
+  { code: "hi", label: "हिंदी", sublabel: "Hindi" },
+  { code: "mr", label: "मराठी", sublabel: "Marathi" },
+  { code: "ta", label: "தமிழ்", sublabel: "Tamil" },
+  { code: "bn", label: "বাংলা", sublabel: "Bengali" },
+];
 
 const ToolbarButton = ({ 
   onClick, title, darkMode, active, children, className = "" 
@@ -74,6 +85,117 @@ const ToolbarButton = ({
   </button>
 );
 
+function LanguageDropdown({
+  darkMode,
+  isTranslated,
+  isTranslating,
+  selectedLang,
+  onTranslate,
+  onShowOriginal,
+}: {
+  darkMode: boolean;
+  isTranslated: boolean;
+  isTranslating: boolean;
+  selectedLang: string;
+  onTranslate: (code: string) => void;
+  onShowOriginal: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const activeLang = LANGUAGES.find((l) => l.code === selectedLang);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => !isTranslating && setOpen(!open)}
+        title="Translate"
+        className="h-9 flex items-center gap-1 px-2 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
+        style={{
+          color: isTranslated
+            ? "hsl(45 90% 55%)"
+            : darkMode ? "hsl(36 44% 75%)" : "hsl(var(--muted-foreground))",
+          background: isTranslated
+            ? darkMode ? "hsl(45 90% 55% / 0.12)" : "hsl(45 90% 55% / 0.1)"
+            : "transparent",
+        }}
+        onMouseEnter={(e) => {
+          if (!isTranslated) e.currentTarget.style.background = darkMode ? "hsl(0 0% 20%)" : "hsl(var(--muted) / 0.6)";
+        }}
+        onMouseLeave={(e) => {
+          if (!isTranslated) e.currentTarget.style.background = isTranslated ? (darkMode ? "hsl(45 90% 55% / 0.12)" : "hsl(45 90% 55% / 0.1)") : "transparent";
+        }}
+      >
+        {isTranslating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
+        <ChevronDown className="w-3 h-3" />
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 top-11 w-48 rounded-xl overflow-hidden shadow-xl z-[100] border"
+          style={{
+            background: darkMode ? "hsl(0 0% 12%)" : "hsl(var(--card))",
+            borderColor: darkMode ? "hsl(0 0% 20%)" : "hsl(var(--border))",
+          }}
+        >
+          {isTranslated && (
+            <button
+              onClick={() => { onShowOriginal(); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors"
+              style={{
+                color: darkMode ? "hsl(36 44% 85%)" : "hsl(var(--foreground))",
+                borderBottom: `1px solid ${darkMode ? "hsl(0 0% 18%)" : "hsl(var(--border))"}`,
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = darkMode ? "hsl(0 0% 16%)" : "hsl(var(--muted) / 0.5)"}
+              onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+            >
+              <Undo2 className="w-3.5 h-3.5" />
+              <span>Original (English)</span>
+            </button>
+          )}
+          {LANGUAGES.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => { onTranslate(lang.code); setOpen(false); }}
+              className="w-full flex items-center justify-between px-3 py-2.5 text-left text-sm transition-colors"
+              style={{
+                color: isTranslated && selectedLang === lang.code
+                  ? "hsl(45 90% 55%)"
+                  : darkMode ? "hsl(36 44% 80%)" : "hsl(var(--foreground))",
+                background: isTranslated && selectedLang === lang.code
+                  ? darkMode ? "hsl(45 90% 55% / 0.08)" : "hsl(45 90% 55% / 0.06)"
+                  : "transparent",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = darkMode ? "hsl(0 0% 16%)" : "hsl(var(--muted) / 0.5)"}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = isTranslated && selectedLang === lang.code
+                  ? darkMode ? "hsl(45 90% 55% / 0.08)" : "hsl(45 90% 55% / 0.06)"
+                  : "transparent";
+              }}
+            >
+              <span>
+                <span className="font-medium">{lang.label}</span>
+                <span className="text-xs ml-1.5 opacity-60">{lang.sublabel}</span>
+              </span>
+              {isTranslated && selectedLang === lang.code && (
+                <span className="text-xs">✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ReaderToolbar({
   bookTitle,
   chapterTitle,
@@ -97,7 +219,9 @@ export function ReaderToolbar({
   onTtsCycleSpeed,
   isTranslated,
   isTranslating,
-  onToggleTranslate,
+  selectedLang,
+  onTranslate,
+  onShowOriginal,
 }: ReaderToolbarProps) {
   const currentIdx = FONT_SIZES.indexOf(fontSize);
   const canDecrease = currentIdx > 0;
@@ -159,7 +283,6 @@ export function ReaderToolbar({
 
       {/* Right: controls */}
       <div className="flex items-center gap-1 shrink-0">
-        {/* Divider-separated groups */}
         <div className="flex items-center gap-0.5">
           <ToolbarButton onClick={onOpenToc} title="Table of Contents" darkMode={darkMode}>
             <List className="w-4 h-4" />
@@ -167,14 +290,14 @@ export function ReaderToolbar({
           <ToolbarButton onClick={onToggleBookmark} title={isBookmarked ? "Remove bookmark" : "Bookmark"} darkMode={darkMode} active={isBookmarked}>
             {isBookmarked ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
           </ToolbarButton>
-          <ToolbarButton
-            onClick={onToggleTranslate}
-            title={isTranslated ? "Show Original" : "Translate to Hindi"}
+          <LanguageDropdown
             darkMode={darkMode}
-            active={isTranslated}
-          >
-            {isTranslating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
-          </ToolbarButton>
+            isTranslated={isTranslated}
+            isTranslating={isTranslating}
+            selectedLang={selectedLang}
+            onTranslate={onTranslate}
+            onShowOriginal={onShowOriginal}
+          />
         </div>
 
         {/* Separator */}

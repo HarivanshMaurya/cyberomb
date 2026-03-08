@@ -26,7 +26,14 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const langName = targetLang === "hi" ? "Hindi (हिन्दी)" : "English";
+    const langMap: Record<string, string> = {
+      hi: "Hindi (हिन्दी)",
+      mr: "Marathi (मराठी)",
+      ta: "Tamil (தமிழ்)",
+      bn: "Bengali (বাংলা)",
+      en: "English",
+    };
+    const langName = langMap[targetLang] || "Hindi (हिन्दी)";
 
     const translatedChapters = [];
 
