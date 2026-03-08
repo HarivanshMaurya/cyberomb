@@ -110,9 +110,9 @@ export function useTextToSpeech() {
   }, []);
 
   return {
-    isPlaying, isPaused, speed, highlightIndex,
+    isPlaying, isPaused, speed, highlightIndex, currentLang,
     sentences: sentencesRef.current,
-    speak, pause, resume, stop, cycleSpeed,
+    speak, pause, resume, stop, cycleSpeed, setLang,
   };
 }
 
