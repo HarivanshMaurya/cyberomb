@@ -109,7 +109,11 @@ const App = () => (
               <Route path="seo" element={<SEOSettings />} />
               <Route path="products" element={<ProductsManager />} />
                <Route path="subscribers" element={<SubscribersManager />} />
-              <Route path="settings" element={<Settings />} />
+              <Route path="database" element={<DatabaseBrowser />} />
+               <Route path="users" element={<UserManagement />} />
+               <Route path="analytics" element={<AnalyticsDashboard />} />
+               <Route path="site-settings" element={<SiteSettingsHub />} />
+               <Route path="settings" element={<Settings />} />
             </Route>
  
              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
