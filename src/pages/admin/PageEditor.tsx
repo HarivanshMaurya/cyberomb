@@ -9,8 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageBuilder } from '@/components/admin/page-builder/PageBuilder';
+import { BlockRenderer } from '@/components/page-blocks/BlockRenderer';
 import { PageBlock } from '@/components/admin/page-builder/types';
-import { Loader2, Save, ArrowLeft, Eye, LayoutGrid, FileText } from 'lucide-react';
+import { Loader2, Save, ArrowLeft, Eye, EyeOff, LayoutGrid, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function PageEditor() {
@@ -34,6 +35,7 @@ export default function PageEditor() {
 
   const [sections, setSections] = useState<PageBlock[]>([]);
   const [editorMode, setEditorMode] = useState<'builder' | 'classic'>('builder');
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     if (page && !isNew) {
@@ -46,7 +48,6 @@ export default function PageEditor() {
         meta_description: page.meta_description || '',
         og_image: page.og_image || '',
       });
-      // Load sections from raw data (since sections isn't in the typed Page interface yet)
       const raw = page as any;
       if (Array.isArray(raw.sections) && raw.sections.length > 0) {
         setSections(raw.sections);
@@ -71,11 +72,9 @@ export default function PageEditor() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const payload: any = { ...formData };
 
     if (isNew) {
-      // Create page first, then update sections separately
       createPage.mutate(payload, {
         onSuccess: async (data) => {
           if (editorMode === 'builder' && sections.length > 0) {
@@ -85,7 +84,6 @@ export default function PageEditor() {
         },
       });
     } else {
-      // Update page + sections
       updatePage.mutate({ id: id!, ...payload }, {
         onSuccess: async () => {
           if (editorMode === 'builder') {
@@ -104,6 +102,42 @@ export default function PageEditor() {
     );
   }
 
+  // Preview mode
+  if (showPreview && editorMode === 'builder') {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between bg-card border border-border rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <Eye className="h-5 w-5 text-primary" />
+            <div>
+              <h2 className="font-semibold">Live Preview</h2>
+              <p className="text-sm text-muted-foreground">This is how your page will look</p>
+            </div>
+          </div>
+          <Button variant="outline" onClick={() => setShowPreview(false)} className="gap-2">
+            <EyeOff className="h-4 w-4" />
+            Back to Editor
+          </Button>
+        </div>
+
+        <div className="border border-border rounded-xl overflow-hidden bg-background shadow-lg">
+          {/* Simulated page header */}
+          <div className="border-b border-border px-6 py-4">
+            <h1 className="text-3xl md:text-4xl font-serif font-bold">{formData.title || 'Untitled Page'}</h1>
+          </div>
+          {/* Rendered blocks */}
+          {sections.length > 0 ? (
+            <BlockRenderer blocks={sections} />
+          ) : (
+            <div className="text-center py-20 text-muted-foreground">
+              <p>No blocks to preview. Add some blocks first!</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -113,19 +147,25 @@ export default function PageEditor() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold">{isNew ? 'New Page' : 'Edit Page'}</h1>
-            <p className="text-muted-foreground mt-1">
-              {isNew ? 'Create a new page' : 'Edit your page'}
-            </p>
+            <p className="text-muted-foreground mt-1">{isNew ? 'Create a new page' : 'Edit your page'}</p>
           </div>
         </div>
-        {!isNew && page?.is_published && (
-          <Button variant="outline" asChild>
-            <a href={`/page/${page.slug}`} target="_blank" rel="noopener noreferrer">
-              <Eye className="mr-2 h-4 w-4" />
-              View Live
-            </a>
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {editorMode === 'builder' && sections.length > 0 && (
+            <Button variant="outline" className="gap-2" onClick={() => setShowPreview(true)}>
+              <Eye className="h-4 w-4" />
+              Preview
+            </Button>
+          )}
+          {!isNew && page?.is_published && (
+            <Button variant="outline" asChild>
+              <a href={`/page/${page.slug}`} target="_blank" rel="noopener noreferrer">
+                <Eye className="mr-2 h-4 w-4" />
+                View Live
+              </a>
+            </Button>
+          )}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -142,46 +182,22 @@ export default function PageEditor() {
                   <CardContent className="pt-6 space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="title">Title</Label>
-                      <Input
-                        id="title"
-                        value={formData.title}
-                        onChange={(e) => handleTitleChange(e.target.value)}
-                        placeholder="Enter page title"
-                        required
-                      />
+                      <Input id="title" value={formData.title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Enter page title" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="slug">Slug</Label>
-                      <Input
-                        id="slug"
-                        value={formData.slug}
-                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                        placeholder="page-url-slug"
-                        required
-                      />
+                      <Input id="slug" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} placeholder="page-url-slug" required />
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Editor Mode Toggle */}
                 <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-1.5 w-fit">
-                  <Button
-                    type="button"
-                    variant={editorMode === 'builder' ? 'default' : 'ghost'}
-                    size="sm"
-                    className="gap-2"
-                    onClick={() => setEditorMode('builder')}
-                  >
+                  <Button type="button" variant={editorMode === 'builder' ? 'default' : 'ghost'} size="sm" className="gap-2" onClick={() => setEditorMode('builder')}>
                     <LayoutGrid className="h-4 w-4" />
                     Page Builder
                   </Button>
-                  <Button
-                    type="button"
-                    variant={editorMode === 'classic' ? 'default' : 'ghost'}
-                    size="sm"
-                    className="gap-2"
-                    onClick={() => setEditorMode('classic')}
-                  >
+                  <Button type="button" variant={editorMode === 'classic' ? 'default' : 'ghost'} size="sm" className="gap-2" onClick={() => setEditorMode('classic')}>
                     <FileText className="h-4 w-4" />
                     Classic Editor
                   </Button>
@@ -190,11 +206,21 @@ export default function PageEditor() {
                 {editorMode === 'builder' ? (
                   <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <LayoutGrid className="h-5 w-5" />
-                        Page Builder
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground">Drag & drop blocks to build your page</p>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <LayoutGrid className="h-5 w-5" />
+                            Page Builder
+                          </CardTitle>
+                          <p className="text-sm text-muted-foreground mt-1">Drag & drop blocks to build your page</p>
+                        </div>
+                        {sections.length > 0 && (
+                          <Button type="button" variant="ghost" size="sm" className="gap-1.5" onClick={() => setShowPreview(true)}>
+                            <Eye className="h-4 w-4" />
+                            Preview
+                          </Button>
+                        )}
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <PageBuilder blocks={sections} onChange={setSections} />
@@ -202,9 +228,7 @@ export default function PageEditor() {
                   </Card>
                 ) : (
                   <Card>
-                    <CardHeader>
-                      <CardTitle>Content</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle>Content</CardTitle></CardHeader>
                     <CardContent>
                       <div className="border border-input rounded-lg overflow-hidden">
                         <textarea
@@ -221,36 +245,17 @@ export default function PageEditor() {
 
               <div className="space-y-6">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Publish</CardTitle>
-                  </CardHeader>
+                  <CardHeader><CardTitle>Publish</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="is_published">Published</Label>
-                      <Switch
-                        id="is_published"
-                        checked={formData.is_published}
-                        onCheckedChange={(checked) =>
-                          setFormData({ ...formData, is_published: checked })
-                        }
-                      />
+                      <Switch id="is_published" checked={formData.is_published} onCheckedChange={(checked) => setFormData({ ...formData, is_published: checked })} />
                     </div>
-
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={createPage.isPending || updatePage.isPending}
-                    >
+                    <Button type="submit" className="w-full" disabled={createPage.isPending || updatePage.isPending}>
                       {createPage.isPending || updatePage.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Saving...
-                        </>
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>
                       ) : (
-                        <>
-                          <Save className="mr-2 h-4 w-4" />
-                          {isNew ? 'Create Page' : 'Save Changes'}
-                        </>
+                        <><Save className="mr-2 h-4 w-4" />{isNew ? 'Create Page' : 'Save Changes'}</>
                       )}
                     </Button>
                   </CardContent>
@@ -258,9 +263,7 @@ export default function PageEditor() {
 
                 {editorMode === 'builder' && sections.length > 0 && (
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm">Block Summary</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle className="text-sm">Block Summary</CardTitle></CardHeader>
                     <CardContent>
                       <div className="space-y-1.5">
                         {sections.map((s, i) => (
@@ -279,41 +282,21 @@ export default function PageEditor() {
 
           <TabsContent value="seo" className="space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>SEO Settings</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle>SEO Settings</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="meta_title">Meta Title</Label>
-                  <Input
-                    id="meta_title"
-                    value={formData.meta_title}
-                    onChange={(e) => setFormData({ ...formData, meta_title: e.target.value })}
-                    placeholder="SEO title"
-                    maxLength={60}
-                  />
+                  <Input id="meta_title" value={formData.meta_title} onChange={(e) => setFormData({ ...formData, meta_title: e.target.value })} placeholder="SEO title" maxLength={60} />
                   <p className="text-xs text-muted-foreground">{formData.meta_title.length}/60 characters</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="meta_description">Meta Description</Label>
-                  <Textarea
-                    id="meta_description"
-                    value={formData.meta_description}
-                    onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
-                    placeholder="SEO description"
-                    maxLength={160}
-                    rows={3}
-                  />
+                  <Textarea id="meta_description" value={formData.meta_description} onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })} placeholder="SEO description" maxLength={160} rows={3} />
                   <p className="text-xs text-muted-foreground">{formData.meta_description.length}/160 characters</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="og_image">Open Graph Image URL</Label>
-                  <Input
-                    id="og_image"
-                    value={formData.og_image}
-                    onChange={(e) => setFormData({ ...formData, og_image: e.target.value })}
-                    placeholder="https://example.com/og-image.jpg"
-                  />
+                  <Input id="og_image" value={formData.og_image} onChange={(e) => setFormData({ ...formData, og_image: e.target.value })} placeholder="https://example.com/og-image.jpg" />
                 </div>
               </CardContent>
             </Card>

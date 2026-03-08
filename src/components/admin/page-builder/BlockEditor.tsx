@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
+import { MediaPicker } from './MediaPicker';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface BlockEditorProps {
@@ -18,7 +19,7 @@ function HeroEditor({ block, onChange }: { block: HeroBlock; onChange: (b: HeroB
     <div className="space-y-3">
       <div><Label>Title</Label><Input value={block.title} onChange={(e) => onChange({ ...block, title: e.target.value })} /></div>
       <div><Label>Subtitle</Label><Input value={block.subtitle} onChange={(e) => onChange({ ...block, subtitle: e.target.value })} /></div>
-      <div><Label>Background Image URL</Label><Input value={block.image} onChange={(e) => onChange({ ...block, image: e.target.value })} placeholder="https://..." /></div>
+      <div><Label>Background Image</Label><MediaPicker value={block.image} onChange={(image) => onChange({ ...block, image })} /></div>
       <div className="grid grid-cols-2 gap-3">
         <div><Label>Button Text</Label><Input value={block.buttonText} onChange={(e) => onChange({ ...block, buttonText: e.target.value })} /></div>
         <div><Label>Button Link</Label><Input value={block.buttonLink} onChange={(e) => onChange({ ...block, buttonLink: e.target.value })} /></div>
@@ -35,7 +36,7 @@ function RichTextBlockEditor({ block, onChange }: { block: RichTextBlock; onChan
 function TextImageEditor({ block, onChange }: { block: TextImageBlock; onChange: (b: TextImageBlock) => void }) {
   return (
     <div className="space-y-3">
-      <div><Label>Image URL</Label><Input value={block.image} onChange={(e) => onChange({ ...block, image: e.target.value })} /></div>
+      <div><Label>Image</Label><MediaPicker value={block.image} onChange={(image) => onChange({ ...block, image })} /></div>
       <div><Label>Image Alt Text</Label><Input value={block.imageAlt} onChange={(e) => onChange({ ...block, imageAlt: e.target.value })} /></div>
       <div>
         <Label>Image Position</Label>
@@ -113,7 +114,8 @@ function ImageGalleryEditor({ block, onChange }: { block: ImageGalleryBlock; onC
             <span className="text-sm font-medium">Image {i + 1}</span>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onChange({ ...block, images: block.images.filter((_, j) => j !== i) })}><Trash2 className="h-3.5 w-3.5" /></Button>
           </div>
-          <Input value={img.url} onChange={(e) => updateImage(i, 'url', e.target.value)} placeholder="Image URL" />
+          <Label className="text-xs">Image</Label>
+          <MediaPicker value={img.url} onChange={(url) => updateImage(i, 'url', url)} />
           <Input value={img.alt} onChange={(e) => updateImage(i, 'alt', e.target.value)} placeholder="Alt text" />
           <Input value={img.caption} onChange={(e) => updateImage(i, 'caption', e.target.value)} placeholder="Caption (optional)" />
         </div>
@@ -143,7 +145,8 @@ function TestimonialsEditor({ block, onChange }: { block: TestimonialsBlock; onC
             <Input value={t.author} onChange={(e) => updateTestimonial(i, 'author', e.target.value)} placeholder="Author name" />
             <Input value={t.role} onChange={(e) => updateTestimonial(i, 'role', e.target.value)} placeholder="Role / Company" />
           </div>
-          <Input value={t.avatar} onChange={(e) => updateTestimonial(i, 'avatar', e.target.value)} placeholder="Avatar URL (optional)" />
+          <Label className="text-xs">Avatar</Label>
+          <MediaPicker value={t.avatar} onChange={(avatar) => updateTestimonial(i, 'avatar', avatar)} />
         </div>
       ))}
       <Button variant="outline" size="sm" onClick={() => onChange({ ...block, testimonials: [...block.testimonials, { quote: '', author: '', role: '', avatar: '' }] })}><Plus className="h-4 w-4 mr-1" />Add Testimonial</Button>
