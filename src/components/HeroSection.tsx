@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Instagram, Facebook, Linkedin, Twitter, ArrowRight, Play, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Instagram, Facebook, Linkedin, Twitter, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeroContent } from "@/hooks/useHeroContent";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,32 +8,33 @@ const HeroSection = () => {
   const { data: hero, isLoading } = useHeroContent();
   const [isVisible, setIsVisible] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
+    const timer = setTimeout(() => setIsVisible(true), 150);
     return () => clearTimeout(timer);
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setMousePos({
-      x: ((e.clientX - rect.left) / rect.width - 0.5) * 20,
-      y: ((e.clientY - rect.top) / rect.height - 0.5) * 20,
+      x: ((e.clientX - rect.left) / rect.width - 0.5) * 2,
+      y: ((e.clientY - rect.top) / rect.height - 0.5) * 2,
     });
   };
 
   if (isLoading) {
     return (
-      <section className="relative rounded-[2.5rem] overflow-hidden bg-muted my-8 md:my-12">
-        <div className="min-h-[70vh] md:min-h-[80vh] p-6 md:p-12 lg:p-16">
-          <div className="grid md:grid-cols-2 gap-8 h-full">
+      <section className="relative overflow-hidden my-6 md:my-10">
+        <div className="min-h-[85vh] p-6 md:p-12 lg:p-16">
+          <div className="grid md:grid-cols-2 gap-8 h-full items-center">
             <div className="flex flex-col justify-center space-y-6">
               <Skeleton className="h-6 w-32 rounded-full" />
               <Skeleton className="h-20 w-full" />
               <Skeleton className="h-16 w-3/4" />
               <Skeleton className="h-12 w-48 rounded-full" />
             </div>
-            <Skeleton className="aspect-[3/4] md:aspect-auto rounded-[2rem]" />
+            <Skeleton className="aspect-square rounded-[2rem]" />
           </div>
         </div>
       </section>
@@ -51,236 +52,267 @@ const HeroSection = () => {
   const twitterUrl = hero?.twitter_url || "";
   const hasSocials = !!(instagramUrl || facebookUrl || linkedinUrl || twitterUrl);
 
+  const socialLinks = [
+    { url: instagramUrl, icon: Instagram, label: "Instagram" },
+    { url: facebookUrl, icon: Facebook, label: "Facebook" },
+    { url: linkedinUrl, icon: Linkedin, label: "LinkedIn" },
+    { url: twitterUrl, icon: Twitter, label: "Twitter / X" },
+  ].filter(s => !!s.url);
+
   return (
     <section
-      className="relative rounded-[2.5rem] overflow-hidden my-8 md:my-12 group/hero"
+      ref={sectionRef}
+      className="relative overflow-hidden my-6 md:my-10"
       onMouseMove={handleMouseMove}
     >
-      {/* Full background image with overlay */}
-      <div className="absolute inset-0">
-        <img
-          src={backgroundImage}
-          alt="Hero background"
-          className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover/hero:scale-105"
+      {/* ─── Background Layer ─── */}
+      <div className="absolute inset-0 -z-10">
+        {/* Gradient mesh background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.08] via-background to-secondary/[0.12]" />
+        
+        {/* Animated blobs */}
+        <div
+          className="absolute w-[600px] h-[600px] rounded-full blur-[120px] opacity-20 bg-accent/30"
           style={{
-            transform: `scale(1.05) translate(${mousePos.x * 0.3}px, ${mousePos.y * 0.3}px)`,
+            top: '10%',
+            right: '5%',
+            transform: `translate(${mousePos.x * -15}px, ${mousePos.y * -15}px)`,
+            transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
           }}
         />
-        {/* Multi-layer overlay for depth */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/30" />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-transparent to-accent/[0.05]" />
-        
-        {/* Animated grain texture */}
-        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay" style={{
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")',
-        }} />
+        <div
+          className="absolute w-[400px] h-[400px] rounded-full blur-[100px] opacity-15 bg-secondary/40"
+          style={{
+            bottom: '5%',
+            left: '10%',
+            transform: `translate(${mousePos.x * 10}px, ${mousePos.y * 10}px)`,
+            transition: 'transform 1s cubic-bezier(0.25, 0.1, 0.25, 1)',
+          }}
+        />
+        <div
+          className="absolute w-[300px] h-[300px] rounded-full blur-[80px] opacity-10 bg-primary/20"
+          style={{
+            top: '50%',
+            left: '40%',
+            transform: `translate(${mousePos.x * 8}px, ${mousePos.y * -8}px)`,
+            transition: 'transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1)',
+          }}
+        />
+
+        {/* Subtle dot grid */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: 'radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
       </div>
 
-      {/* Floating decorative elements */}
-      <div className="absolute top-20 right-20 w-32 h-32 rounded-full bg-accent/10 blur-3xl animate-[pulse_6s_ease-in-out_infinite]" />
-      <div className="absolute bottom-32 right-1/3 w-24 h-24 rounded-full bg-primary/5 blur-2xl animate-[pulse_8s_ease-in-out_infinite_2s]" />
+      {/* ─── Main Content ─── */}
+      <div className="min-h-[85vh] md:min-h-[90vh] flex items-center">
+        <div className="w-full max-w-7xl mx-auto px-5 md:px-8 lg:px-12 py-12 md:py-16">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
-      {/* Content */}
-      <div className="relative min-h-[70vh] md:min-h-[85vh] flex flex-col">
-        <div className="flex-1 grid md:grid-cols-12 gap-6 md:gap-8 p-6 md:p-12 lg:p-16 xl:p-20 items-center">
-          
-          {/* Left content - 7 columns */}
-          <div className="md:col-span-7 flex flex-col justify-center space-y-8 md:space-y-10">
-            
-            {/* Badge */}
-            <div
-              className={`inline-flex items-center gap-2 self-start transition-all duration-700 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-              }`}
-            >
-              <span className="flex items-center gap-2 bg-card/60 backdrop-blur-md border border-border/30 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                Featured Story
-              </span>
-            </div>
+            {/* ─── Left: Text Content ─── */}
+            <div className="lg:col-span-6 xl:col-span-7 space-y-8 md:space-y-10">
 
-            {/* Title with staggered animation */}
-            <div className="space-y-2">
-              <h1
-                className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold font-serif leading-[0.95] tracking-tight transition-all duration-1000 delay-200 ${
+              {/* Animated badge */}
+              <div
+                className={`transition-all duration-700 ease-out ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                }`}
+              >
+                <span className="inline-flex items-center gap-2.5 bg-accent/10 border border-accent/20 rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] text-accent">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Featured Story
+                </span>
+              </div>
+
+              {/* Title - each line animates separately */}
+              <div
+                className={`transition-all duration-1000 delay-200 ease-out ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+              >
+                <h1 className="text-[2.75rem] sm:text-5xl md:text-6xl lg:text-[4.25rem] xl:text-7xl font-bold font-serif leading-[1.05] tracking-tight text-foreground">
+                  {title.split(' ').map((word, i) => (
+                    <span
+                      key={i}
+                      className="inline-block mr-[0.3em] transition-all duration-500 hover:text-accent cursor-default"
+                      style={{
+                        transitionDelay: `${200 + i * 80}ms`,
+                        opacity: isVisible ? 1 : 0,
+                        transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+                      }}
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </h1>
+              </div>
+
+              {/* Subtitle with accent bar */}
+              <div
+                className={`flex gap-4 transition-all duration-1000 delay-500 ease-out ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
               >
-                {title.split(' ').map((word, i) => (
-                  <span
-                    key={i}
-                    className="inline-block mr-[0.25em] hover:text-primary/70 transition-colors duration-300"
-                    style={{ transitionDelay: `${i * 50}ms` }}
-                  >
-                    {word}
-                  </span>
-                ))}
-              </h1>
-            </div>
+                <div className="w-1 rounded-full bg-gradient-to-b from-accent via-accent/50 to-transparent flex-shrink-0" />
+                <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-md">
+                  {subtitle}
+                </p>
+              </div>
 
-            {/* Subtitle */}
-            <p
-              className={`text-base sm:text-lg md:text-xl text-muted-foreground/80 leading-relaxed max-w-lg transition-all duration-1000 delay-500 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
-            >
-              {subtitle}
-            </p>
-
-            {/* CTA area */}
-            <div
-              className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-5 transition-all duration-1000 delay-700 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
-            >
-              <Button
-                className="group/btn relative bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8 py-6 md:px-10 md:py-7 text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.4)] overflow-hidden"
-                asChild
-              >
-                <a href={buttonLink}>
-                  <span className="relative z-10 flex items-center gap-2">
-                    {buttonText}
-                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/90 to-primary opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500" />
-                </a>
-              </Button>
-
-              {/* Scroll hint */}
-              <a
-                href="#articles"
-                className="group/play flex items-center gap-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <div className="w-12 h-12 rounded-full border-2 border-border/50 hover:border-primary/50 flex items-center justify-center group-hover/play:scale-110 group-hover/play:bg-primary/5 transition-all duration-300">
-                  <Play className="w-4 h-4 ml-0.5" />
-                </div>
-                <span className="hidden sm:inline">Browse Articles</span>
-              </a>
-            </div>
-
-            {/* Social links */}
-            {hasSocials && (
+              {/* CTA Buttons */}
               <div
-                className={`flex items-center gap-3 pt-4 transition-all duration-1000 delay-[900ms] ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                className={`flex flex-wrap items-center gap-4 transition-all duration-1000 delay-700 ease-out ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                 }`}
               >
-                <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground/40 font-semibold mr-2">
-                  Follow
-                </span>
-                <div className="w-8 h-px bg-border/40" />
-                {instagramUrl && (
-                  <a
-                    href={instagramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group/social w-10 h-10 rounded-full border border-border/30 bg-card/30 backdrop-blur-sm hover:border-primary/40 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center hover:scale-110 hover:-translate-y-0.5"
-                    aria-label="Instagram"
-                  >
-                    <Instagram className="w-4 h-4 text-muted-foreground/60 group-hover/social:text-foreground transition-colors" />
+                <Button
+                  className="group/btn relative bg-foreground hover:bg-foreground/90 text-background rounded-full px-8 py-6 md:px-10 md:py-7 text-sm md:text-base font-semibold transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_20px_60px_-15px_hsl(var(--foreground)/0.3)] overflow-hidden"
+                  asChild
+                >
+                  <a href={buttonLink}>
+                    <span className="relative z-10 flex items-center gap-2.5">
+                      {buttonText}
+                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1.5 transition-transform duration-300" />
+                    </span>
                   </a>
-                )}
-                {facebookUrl && (
-                  <a
-                    href={facebookUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group/social w-10 h-10 rounded-full border border-border/30 bg-card/30 backdrop-blur-sm hover:border-primary/40 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center hover:scale-110 hover:-translate-y-0.5"
-                    aria-label="Facebook"
-                  >
-                    <Facebook className="w-4 h-4 text-muted-foreground/60 group-hover/social:text-foreground transition-colors" />
-                  </a>
-                )}
-                {linkedinUrl && (
-                  <a
-                    href={linkedinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group/social w-10 h-10 rounded-full border border-border/30 bg-card/30 backdrop-blur-sm hover:border-primary/40 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center hover:scale-110 hover:-translate-y-0.5"
-                    aria-label="LinkedIn"
-                  >
-                    <Linkedin className="w-4 h-4 text-muted-foreground/60 group-hover/social:text-foreground transition-colors" />
-                  </a>
-                )}
-                {twitterUrl && (
-                  <a
-                    href={twitterUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group/social w-10 h-10 rounded-full border border-border/30 bg-card/30 backdrop-blur-sm hover:border-primary/40 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center hover:scale-110 hover:-translate-y-0.5"
-                    aria-label="Twitter / X"
-                  >
-                    <Twitter className="w-4 h-4 text-muted-foreground/60 group-hover/social:text-foreground transition-colors" />
-                  </a>
-                )}
-              </div>
-            )}
-          </div>
+                </Button>
 
-          {/* Right side - Floating image card */}
-          <div className="md:col-span-5 hidden md:flex items-center justify-center">
-            <div
-              className={`relative transition-all duration-1000 delay-300 ${
-                isVisible ? 'opacity-100 translate-y-0 rotate-0' : 'opacity-0 translate-y-12 rotate-2'
-              }`}
-              style={{
-                transform: isVisible
-                  ? `perspective(1000px) rotateY(${mousePos.x * -0.15}deg) rotateX(${mousePos.y * 0.15}deg)`
-                  : undefined,
-                transition: 'transform 0.3s ease-out',
-              }}
-            >
-              {/* Decorative frame behind */}
-              <div className="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-br from-primary/10 via-accent/5 to-transparent rotate-3 scale-95 blur-sm" />
-              <div className="absolute -inset-3 rounded-[2.5rem] border border-border/20 rotate-2 scale-[0.97]" />
-              
-              {/* Main image card */}
-              <div className="relative rounded-[2rem] overflow-hidden shadow-[0_40px_80px_-20px_hsl(var(--primary)/0.15)] border border-border/20">
-                <img
-                  src={backgroundImage}
-                  alt="Hero"
-                  className="w-full aspect-[3/4] object-cover"
+                <a
+                  href="#articles"
+                  className="group/link flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 px-4 py-3"
+                >
+                  <span className="underline underline-offset-4 decoration-border group-hover/link:decoration-foreground transition-colors">
+                    Browse Articles
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-2 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all duration-300" />
+                </a>
+              </div>
+
+              {/* Social links */}
+              {hasSocials && (
+                <div
+                  className={`flex items-center gap-2 transition-all duration-1000 delay-[900ms] ease-out ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                  }`}
+                >
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground/50 font-semibold mr-1">
+                    Follow
+                  </span>
+                  <div className="w-6 h-px bg-border/60 mr-1" />
+                  {socialLinks.map(({ url, icon: Icon, label }) => (
+                    <a
+                      key={label}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group/social w-9 h-9 rounded-full border border-border/40 hover:border-accent/50 hover:bg-accent/10 transition-all duration-300 flex items-center justify-center hover:scale-110"
+                      aria-label={label}
+                    >
+                      <Icon className="w-3.5 h-3.5 text-muted-foreground/50 group-hover/social:text-accent transition-colors duration-300" />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ─── Right: Image Composition ─── */}
+            <div className="lg:col-span-6 xl:col-span-5 hidden lg:flex items-center justify-center">
+              <div
+                className={`relative w-full max-w-md transition-all duration-1000 delay-400 ease-out ${
+                  isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95'
+                }`}
+              >
+                {/* Decorative ring */}
+                <div
+                  className="absolute -inset-6 rounded-[2.5rem] border border-border/15"
+                  style={{
+                    transform: `translate(${mousePos.x * 4}px, ${mousePos.y * 4}px)`,
+                    transition: 'transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                  }}
                 />
-                {/* Overlay gradient on image */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
-                
-                {/* Floating stats badge */}
-                <div className="absolute bottom-6 left-6 right-6">
-                  <div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/20 p-4 flex items-center gap-4">
-                    <div className="flex -space-x-2">
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className="w-8 h-8 rounded-full bg-muted border-2 border-card flex items-center justify-center text-[10px] font-bold text-muted-foreground">
-                          {String.fromCharCode(64 + i)}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-foreground">5K+ Readers</p>
-                      <p className="text-[10px] text-muted-foreground">Join our community</p>
+                <div
+                  className="absolute -inset-12 rounded-[3rem] border border-border/8"
+                  style={{
+                    transform: `translate(${mousePos.x * 7}px, ${mousePos.y * 7}px)`,
+                    transition: 'transform 0.9s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                  }}
+                />
+
+                {/* Main image container */}
+                <div
+                  className="relative rounded-[2rem] overflow-hidden shadow-2xl"
+                  style={{
+                    transform: `perspective(800px) rotateY(${mousePos.x * -2}deg) rotateX(${mousePos.y * 2}deg)`,
+                    transition: 'transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                  }}
+                >
+                  <img
+                    src={backgroundImage}
+                    alt="Hero"
+                    className="w-full aspect-[4/5] object-cover"
+                  />
+                  
+                  {/* Subtle gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/30 via-transparent to-foreground/5" />
+
+                  {/* Floating glass card at bottom */}
+                  <div className="absolute bottom-5 left-5 right-5">
+                    <div className="bg-background/70 dark:bg-background/60 backdrop-blur-xl rounded-2xl border border-border/30 p-4 flex items-center gap-4">
+                      <div className="flex -space-x-2.5">
+                        {['🌍', '✨', '📖'].map((emoji, i) => (
+                          <div
+                            key={i}
+                            className="w-9 h-9 rounded-full bg-accent/15 border-2 border-background flex items-center justify-center text-sm"
+                          >
+                            {emoji}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-foreground">5K+ Readers</p>
+                        <p className="text-[11px] text-muted-foreground">Join our community</p>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Floating accent dot */}
+                <div
+                  className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-accent shadow-lg shadow-accent/30"
+                  style={{
+                    transform: `translate(${mousePos.x * -10}px, ${mousePos.y * -10}px)`,
+                    transition: 'transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* ─── Mobile Image ─── */}
+            <div className="lg:hidden">
+              <div
+                className={`relative rounded-2xl overflow-hidden transition-all duration-1000 delay-300 ease-out ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}
+              >
+                <img
+                  src={backgroundImage}
+                  alt="Hero"
+                  className="w-full aspect-[16/9] object-cover rounded-2xl"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 via-transparent to-transparent rounded-2xl" />
               </div>
             </div>
           </div>
         </div>
-
-        {/* Bottom scroll indicator */}
-        <div
-          className={`flex justify-center pb-6 md:pb-8 transition-all duration-1000 delay-[1100ms] ${
-            isVisible ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          <a
-            href="#articles"
-            className="flex flex-col items-center gap-1 text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors group/scroll"
-          >
-            <span className="text-[9px] uppercase tracking-[0.3em] font-semibold">Scroll</span>
-            <ChevronDown className="w-4 h-4 animate-bounce" />
-          </a>
-        </div>
       </div>
+
+      {/* ─── Bottom edge fade ─── */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
     </section>
   );
 };
