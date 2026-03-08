@@ -85,7 +85,7 @@ export default function ResetPassword() {
             <div className="animate-spin h-7 w-7 border-[3px] border-primary border-t-transparent rounded-full" />
           </div>
           <div>
-            <p className="font-serif text-lg font-semibold text-foreground">Verifying Reset Link</p>
+            <p className="text-lg font-semibold text-foreground">Verifying Reset Link</p>
             <p className="text-sm text-muted-foreground mt-1">Please wait while we validate your request...</p>
           </div>
         </div>
@@ -114,7 +114,7 @@ export default function ResetPassword() {
                         <CheckCircle2 className="h-8 w-8 text-accent" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">Password Updated</h1>
+                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">Password Updated</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">Your account is now secured with the new password</p>
                   </>
                 ) : !isValidSession ? (
@@ -125,7 +125,7 @@ export default function ResetPassword() {
                         <ShieldAlert className="h-8 w-8 text-destructive" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">Link Expired</h1>
+                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">Link Expired</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">This reset link is no longer valid</p>
                   </>
                 ) : (
@@ -136,7 +136,7 @@ export default function ResetPassword() {
                         <ShieldCheck className="h-8 w-8 text-primary" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">New Password</h1>
+                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">New Password</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">Create a strong and unique password</p>
                   </>
                 )}

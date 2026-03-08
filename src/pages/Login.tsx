@@ -164,7 +164,7 @@ export default function Login() {
                         <Fingerprint className="h-8 w-8 text-primary" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">Welcome Back</h1>
+                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">Welcome Back</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">
                       {fromAdmin ? 'Admin access requires authentication' : 'Sign in to continue your journey'}
                     </p>
@@ -178,7 +178,7 @@ export default function Login() {
                         <Sparkles className="h-8 w-8 text-accent" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">Join Us</h1>
+                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">Join Us</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">Create your account in seconds</p>
                   </>
                 )}
@@ -190,7 +190,7 @@ export default function Login() {
                         <Shield className="h-8 w-8 text-secondary-foreground" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">Recover Access</h1>
+                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">Recover Access</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">We'll send a secure reset link to your email</p>
                   </>
                 )}
@@ -202,7 +202,7 @@ export default function Login() {
                         <CheckCircle2 className="h-8 w-8 text-accent" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">Check Your Inbox</h1>
+                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">Check Your Inbox</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">A reset link has been sent</p>
                   </>
                 )}
