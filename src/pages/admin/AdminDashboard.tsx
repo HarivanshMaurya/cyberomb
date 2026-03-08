@@ -83,6 +83,9 @@ export default function AdminDashboard() {
 
   const publishedArticles = articles?.filter(a => a.status === 'published') ?? [];
   const draftArticles = articles?.filter(a => a.status === 'draft') ?? [];
+  const scheduledArticles = articles?.filter(a => a.status === 'scheduled') ?? [];
+  const scheduledWellness = wellnessArticles?.filter(a => a.status === 'scheduled') ?? [];
+  const totalScheduled = scheduledArticles.length + scheduledWellness.length;
   const unreadMessages = contactMessages?.filter(m => !m.is_read) ?? [];
   const activeProducts = products?.filter(p => p.is_active) ?? [];
   const totalContent = (articles?.length ?? 0) + (wellnessArticles?.length ?? 0);
@@ -195,6 +198,7 @@ export default function AdminDashboard() {
         <MiniStat icon={FileText} label="Pages" value={pages?.length ?? 0} />
         <MiniStat icon={Image} label="Media Files" value={media?.length ?? 0} />
         <MiniStat icon={MessageSquare} label="Messages" value={contactMessages?.length ?? 0} badge={unreadMessages.length > 0 ? `${unreadMessages.length} new` : undefined} />
+        <MiniStat icon={CalendarDays} label="Scheduled" value={totalScheduled} badge={totalScheduled > 0 ? `${totalScheduled} pending` : undefined} />
         <MiniStat icon={Heart} label="Wellness Posts" value={wellnessArticles?.length ?? 0} />
       </div>
 
@@ -221,7 +225,8 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <StatusBar label="Published" count={publishedArticles.length} total={totalContent} variant="primary" />
+             <StatusBar label="Published" count={publishedArticles.length} total={totalContent} variant="primary" />
+              <StatusBar label="Scheduled" count={totalScheduled} total={totalContent} variant="accent" />
               <StatusBar label="Drafts" count={draftArticles.length} total={totalContent} variant="warning" />
               <StatusBar label="Wellness" count={wellnessArticles?.filter(a => a.status === 'published').length ?? 0} total={totalContent} variant="accent" />
             </div>

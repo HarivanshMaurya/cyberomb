@@ -11,7 +11,8 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, Search, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Loader2, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 
 export default function WellnessArticlesList() {
   const { data: articles, isLoading } = useWellnessArticles();
@@ -74,6 +75,7 @@ export default function WellnessArticlesList() {
                   <TableHead>Author</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead>Scheduled</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -89,13 +91,24 @@ export default function WellnessArticlesList() {
                     <TableCell>
                       <span className={`text-xs px-2 py-1 rounded-full ${
                         article.status === 'published' ? 'bg-green-100 text-green-700' :
+                        article.status === 'scheduled' ? 'bg-blue-100 text-blue-700' :
                         article.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
                         'bg-gray-100 text-gray-700'
                       }`}>
-                        {article.status}
+                        {article.status === 'scheduled' ? `📅 ${article.status}` : article.status}
                       </span>
                     </TableCell>
                     <TableCell>{new Date(article.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      {article.status === 'scheduled' && article.published_at ? (
+                        <div className="flex items-center gap-1 text-xs text-blue-600">
+                          <CalendarIcon className="h-3 w-3" />
+                          {format(new Date(article.published_at), 'MMM dd, yyyy HH:mm')}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button variant="ghost" size="icon" onClick={() => navigate(`/admin/wellness-articles/${article.id}`)}>
