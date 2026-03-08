@@ -424,6 +424,18 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         />
       </div>
 
+      {/* Translating overlay */}
+      {isTranslating && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center" style={{ background: darkMode ? "hsl(0 0% 8% / 0.85)" : "hsl(var(--background) / 0.85)" }}>
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin" style={{ color: darkMode ? "hsl(36 44% 70%)" : "hsl(var(--primary))" }} />
+            <span className="text-sm font-serif" style={{ color: darkMode ? "hsl(36 44% 85%)" : "hsl(var(--foreground))" }}>
+              {contentLang === "hi" ? "हिंदी में अनुवाद हो रहा है..." : "Translating..."}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Book container */}
       <div
         className="flex-1 flex items-center justify-center p-4 md:p-8 lg:p-12"
