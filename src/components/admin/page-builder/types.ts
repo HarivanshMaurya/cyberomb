@@ -51,6 +51,7 @@ export interface TextImageBlock {
   image: string;
   imageAlt: string;
   imagePosition: 'left' | 'right';
+  style?: BlockStyleSettings;
 }
 
 export interface FeatureCard {
