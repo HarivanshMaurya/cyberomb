@@ -476,6 +476,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
       return;
     }
     
+    // Instant switch if already cached (from DB or memory)
     if (translationCache[langCode]) {
       setSelectedLang(langCode);
       setIsTranslated(true);
@@ -487,7 +488,6 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     setTranslationProgress({ current: 0, total: 1 });
     
     try {
-      // Single API call with ALL chapters
       const { data, error } = await supabase.functions.invoke('translate-ebook', {
         body: { chapters, targetLang: langCode },
       });
@@ -501,6 +501,18 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
       setIsTranslated(true);
       const langLabel = LANGUAGES[langCode] || langCode;
       toast({ title: 'अनुवाद पूरा हुआ ✅', description: `${chapters.length} अध्याय ${langLabel} में अनुवादित हो गए` });
+      
+      // Save translation to DB for instant access next time (fire and forget)
+      if (productId) {
+        const updatedTranslations = { ...translationCache, [langCode]: translated };
+        supabase
+          .from("products" as any)
+          .update({ translations: updatedTranslations } as any)
+          .eq("id", productId)
+          .then(({ error: saveErr }) => {
+            if (saveErr) console.error("Failed to cache translation:", saveErr);
+          });
+      }
     } catch (err: any) {
       console.error('Translation error:', err);
       toast({ title: 'अनुवाद में समस्या', description: 'कृपया कुछ देर बाद पुनः प्रयास करें', variant: 'destructive' });
@@ -508,7 +520,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
       setIsTranslating(false);
       setTranslationProgress({ current: 0, total: 0 });
     }
-  }, [isTranslated, isTranslating, selectedLang, translationCache, chapters]);
+  }, [isTranslated, isTranslating, selectedLang, translationCache, chapters, productId]);
 
   const handleShowOriginal = useCallback(() => {
     setIsTranslated(false);
