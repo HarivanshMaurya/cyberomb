@@ -19,6 +19,10 @@ import {
   Users,
   ShoppingCart,
   Mail,
+  Database,
+  BarChart3,
+  Shield,
+  Settings2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
