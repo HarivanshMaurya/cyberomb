@@ -10,7 +10,6 @@ import { useReadingAnalytics } from "@/hooks/useReadingAnalytics";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, BookOpen, Bookmark } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Chapter {
   title: string;
