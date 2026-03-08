@@ -108,10 +108,20 @@ export default function ArticleEditor() {
    const handleSubmit = async (e: React.FormEvent) => {
      e.preventDefault();
  
-     const articleData = {
-       ...formData,
-       published_at: formData.status === 'published' ? new Date().toISOString() : null,
-     };
+      let publishedAt: string | null = null;
+      if (formData.status === 'published') {
+        publishedAt = new Date().toISOString();
+      } else if (formData.status === 'scheduled' && scheduledDate) {
+        const [hours, minutes] = scheduledTime.split(':').map(Number);
+        const scheduled = new Date(scheduledDate);
+        scheduled.setHours(hours, minutes, 0, 0);
+        publishedAt = scheduled.toISOString();
+      }
+
+      const articleData = {
+        ...formData,
+        published_at: publishedAt,
+      };
  
      if (isNew) {
        createArticle.mutate(articleData, {
