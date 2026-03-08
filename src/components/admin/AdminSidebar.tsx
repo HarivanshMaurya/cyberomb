@@ -19,6 +19,10 @@ import {
   Users,
   ShoppingCart,
   Mail,
+  Database,
+  BarChart3,
+  Shield,
+  Settings2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -40,6 +44,10 @@ const navItems = [
   { to: '/admin/sections', icon: Globe, label: 'Site Content' },
   { to: '/admin/media', icon: Image, label: 'Media Library' },
   { to: '/admin/seo', icon: Search, label: 'SEO Settings' },
+  { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+  { to: '/admin/database', icon: Database, label: 'Database' },
+  { to: '/admin/users', icon: Shield, label: 'Users' },
+  { to: '/admin/site-settings', icon: Settings2, label: 'Site Settings' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
 ];
  

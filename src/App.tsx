@@ -44,6 +44,10 @@ import ProductDetail from "./pages/ProductDetail";
 import ReadBook from "./pages/ReadBook";
 import Newsletter from "./pages/Newsletter";
 import SubscribersManager from "./pages/admin/SubscribersManager";
+import DatabaseBrowser from "./pages/admin/DatabaseBrowser";
+import UserManagement from "./pages/admin/UserManagement";
+import AnalyticsDashboard from "./pages/admin/AnalyticsDashboard";
+import SiteSettingsHub from "./pages/admin/SiteSettingsHub";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -105,7 +109,11 @@ const App = () => (
               <Route path="seo" element={<SEOSettings />} />
               <Route path="products" element={<ProductsManager />} />
                <Route path="subscribers" element={<SubscribersManager />} />
-              <Route path="settings" element={<Settings />} />
+              <Route path="database" element={<DatabaseBrowser />} />
+               <Route path="users" element={<UserManagement />} />
+               <Route path="analytics" element={<AnalyticsDashboard />} />
+               <Route path="site-settings" element={<SiteSettingsHub />} />
+               <Route path="settings" element={<Settings />} />
             </Route>
  
              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
