@@ -97,6 +97,7 @@ export interface TestimonialsBlock {
   id: string;
   heading: string;
   testimonials: Testimonial[];
+  style?: BlockStyleSettings;
 }
 
 export interface FAQItem {
