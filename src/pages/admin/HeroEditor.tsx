@@ -171,6 +171,16 @@
                     placeholder="https://linkedin.com/in/yourprofile"
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="twitter_url">Twitter / X URL</Label>
+                  <Input
+                    id="twitter_url"
+                    value={formData.twitter_url}
+                    onChange={(e) => setFormData({ ...formData, twitter_url: e.target.value })}
+                    placeholder="https://x.com/yourprofile"
+                  />
+                </div>
  
                <Button type="submit" disabled={updateHero.isPending} className="w-full">
                  {updateHero.isPending ? (
