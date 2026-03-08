@@ -105,7 +105,7 @@ const Header = () => {
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border animate-fade-in">
+          <div className="md:hidden py-4 border-t border-border animate-fade-in bg-background/95 backdrop-blur-md rounded-b-2xl shadow-lg mt-1 px-4">
             <nav className="flex flex-col gap-4">
               {navLinks.map((link) => (
                 <a key={link.href} href={link.href} className="text-sm font-medium hover:text-accent transition-colors">
