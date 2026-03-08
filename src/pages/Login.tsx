@@ -91,11 +91,17 @@ export default function Login() {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
-      if (result.error) {
-        toast.error('Google sign in failed');
+      if (result.redirected) {
+        // User is being redirected to Google, don't reset loading
+        return;
       }
-    } catch {
-      toast.error('Google sign in failed');
+      if (result.error) {
+        console.error('Google sign in error:', result.error);
+        toast.error('Google sign in failed: ' + (result.error.message || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error('Google sign in exception:', err);
+      toast.error('Google sign in failed. Please try again.');
     }
     setGoogleLoading(false);
   };
@@ -106,11 +112,17 @@ export default function Login() {
       const result = await lovable.auth.signInWithOAuth("apple", {
         redirect_uri: window.location.origin,
       });
-      if (result.error) {
-        toast.error('Apple sign in failed');
+      if (result.redirected) {
+        // User is being redirected to Apple, don't reset loading
+        return;
       }
-    } catch {
-      toast.error('Apple sign in failed');
+      if (result.error) {
+        console.error('Apple sign in error:', result.error);
+        toast.error('Apple sign in failed: ' + (result.error.message || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error('Apple sign in exception:', err);
+      toast.error('Apple sign in failed. Please try again.');
     }
     setAppleLoading(false);
   };
