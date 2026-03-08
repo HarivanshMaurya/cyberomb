@@ -49,6 +49,9 @@ import UserManagement from "./pages/admin/UserManagement";
 import AnalyticsDashboard from "./pages/admin/AnalyticsDashboard";
 import SiteSettingsHub from "./pages/admin/SiteSettingsHub";
 import ResetPassword from "./pages/ResetPassword";
+import WellnessArticlesList from "./pages/admin/WellnessArticlesList";
+import WellnessArticleEditor from "./pages/admin/WellnessArticleEditor";
+import WellnessArticlePage from "./pages/WellnessArticle";
 const queryClient = new QueryClient();
 
 const App = () => (
