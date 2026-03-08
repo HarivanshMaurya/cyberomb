@@ -176,8 +176,11 @@ export type Database = {
           button_link: string
           button_text: string
           created_at: string
+          facebook_url: string | null
           id: string
+          instagram_url: string | null
           is_active: boolean
+          linkedin_url: string | null
           subtitle: string
           title: string
           updated_at: string
@@ -187,8 +190,11 @@ export type Database = {
           button_link?: string
           button_text?: string
           created_at?: string
+          facebook_url?: string | null
           id?: string
+          instagram_url?: string | null
           is_active?: boolean
+          linkedin_url?: string | null
           subtitle?: string
           title?: string
           updated_at?: string
@@ -198,8 +204,11 @@ export type Database = {
           button_link?: string
           button_text?: string
           created_at?: string
+          facebook_url?: string | null
           id?: string
+          instagram_url?: string | null
           is_active?: boolean
+          linkedin_url?: string | null
           subtitle?: string
           title?: string
           updated_at?: string
