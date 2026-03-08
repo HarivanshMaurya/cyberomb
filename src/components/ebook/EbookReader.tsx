@@ -187,7 +187,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
   }
 
   return (
-    <div className="fixed inset-0 z-50" style={{ background: readerBg }}>
+    <div ref={containerRef} className="fixed inset-0 z-50" style={{ background: readerBg }}>
       {/* Toolbar */}
       <ReaderToolbar
         bookTitle={bookTitle}
@@ -200,6 +200,8 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
         isBookmarked={isBookmarked}
         onToggleBookmark={toggleBookmark}
         onOpenToc={() => setShowToc(true)}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={toggleFullscreen}
       />
 
       {/* Book container */}
