@@ -492,7 +492,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
       setTranslationProgress({ current: 1, total: 1 });
       setTranslationCache(prev => ({ ...prev, [langCode]: translated }));
       setIsTranslated(true);
-      const langLabel = LANGUAGES[langCode] || langCode;
+      const langLabel = langName || langCode;
       toast({ title: 'अनुवाद पूरा हुआ ✅', description: `${chapters.length} अध्याय ${langLabel} में अनुवादित हो गए` });
       
       // Save translation to DB for instant access next time (fire and forget)
