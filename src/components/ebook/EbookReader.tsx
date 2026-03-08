@@ -10,6 +10,8 @@ import { useReadingAnalytics } from "@/hooks/useReadingAnalytics";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, BookOpen, Bookmark } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface Chapter {
   title: string;
