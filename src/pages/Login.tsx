@@ -164,7 +164,7 @@ export default function Login() {
                         <Fingerprint className="h-8 w-8 text-primary" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">Welcome Back</h1>
+                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">Welcome Back</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">
                       {fromAdmin ? 'Admin access requires authentication' : 'Sign in to continue your journey'}
                     </p>
