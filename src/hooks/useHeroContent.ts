@@ -12,6 +12,7 @@ export interface HeroContent {
   instagram_url: string;
   facebook_url: string;
   linkedin_url: string;
+  twitter_url: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;

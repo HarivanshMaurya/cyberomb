@@ -1,0 +1,1 @@
+ALTER TABLE public.hero_content ADD COLUMN twitter_url TEXT DEFAULT '';

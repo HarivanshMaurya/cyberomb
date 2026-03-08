@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Instagram, Facebook, Linkedin, ArrowRight, Play, ChevronDown } from "lucide-react";
+import { Instagram, Facebook, Linkedin, Twitter, ArrowRight, Play, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeroContent } from "@/hooks/useHeroContent";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,7 +48,8 @@ const HeroSection = () => {
   const instagramUrl = hero?.instagram_url || "";
   const facebookUrl = hero?.facebook_url || "";
   const linkedinUrl = hero?.linkedin_url || "";
-  const hasSocials = !!(instagramUrl || facebookUrl || linkedinUrl);
+  const twitterUrl = hero?.twitter_url || "";
+  const hasSocials = !!(instagramUrl || facebookUrl || linkedinUrl || twitterUrl);
 
   return (
     <section
@@ -200,6 +201,17 @@ const HeroSection = () => {
                     aria-label="LinkedIn"
                   >
                     <Linkedin className="w-4 h-4 text-muted-foreground/60 group-hover/social:text-foreground transition-colors" />
+                  </a>
+                )}
+                {twitterUrl && (
+                  <a
+                    href={twitterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group/social w-10 h-10 rounded-full border border-border/30 bg-card/30 backdrop-blur-sm hover:border-primary/40 hover:bg-primary/10 transition-all duration-300 flex items-center justify-center hover:scale-110 hover:-translate-y-0.5"
+                    aria-label="Twitter / X"
+                  >
+                    <Twitter className="w-4 h-4 text-muted-foreground/60 group-hover/social:text-foreground transition-colors" />
                   </a>
                 )}
               </div>

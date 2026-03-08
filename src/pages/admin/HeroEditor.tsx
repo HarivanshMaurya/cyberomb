@@ -20,6 +20,7 @@
     instagram_url: '',
     facebook_url: '',
     linkedin_url: '',
+    twitter_url: '',
   });
  
    useEffect(() => {
@@ -33,6 +34,7 @@
           instagram_url: hero.instagram_url || '',
           facebook_url: hero.facebook_url || '',
           linkedin_url: hero.linkedin_url || '',
+          twitter_url: hero.twitter_url || '',
         });
      }
    }, [hero]);
@@ -167,6 +169,16 @@
                     value={formData.linkedin_url}
                     onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
                     placeholder="https://linkedin.com/in/yourprofile"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="twitter_url">Twitter / X URL</Label>
+                  <Input
+                    id="twitter_url"
+                    value={formData.twitter_url}
+                    onChange={(e) => setFormData({ ...formData, twitter_url: e.target.value })}
+                    placeholder="https://x.com/yourprofile"
                   />
                 </div>
  
