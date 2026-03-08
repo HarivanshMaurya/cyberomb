@@ -353,7 +353,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
         </Popover>
         {editor.isActive('link') && (
           <ToolbarButton active={false} onClick={() => editor.chain().focus().unsetLink().run()} title="Remove Link">
-            <LinkOff className="h-4 w-4" />
+            <Link2Off className="h-4 w-4" />
           </ToolbarButton>
         )}
 
