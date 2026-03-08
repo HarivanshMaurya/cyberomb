@@ -530,17 +530,20 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
       />
 
       {/* Reading progress bar */}
-      <div className="h-0.5 w-full" style={{ background: darkMode ? "hsl(0 0% 15%)" : "hsl(var(--muted))" }}>
+      <div className="h-[2px] w-full" style={{ background: darkMode ? "hsl(0 0% 12%)" : "hsl(var(--muted))" }}>
         <div
           className="h-full transition-all duration-500 ease-out"
-          style={{ width: `${progressPercent}%`, background: primaryBar }}
+          style={{
+            width: `${progressPercent}%`,
+            background: `linear-gradient(90deg, ${primaryBar}, ${darkMode ? "hsl(36 60% 55%)" : "hsl(var(--accent))"})`,
+          }}
         />
       </div>
 
       {/* Book container */}
       <div
         className="flex-1 flex items-center justify-center p-4 md:p-8 lg:p-12"
-        style={{ height: "calc(100vh - 3.5rem - 4.5rem)" }}
+        style={{ height: "calc(100vh - 4rem - 5rem)" }}
       >
         <div
           ref={bookRef}
