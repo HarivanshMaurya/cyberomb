@@ -42,6 +42,7 @@ import NavbarEditor from "./pages/admin/NavbarEditor";
 import ProductsManager from "./pages/admin/ProductsManager";
 import ProductDetail from "./pages/ProductDetail";
 import ReadBook from "./pages/ReadBook";
+import Newsletter from "./pages/Newsletter";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -70,8 +71,9 @@ const App = () => (
               <Route path="/blog/:slug" element={<BlogArticle />} />
                <Route path="/category/:slug" element={<CategoryPage />} />
                <Route path="/product/:slug" element={<ProductDetail />} />
-               <Route path="/read/:slug" element={<ReadBook />} />
-              <Route path="/login" element={<Login />} />
+                <Route path="/read/:slug" element={<ReadBook />} />
+                <Route path="/newsletter" element={<Newsletter />} />
+               <Route path="/login" element={<Login />} />
               <Route path="/404" element={<NotFound />} />
  
               {/* Admin Login - redirect to unified login */}
