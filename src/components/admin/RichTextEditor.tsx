@@ -58,6 +58,8 @@ import {
   PlusCircle,
   Type,
   Eraser,
+  Indent,
+  Outdent,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
