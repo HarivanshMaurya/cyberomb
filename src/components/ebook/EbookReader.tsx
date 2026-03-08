@@ -6,6 +6,7 @@ import { ReaderToolbar } from "./ReaderToolbar";
 import { ChapterTocPanel } from "./ChapterTocPanel";
 import { BookmarksPanel, BookmarkEntry } from "./BookmarksPanel";
 import { useTextToSpeech } from "./TextToSpeech";
+import { useReadingAnalytics } from "@/hooks/useReadingAnalytics";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, BookOpen, Bookmark } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -19,7 +20,9 @@ interface EbookReaderProps {
   chapters: Chapter[];
   bookTitle: string;
   bookSlug?: string;
+  productId?: string;
   coverImage?: string | null;
+  userEmail?: string | null;
   onClose: () => void;
 }
 
@@ -27,7 +30,7 @@ function getStorageKey(slug: string, key: string) {
   return `ebook_${slug}_${key}`;
 }
 
-export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverImage, onClose }: EbookReaderProps) {
+export function EbookReader({ chapters, bookTitle, bookSlug = "default", productId, coverImage, userEmail, onClose }: EbookReaderProps) {
   const isMobile = useIsMobile();
   const [showCover, setShowCover] = useState(true);
 
@@ -46,17 +49,50 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverIm
   const pagesPerSpread = isMobile ? 1 : 2;
   const totalSpreads = Math.ceil(pages.length / pagesPerSpread);
 
+  // Reading analytics
+  const { saveProgress, getResumePage } = useReadingAnalytics(bookSlug, productId);
+
   const [currentSpread, setCurrentSpread] = useState(0);
   const [isFlipping, setIsFlipping] = useState(false);
   const [flipDirection, setFlipDirection] = useState<"next" | "prev" | null>(null);
   const [showToc, setShowToc] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [hasResumed, setHasResumed] = useState(false);
   const touchStartX = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setInterval>>();
 
-  // TTS
+  // TTS with sentence highlighting
   const tts = useTextToSpeech();
+
+  // Resume reading position
+  useEffect(() => {
+    if (hasResumed || pages.length === 0) return;
+    const resumePage = getResumePage();
+    if (resumePage > 1) {
+      const spreadIdx = Math.floor((resumePage - 1) / pagesPerSpread);
+      setCurrentSpread(Math.min(spreadIdx, totalSpreads - 1));
+    }
+    setHasResumed(true);
+  }, [pages, hasResumed, getResumePage, pagesPerSpread, totalSpreads]);
+
+  // Content protection: disable keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Disable PrintScreen, Ctrl+P, Ctrl+S, Ctrl+C in reader
+      if (
+        e.key === "PrintScreen" ||
+        (e.ctrlKey && (e.key === "p" || e.key === "s" || e.key === "c" || e.key === "u")) ||
+        (e.metaKey && (e.key === "p" || e.key === "s" || e.key === "c" || e.key === "u"))
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    window.addEventListener("keydown", handler, true);
+    return () => window.removeEventListener("keydown", handler, true);
+  }, []);
 
   // Fullscreen toggle
   const toggleFullscreen = useCallback(() => {
@@ -85,6 +121,21 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverIm
   useEffect(() => {
     try { localStorage.setItem(getStorageKey(bookSlug, "bookmarks"), JSON.stringify(bookmarks)); } catch {}
   }, [bookmarks, bookSlug]);
+
+  // Auto-save reading progress every 30s
+  useEffect(() => {
+    saveTimerRef.current = setInterval(() => {
+      const leftPage = getSpreadPages(currentSpread)[0];
+      if (leftPage) saveProgress(leftPage.pageNumber, pages.length);
+    }, 30000);
+    return () => { if (saveTimerRef.current) clearInterval(saveTimerRef.current); };
+  }, [currentSpread, pages.length]);
+
+  // Save on page change
+  useEffect(() => {
+    const leftPage = getSpreadPages(currentSpread)[0];
+    if (leftPage) saveProgress(leftPage.pageNumber, pages.length);
+  }, [currentSpread]);
 
   // Clamp spread when pages change
   useEffect(() => {
@@ -135,7 +186,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverIm
     if (page) jumpToPage(page.pageNumber);
   }, [pages, jumpToPage]);
 
-  // Keyboard
+  // Keyboard navigation
   useEffect(() => {
     if (showCover) return;
     const handler = (e: KeyboardEvent) => {
@@ -154,7 +205,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverIm
     if (Math.abs(diff) > 50) { diff > 0 ? goNext() : goPrev(); }
   };
 
-  // Page corner click zones for turning
+  // Page corner click
   const handlePageClick = (e: React.MouseEvent, side: "left" | "right") => {
     if (isMobile) return;
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -180,15 +231,59 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverIm
     }
   };
 
-  // TTS: read current page
+  // TTS: read current page, auto-continue to next page
   const handleTtsPlay = useCallback(() => {
     const [left, right] = getSpreadPages(currentSpread);
     const text = [left?.content, right?.content].filter(Boolean).join(" ");
-    tts.speak(text);
-  }, [currentSpread, getSpreadPages, tts]);
+    tts.speak(text, () => {
+      // Auto-continue to next page
+      if (currentSpread < totalSpreads - 1) {
+        setCurrentSpread((s) => s + 1);
+        // Will re-trigger TTS via effect below
+      }
+    });
+  }, [currentSpread, getSpreadPages, tts, totalSpreads]);
 
-  // Stop TTS on page change
-  useEffect(() => { tts.stop(); }, [currentSpread]);
+  // Auto-continue TTS when page changes during playback
+  const ttsWasPlayingRef = useRef(false);
+  useEffect(() => {
+    if (tts.isPlaying && !tts.isPaused) {
+      ttsWasPlayingRef.current = true;
+    }
+    if (ttsWasPlayingRef.current && !tts.isPlaying && !tts.isPaused) {
+      // TTS ended, check if we should auto-play on new page
+      const timer = setTimeout(() => {
+        if (ttsWasPlayingRef.current) {
+          const [left, right] = getSpreadPages(currentSpread);
+          const text = [left?.content, right?.content].filter(Boolean).join(" ");
+          if (text.trim()) {
+            tts.speak(text, () => {
+              if (currentSpread < totalSpreads - 1) {
+                setCurrentSpread((s) => s + 1);
+              } else {
+                ttsWasPlayingRef.current = false;
+              }
+            });
+          } else {
+            ttsWasPlayingRef.current = false;
+          }
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [currentSpread]);
+
+  // Stop TTS tracking when manually stopped
+  useEffect(() => {
+    if (!tts.isPlaying && !tts.isPaused) {
+      // Only reset if user manually stopped (not auto-continue)
+    }
+  }, [tts.isPlaying, tts.isPaused]);
+
+  const handleTtsStop = useCallback(() => {
+    ttsWasPlayingRef.current = false;
+    tts.stop();
+  }, [tts]);
 
   const [leftPage, rightPage] = getSpreadPages(currentSpread);
 
@@ -222,7 +317,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverIm
   }
 
   return (
-    <div ref={containerRef} className="fixed inset-0 z-50" style={{ background: readerBg }}>
+    <div ref={containerRef} className="fixed inset-0 z-50 ebook-protected" style={{ background: readerBg }} onContextMenu={(e) => e.preventDefault()}>
       {/* Toolbar */}
       <ReaderToolbar
         bookTitle={bookTitle}
@@ -240,14 +335,16 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverIm
         ttsPlaying={tts.isPlaying}
         ttsPaused={tts.isPaused}
         ttsSpeed={tts.speed}
+        ttsLangLabel={tts.currentLangLabel}
         onTtsPlay={handleTtsPlay}
         onTtsPause={tts.pause}
         onTtsResume={tts.resume}
-        onTtsStop={tts.stop}
+        onTtsStop={handleTtsStop}
         onTtsCycleSpeed={tts.cycleSpeed}
+        onTtsCycleLang={tts.cycleLang}
       />
 
-      {/* Reading progress bar (top edge) */}
+      {/* Reading progress bar */}
       <div className="h-0.5 w-full" style={{ background: darkMode ? "hsl(0 0% 15%)" : "hsl(var(--muted))" }}>
         <div
           className="h-full transition-all duration-500 ease-out"
@@ -287,13 +384,30 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverIm
             }`}
             style={{ transformStyle: "preserve-3d" }}
           >
-            {/* Left page with corner click zone */}
             <div className="flex-1 flex cursor-default" onClick={(e) => handlePageClick(e, "left")}>
-              <BookPageView page={leftPage} totalPages={pages.length} side={isMobile ? "single" : "left"} darkMode={darkMode} fontSize={fontSize} />
+              <BookPageView
+                page={leftPage}
+                totalPages={pages.length}
+                side={isMobile ? "single" : "left"}
+                darkMode={darkMode}
+                fontSize={fontSize}
+                watermark={userEmail || undefined}
+                highlightSentenceIndex={tts.highlightIndex}
+                sentences={tts.sentences}
+              />
             </div>
             {!isMobile && (
               <div className="flex-1 flex cursor-default" onClick={(e) => handlePageClick(e, "right")}>
-                <BookPageView page={rightPage} totalPages={pages.length} side="right" darkMode={darkMode} fontSize={fontSize} />
+                <BookPageView
+                  page={rightPage}
+                  totalPages={pages.length}
+                  side="right"
+                  darkMode={darkMode}
+                  fontSize={fontSize}
+                  watermark={userEmail || undefined}
+                  highlightSentenceIndex={tts.highlightIndex}
+                  sentences={tts.sentences}
+                />
               </div>
             )}
           </div>
@@ -341,7 +455,6 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverIm
           <span className="hidden sm:inline">Previous</span>
         </Button>
 
-        {/* Bookmarks quick access (mobile) */}
         <Button
           variant="ghost"
           size="icon"
@@ -370,7 +483,6 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverIm
           </div>
         </div>
 
-        {/* Bookmarks button (desktop) */}
         <Button
           variant="ghost"
           size="sm"
@@ -395,7 +507,6 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverIm
         </Button>
       </div>
 
-      {/* TOC Panel */}
       {showToc && (
         <ChapterTocPanel
           chapters={chapters}
@@ -407,7 +518,6 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverIm
         />
       )}
 
-      {/* Bookmarks Panel */}
       {showBookmarks && (
         <BookmarksPanel
           bookmarks={bookmarks}

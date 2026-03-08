@@ -3,12 +3,14 @@ import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EbookReader } from "@/components/ebook/EbookReader";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { BookOpen, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import SEOHead from "@/components/SEOHead";
 
 interface ReaderProduct {
+  id: string;
   title: string;
   slug: string | null;
   image: string | null;
@@ -17,19 +19,21 @@ interface ReaderProduct {
 
 const ReadBook = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { user } = useAuth();
 
   const { data: product, isLoading } = useQuery({
     queryKey: ["product-read", slug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products" as any)
-        .select("title, slug, chapters, image")
+        .select("id, title, slug, chapters, image")
         .eq("slug", slug)
         .eq("is_active", true)
         .single();
       if (error) throw error;
       const raw = data as any;
       return {
+        id: raw.id,
         title: raw.title,
         slug: raw.slug,
         image: raw.image,
@@ -81,7 +85,9 @@ const ReadBook = () => {
         chapters={product.chapters}
         bookTitle={product.title}
         bookSlug={product.slug || slug || "default"}
+        productId={product.id}
         coverImage={product.image}
+        userEmail={user?.email}
         onClose={() => window.history.back()}
       />
     </>
