@@ -83,6 +83,7 @@ export default function Login() {
   };
 
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -97,6 +98,21 @@ export default function Login() {
       toast.error('Google sign in failed');
     }
     setGoogleLoading(false);
+  };
+
+  const handleAppleSignIn = async () => {
+    setAppleLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("apple", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error('Apple sign in failed');
+      }
+    } catch {
+      toast.error('Apple sign in failed');
+    }
+    setAppleLoading(false);
   };
 
   const passwordStrength = (() => {
