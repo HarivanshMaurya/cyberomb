@@ -369,11 +369,11 @@ const HeroSection = () => {
                   alt="Hero"
                   className="w-full aspect-[16/9] object-cover rounded-2xl"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/15 via-transparent to-transparent rounded-2xl" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 dark:from-foreground/15 via-transparent to-transparent rounded-2xl" />
                 
                 {/* Mobile glass card */}
                 <div className="absolute bottom-3 left-3 right-3">
-                  <div className="bg-background/60 backdrop-blur-xl rounded-xl border border-border/20 p-3 flex items-center gap-3">
+                  <div className="bg-white/75 dark:bg-background/60 backdrop-blur-xl rounded-xl border border-white/30 dark:border-border/20 p-3 flex items-center gap-3">
                     <div className="flex -space-x-2">
                       {['🌍', '✨', '📖'].map((emoji, i) => (
                         <div key={i} className="w-7 h-7 rounded-full bg-accent/10 border-2 border-background flex items-center justify-center text-xs">
