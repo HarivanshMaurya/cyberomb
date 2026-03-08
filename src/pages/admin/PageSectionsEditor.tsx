@@ -72,7 +72,7 @@ const PageSectionsEditor = () => {
         const page = pages?.find(p => p.page_key === key);
         setEditingPage(page ? { ...page } : null);
       }}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           {pages?.map((page) => (
             <TabsTrigger key={page.page_key} value={page.page_key} className="flex items-center gap-2">
               {getPageIcon(page.page_key)}
