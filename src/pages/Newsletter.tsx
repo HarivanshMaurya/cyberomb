@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Header } from '@/components/Header';
-import { SEOHead } from '@/components/SEOHead';
+import Header from '@/components/Header';
+import SEOHead from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
