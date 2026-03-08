@@ -27,7 +27,7 @@ const Index = () => {
     : staticArticles.slice(0, 6);
 
   const newsletterContent = newsletterSection?.content as { heading?: string; description?: string; button_text?: string } | null;
-  const footerContent = footerSection?.content as { copyright?: string } | null;
+  const footerContent = footerSection?.content as { copyright?: string; brand_description?: string; newsletter_placeholder?: string } | null;
 
   return (
     <div className="min-h-screen bg-background animate-fade-in">
