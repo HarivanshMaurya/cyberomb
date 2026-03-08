@@ -470,13 +470,11 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
   const handleTranslate = useCallback(async (langCode: string) => {
     if (isTranslating) return;
     
-    // If already showing this language, toggle back to original
     if (isTranslated && selectedLang === langCode) {
       setIsTranslated(false);
       return;
     }
     
-    // If cached, switch instantly
     if (translationCache[langCode]) {
       setSelectedLang(langCode);
       setIsTranslated(true);
@@ -485,68 +483,19 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     
     setIsTranslating(true);
     setSelectedLang(langCode);
-    setTranslationProgress({ current: 0, total: chapters.length });
+    setTranslationProgress({ current: 0, total: 1 });
     
     try {
-      const translated: Chapter[] = [];
+      // Single API call with ALL chapters
+      const { data, error } = await supabase.functions.invoke('translate-ebook', {
+        body: { chapters, targetLang: langCode },
+      });
       
-      for (let i = 0; i < chapters.length; i++) {
-        setTranslationProgress({ current: i, total: chapters.length });
-        
-        let success = false;
-        let retries = 0;
-        const MAX_RETRIES = 4;
-        
-        while (!success && retries < MAX_RETRIES) {
-          try {
-            const { data, error } = await supabase.functions.invoke('translate-ebook', {
-              body: { chapters: [chapters[i]], targetLang: langCode },
-            });
-            
-            if (error) {
-              const errBody = error?.context?.body ? await error.context.text?.() : null;
-              if (error.message?.includes('non-2xx') || errBody?.includes('Rate limit')) {
-                retries++;
-                if (retries < MAX_RETRIES) {
-                  await new Promise(r => setTimeout(r, 3000 * Math.pow(2, retries - 1)));
-                  continue;
-                }
-              }
-              translated.push(chapters[i]);
-              success = true;
-              continue;
-            }
-            
-            if (data?.error && data.error.includes('Rate limit')) {
-              retries++;
-              if (retries < MAX_RETRIES) {
-                await new Promise(r => setTimeout(r, 3000 * Math.pow(2, retries - 1)));
-                continue;
-              }
-              translated.push(chapters[i]);
-              success = true;
-              continue;
-            }
-            
-            translated.push(data?.chapters?.[0] || chapters[i]);
-            success = true;
-          } catch {
-            retries++;
-            if (retries < MAX_RETRIES) {
-              await new Promise(r => setTimeout(r, 3000 * Math.pow(2, retries - 1)));
-            } else {
-              translated.push(chapters[i]);
-              success = true;
-            }
-          }
-        }
-        
-        if (i < chapters.length - 1) {
-          await new Promise(r => setTimeout(r, 1500));
-        }
-      }
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       
-      setTranslationProgress({ current: chapters.length, total: chapters.length });
+      const translated = data?.chapters || chapters;
+      setTranslationProgress({ current: 1, total: 1 });
       setTranslationCache(prev => ({ ...prev, [langCode]: translated }));
       setIsTranslated(true);
       const langLabel = LANGUAGES[langCode] || langCode;
