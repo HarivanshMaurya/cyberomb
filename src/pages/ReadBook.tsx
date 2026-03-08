@@ -32,6 +32,7 @@ const ReadBook = () => {
       return {
         title: raw.title,
         slug: raw.slug,
+        image: raw.image,
         chapters: Array.isArray(raw.chapters) ? raw.chapters : [],
       } as ReaderProduct;
     },
