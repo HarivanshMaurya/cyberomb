@@ -90,6 +90,7 @@ const ReadBook = () => {
         productId={product.id}
         coverImage={product.image}
         userEmail={user?.email}
+        cachedTranslations={product.translations}
         onClose={() => window.history.back()}
       />
     </>
