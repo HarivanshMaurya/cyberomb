@@ -167,6 +167,14 @@ export function ReaderToolbar({
           <ToolbarButton onClick={onToggleBookmark} title={isBookmarked ? "Remove bookmark" : "Bookmark"} darkMode={darkMode} active={isBookmarked}>
             {isBookmarked ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
           </ToolbarButton>
+          <ToolbarButton
+            onClick={onToggleTranslate}
+            title={isTranslated ? "Show Original" : "Translate to Hindi"}
+            darkMode={darkMode}
+            active={isTranslated}
+          >
+            {isTranslating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
+          </ToolbarButton>
         </div>
 
         {/* Separator */}
