@@ -30,6 +30,11 @@ function getStorageKey(slug: string, key: string) {
   return `ebook_${slug}_${key}`;
 }
 
+// Easing function: cubic ease-in-out
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
 export function EbookReader({ chapters, bookTitle, bookSlug = "default", productId, coverImage, userEmail, onClose }: EbookReaderProps) {
   const isMobile = useIsMobile();
   const [showCover, setShowCover] = useState(true);
@@ -55,18 +60,23 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
   const [currentSpread, setCurrentSpread] = useState(0);
   const [isFlipping, setIsFlipping] = useState(false);
   const [flipDirection, setFlipDirection] = useState<"next" | "prev" | null>(null);
-  const [flipProgress, setFlipProgress] = useState(0); // 0-1 for drag
+  const [flipProgress, setFlipProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [prevSpreadIdx, setPrevSpreadIdx] = useState(0); // track for animation
+  const [dragStartX, setDragStartX] = useState(0);
+  const [dragCurrentX, setDragCurrentX] = useState(0);
+  const [prevSpreadIdx, setPrevSpreadIdx] = useState(0);
   const [showToc, setShowToc] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [hasResumed, setHasResumed] = useState(false);
   const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const bookRef = useRef<HTMLDivElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setInterval>>();
+  const animFrameRef = useRef<number>(0);
 
-  // TTS with sentence highlighting
+  // TTS
   const tts = useTextToSpeech();
 
   // Resume reading position
@@ -80,10 +90,9 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     setHasResumed(true);
   }, [pages, hasResumed, getResumePage, pagesPerSpread, totalSpreads]);
 
-  // Content protection: disable keyboard shortcuts
+  // Content protection
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // Disable PrintScreen, Ctrl+P, Ctrl+S, Ctrl+C in reader
       if (
         e.key === "PrintScreen" ||
         (e.ctrlKey && (e.key === "p" || e.key === "s" || e.key === "c" || e.key === "u")) ||
@@ -97,7 +106,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     return () => window.removeEventListener("keydown", handler, true);
   }, []);
 
-  // Fullscreen toggle
+  // Fullscreen
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
       containerRef.current?.requestFullscreen?.().catch(() => {});
@@ -125,7 +134,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     try { localStorage.setItem(getStorageKey(bookSlug, "bookmarks"), JSON.stringify(bookmarks)); } catch {}
   }, [bookmarks, bookSlug]);
 
-  // Auto-save reading progress every 30s
+  // Auto-save progress
   useEffect(() => {
     saveTimerRef.current = setInterval(() => {
       const leftPage = getSpreadPages(currentSpread)[0];
@@ -134,13 +143,11 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     return () => { if (saveTimerRef.current) clearInterval(saveTimerRef.current); };
   }, [currentSpread, pages.length]);
 
-  // Save on page change
   useEffect(() => {
     const leftPage = getSpreadPages(currentSpread)[0];
     if (leftPage) saveProgress(leftPage.pageNumber, pages.length);
   }, [currentSpread]);
 
-  // Clamp spread when pages change
   useEffect(() => {
     if (currentSpread >= totalSpreads && totalSpreads > 0) {
       setCurrentSpread(totalSpreads - 1);
@@ -157,57 +164,69 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     [pages, pagesPerSpread]
   );
 
-  const FLIP_DURATION = 600;
+  const FLIP_DURATION = 650;
+
+  // Animate flip from a given starting progress to 1
+  const animateFlip = useCallback((direction: "next" | "prev", fromProgress = 0) => {
+    setFlipDirection(direction);
+    setIsFlipping(true);
+    const startProgress = fromProgress;
+    const start = performance.now();
+    const remaining = (1 - startProgress) * FLIP_DURATION;
+
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(elapsed / remaining, 1);
+      const eased = easeInOutCubic(t);
+      const progress = startProgress + (1 - startProgress) * eased;
+      setFlipProgress(progress);
+      if (t < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        setCurrentSpread((s) => direction === "next" ? s + 1 : s - 1);
+        setIsFlipping(false);
+        setFlipDirection(null);
+        setFlipProgress(0);
+        setIsDragging(false);
+      }
+    };
+    animFrameRef.current = requestAnimationFrame(animate);
+  }, [FLIP_DURATION]);
+
+  // Animate snap-back (from current progress to 0)
+  const animateSnapBack = useCallback(() => {
+    const startProgress = flipProgress;
+    const start = performance.now();
+    const duration = startProgress * 300; // fast snap back
+
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(elapsed / Math.max(duration, 50), 1);
+      const eased = easeInOutCubic(t);
+      setFlipProgress(startProgress * (1 - eased));
+      if (t < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        setIsFlipping(false);
+        setFlipDirection(null);
+        setFlipProgress(0);
+        setIsDragging(false);
+      }
+    };
+    animFrameRef.current = requestAnimationFrame(animate);
+  }, [flipProgress]);
 
   const goNext = useCallback(() => {
     if (currentSpread >= totalSpreads - 1 || isFlipping) return;
     setPrevSpreadIdx(currentSpread);
-    setFlipDirection("next");
-    setIsFlipping(true);
-    setFlipProgress(0);
-    // Animate progress
-    const start = performance.now();
-    const animate = (now: number) => {
-      const elapsed = now - start;
-      const t = Math.min(elapsed / FLIP_DURATION, 1);
-      // Ease-in-out cubic
-      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-      setFlipProgress(eased);
-      if (t < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setCurrentSpread((s) => s + 1);
-        setIsFlipping(false);
-        setFlipDirection(null);
-        setFlipProgress(0);
-      }
-    };
-    requestAnimationFrame(animate);
-  }, [currentSpread, totalSpreads, isFlipping]);
+    animateFlip("next", 0);
+  }, [currentSpread, totalSpreads, isFlipping, animateFlip]);
 
   const goPrev = useCallback(() => {
     if (currentSpread <= 0 || isFlipping) return;
     setPrevSpreadIdx(currentSpread);
-    setFlipDirection("prev");
-    setIsFlipping(true);
-    setFlipProgress(0);
-    const start = performance.now();
-    const animate = (now: number) => {
-      const elapsed = now - start;
-      const t = Math.min(elapsed / FLIP_DURATION, 1);
-      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-      setFlipProgress(eased);
-      if (t < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setCurrentSpread((s) => s - 1);
-        setIsFlipping(false);
-        setFlipDirection(null);
-        setFlipProgress(0);
-      }
-    };
-    requestAnimationFrame(animate);
-  }, [currentSpread, isFlipping]);
+    animateFlip("prev", 0);
+  }, [currentSpread, isFlipping, animateFlip]);
 
   const jumpToPage = useCallback((pageNumber: number) => {
     const spreadIdx = Math.floor((pageNumber - 1) / pagesPerSpread);
@@ -231,16 +250,141 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     return () => window.removeEventListener("keydown", handler);
   }, [goNext, goPrev, onClose, showCover]);
 
-  // Touch
-  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  // ===== DRAG-TO-FLIP (mouse) =====
+  const handleDragStart = useCallback((e: React.MouseEvent, side: "left" | "right") => {
+    if (isFlipping && !isDragging) return;
+    const rect = bookRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const x = e.clientX;
+    const relX = x - rect.left;
+    const cornerZone = isMobile ? rect.width * 0.25 : rect.width * 0.12;
+
+    // Check if clicking in corner zone
+    const isRightCorner = relX > rect.width - cornerZone;
+    const isLeftCorner = relX < cornerZone;
+
+    if (isRightCorner && currentSpread < totalSpreads - 1) {
+      setPrevSpreadIdx(currentSpread);
+      setFlipDirection("next");
+      setIsFlipping(true);
+      setIsDragging(true);
+      setDragStartX(x);
+      setDragCurrentX(x);
+      setFlipProgress(0);
+    } else if (isLeftCorner && currentSpread > 0) {
+      setPrevSpreadIdx(currentSpread);
+      setFlipDirection("prev");
+      setIsFlipping(true);
+      setIsDragging(true);
+      setDragStartX(x);
+      setDragCurrentX(x);
+      setFlipProgress(0);
+    }
+  }, [isFlipping, isDragging, currentSpread, totalSpreads, isMobile]);
+
+  const handleDragMove = useCallback((e: MouseEvent) => {
+    if (!isDragging || !bookRef.current) return;
+    e.preventDefault();
+    const rect = bookRef.current.getBoundingClientRect();
+    const bookWidth = rect.width;
+    const halfWidth = isMobile ? bookWidth : bookWidth / 2;
+    const dx = e.clientX - dragStartX;
+
+    let progress = 0;
+    if (flipDirection === "next") {
+      progress = Math.max(0, Math.min(1, -dx / halfWidth));
+    } else {
+      progress = Math.max(0, Math.min(1, dx / halfWidth));
+    }
+    setDragCurrentX(e.clientX);
+    setFlipProgress(progress);
+  }, [isDragging, dragStartX, flipDirection, isMobile]);
+
+  const handleDragEnd = useCallback(() => {
+    if (!isDragging) return;
+    // If dragged more than 30%, complete the flip; otherwise snap back
+    if (flipProgress > 0.3) {
+      animateFlip(flipDirection!, flipProgress);
+    } else {
+      animateSnapBack();
+    }
+    setIsDragging(false);
+  }, [isDragging, flipProgress, flipDirection, animateFlip, animateSnapBack]);
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener("mousemove", handleDragMove);
+      window.addEventListener("mouseup", handleDragEnd);
+      return () => {
+        window.removeEventListener("mousemove", handleDragMove);
+        window.removeEventListener("mouseup", handleDragEnd);
+      };
+    }
+  }, [isDragging, handleDragMove, handleDragEnd]);
+
+  // ===== TOUCH SWIPE & DRAG =====
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
+
+    const rect = bookRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const relX = touch.clientX - rect.left;
+    const cornerZone = rect.width * 0.25;
+
+    if (relX > rect.width - cornerZone && currentSpread < totalSpreads - 1) {
+      setPrevSpreadIdx(currentSpread);
+      setFlipDirection("next");
+      setIsFlipping(true);
+      setIsDragging(true);
+      setDragStartX(touch.clientX);
+      setFlipProgress(0);
+    } else if (relX < cornerZone && currentSpread > 0) {
+      setPrevSpreadIdx(currentSpread);
+      setFlipDirection("prev");
+      setIsFlipping(true);
+      setIsDragging(true);
+      setDragStartX(touch.clientX);
+      setFlipProgress(0);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !bookRef.current) return;
+    const touch = e.touches[0];
+    const rect = bookRef.current.getBoundingClientRect();
+    const halfWidth = isMobile ? rect.width : rect.width / 2;
+    const dx = touch.clientX - dragStartX;
+
+    let progress = 0;
+    if (flipDirection === "next") {
+      progress = Math.max(0, Math.min(1, -dx / halfWidth));
+    } else {
+      progress = Math.max(0, Math.min(1, dx / halfWidth));
+    }
+    setFlipProgress(progress);
+  };
+
   const handleTouchEnd = (e: React.TouchEvent) => {
+    if (isDragging) {
+      if (flipProgress > 0.25) {
+        animateFlip(flipDirection!, flipProgress);
+      } else {
+        animateSnapBack();
+      }
+      setIsDragging(false);
+      return;
+    }
+    // Fallback: simple swipe detection
     const diff = touchStartX.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 50) { diff > 0 ? goNext() : goPrev(); }
   };
 
-  // Page corner click
+  // Page corner click (non-drag)
   const handlePageClick = (e: React.MouseEvent, side: "left" | "right") => {
-    if (isMobile) return;
+    if (isMobile || isDragging) return;
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const x = e.clientX - rect.left;
     const cornerZone = rect.width * 0.15;
@@ -264,27 +408,23 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     }
   };
 
-  // TTS: read current page, auto-continue to next page
+  // TTS
   const handleTtsPlay = useCallback(() => {
     const [left, right] = getSpreadPages(currentSpread);
     const text = [left?.content, right?.content].filter(Boolean).join(" ");
     tts.speak(text, () => {
-      // Auto-continue to next page
       if (currentSpread < totalSpreads - 1) {
         setCurrentSpread((s) => s + 1);
-        // Will re-trigger TTS via effect below
       }
     });
   }, [currentSpread, getSpreadPages, tts, totalSpreads]);
 
-  // Auto-continue TTS when page changes during playback
   const ttsWasPlayingRef = useRef(false);
   useEffect(() => {
     if (tts.isPlaying && !tts.isPaused) {
       ttsWasPlayingRef.current = true;
     }
     if (ttsWasPlayingRef.current && !tts.isPlaying && !tts.isPaused) {
-      // TTS ended, check if we should auto-play on new page
       const timer = setTimeout(() => {
         if (ttsWasPlayingRef.current) {
           const [left, right] = getSpreadPages(currentSpread);
@@ -306,30 +446,24 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     }
   }, [currentSpread]);
 
-  // Stop TTS tracking when manually stopped
-  useEffect(() => {
-    if (!tts.isPlaying && !tts.isPaused) {
-      // Only reset if user manually stopped (not auto-continue)
-    }
-  }, [tts.isPlaying, tts.isPaused]);
-
   const handleTtsStop = useCallback(() => {
     ttsWasPlayingRef.current = false;
     tts.stop();
   }, [tts]);
 
+  // Cleanup animation frame on unmount
+  useEffect(() => {
+    return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
+  }, []);
+
   const [leftPage, rightPage] = getSpreadPages(currentSpread);
-  
-  // Pages for flip animation - show current + next/prev spread
-  const nextSpreadPages = getSpreadPages(currentSpread + 1);
-  const prevSpreadPages = getSpreadPages(currentSpread - 1);
-  
-  // During animation, show the spread we're coming from
+
+  // Pages for flip animation
   const flipFromPages = isFlipping ? getSpreadPages(prevSpreadIdx) : [null, null];
-  const flipToPages = isFlipping && flipDirection === "next" 
-    ? getSpreadPages(prevSpreadIdx + 1) 
-    : isFlipping && flipDirection === "prev" 
-      ? getSpreadPages(prevSpreadIdx - 1) 
+  const flipToPages = isFlipping && flipDirection === "next"
+    ? getSpreadPages(prevSpreadIdx + 1)
+    : isFlipping && flipDirection === "prev"
+      ? getSpreadPages(prevSpreadIdx - 1)
       : [null, null];
 
   // Reading progress
@@ -340,9 +474,17 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
   const navBorder = darkMode ? "hsl(0 0% 22%)" : "hsl(var(--border))";
   const navText = darkMode ? "hsl(0 0% 55%)" : "hsl(var(--muted-foreground))";
   const primaryBar = darkMode ? "hsl(36 44% 70%)" : "hsl(var(--primary))";
-  const spineShadow = darkMode ? "hsl(0 0% 0% / 0.25)" : "hsl(var(--shadow-soft) / 0.15)";
 
-  // Show cover first
+  // Book thickness calculations
+  const totalBookPages = pages.length;
+  const currentPageIndex = currentSpread * pagesPerSpread;
+  const leftThickness = Math.max(1, Math.min(8, Math.floor((currentPageIndex / totalBookPages) * 8)));
+  const rightThickness = Math.max(1, Math.min(8, Math.floor(((totalBookPages - currentPageIndex) / totalBookPages) * 8)));
+
+  // Page curl amount based on flip progress (peaks at 0.5)
+  const curlAmount = Math.sin(flipProgress * Math.PI);
+  const shadowIntensity = curlAmount * 0.4;
+
   if (showCover && pages.length > 0) {
     return <BookCover bookTitle={bookTitle} coverImage={coverImage} onOpen={() => setShowCover(false)} />;
   }
@@ -395,50 +537,90 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         />
       </div>
 
-
       {/* Book container */}
       <div
         className="flex-1 flex items-center justify-center p-4 md:p-8 lg:p-12"
         style={{ height: "calc(100vh - 3.5rem - 4.5rem)" }}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
       >
         <div
-          className="w-full max-w-5xl h-full max-h-[85vh] flex relative overflow-hidden"
-          style={{ perspective: "2000px", borderRadius: "4px" }}
+          ref={bookRef}
+          className="w-full max-w-5xl h-full max-h-[85vh] flex relative select-none"
+          style={{
+            perspective: "2500px",
+            perspectiveOrigin: "50% 50%",
+          }}
+          onMouseDown={(e) => handleDragStart(e, e.clientX > (bookRef.current?.getBoundingClientRect().left ?? 0) + (bookRef.current?.getBoundingClientRect().width ?? 0) / 2 ? "right" : "left")}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
-          {/* Book spine */}
-          {!isMobile && (
-            <div
-              className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-6 z-30 pointer-events-none"
-              style={{
-                background: `linear-gradient(to right, ${spineShadow}, ${darkMode ? "hsl(0 0% 0% / 0.35)" : "hsl(var(--shadow-soft) / 0.2)"}, ${spineShadow})`,
-              }}
-            />
-          )}
-
-          {/* === STATIC BASE PAGES (always visible underneath) === */}
-          <div className="flex w-full h-full absolute inset-0">
-            {/* Left page */}
-            <div className="flex-1 flex cursor-default" onClick={(e) => handlePageClick(e, "left")}>
-              <BookPageView
-                page={isFlipping && flipDirection === "next" ? flipFromPages[0] : isFlipping && flipDirection === "prev" ? flipToPages[0] : leftPage}
-                totalPages={pages.length}
-                side={isMobile ? "single" : "left"}
-                darkMode={darkMode}
-                fontSize={fontSize}
-                watermark={userEmail || undefined}
-                highlightSentenceIndex={!isFlipping ? tts.highlightIndex : -1}
-                sentences={!isFlipping ? tts.sentences : []}
-              />
-            </div>
-            {/* Right page */}
+          {/* Book body with 3D depth */}
+          <div
+            className="w-full h-full flex relative"
+            style={{
+              transformStyle: "preserve-3d",
+              borderRadius: "4px",
+            }}
+          >
+            {/* === LEFT PAGE STACK (thickness) === */}
             {!isMobile && (
-              <div className="flex-1 flex cursor-default" onClick={(e) => handlePageClick(e, "right")}>
+              <div
+                className="absolute top-1 bottom-1 left-0 z-0 pointer-events-none"
+                style={{
+                  width: `${leftThickness}px`,
+                  background: darkMode
+                    ? `linear-gradient(to right, hsl(0 0% 18%), hsl(0 0% 22%), hsl(0 0% 16%))`
+                    : `linear-gradient(to right, hsl(36 30% 82%), hsl(36 35% 88%), hsl(36 30% 84%))`,
+                  borderRadius: "3px 0 0 3px",
+                  boxShadow: darkMode
+                    ? `-2px 0 6px hsl(0 0% 0% / 0.3)`
+                    : `-2px 0 6px hsl(0 0% 0% / 0.1)`,
+                }}
+              />
+            )}
+
+            {/* === RIGHT PAGE STACK (thickness) === */}
+            {!isMobile && (
+              <div
+                className="absolute top-1 bottom-1 right-0 z-0 pointer-events-none"
+                style={{
+                  width: `${rightThickness}px`,
+                  background: darkMode
+                    ? `linear-gradient(to left, hsl(0 0% 18%), hsl(0 0% 22%), hsl(0 0% 16%))`
+                    : `linear-gradient(to left, hsl(36 30% 82%), hsl(36 35% 88%), hsl(36 30% 84%))`,
+                  borderRadius: "0 3px 3px 0",
+                  boxShadow: darkMode
+                    ? `2px 0 6px hsl(0 0% 0% / 0.3)`
+                    : `2px 0 6px hsl(0 0% 0% / 0.1)`,
+                }}
+              />
+            )}
+
+            {/* === BOOK SPINE === */}
+            {!isMobile && (
+              <div
+                className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
+                style={{
+                  width: "8px",
+                  background: darkMode
+                    ? `linear-gradient(to right, hsl(0 0% 5%), hsl(0 0% 12%), hsl(0 0% 5%))`
+                    : `linear-gradient(to right, hsl(0 0% 0% / 0.12), hsl(0 0% 0% / 0.03), hsl(0 0% 0% / 0.12))`,
+                  boxShadow: `0 0 12px 2px hsl(0 0% 0% / ${darkMode ? 0.4 : 0.08})`,
+                }}
+              />
+            )}
+
+            {/* === STATIC BASE PAGES === */}
+            <div className="flex w-full h-full absolute inset-0" style={{ marginLeft: !isMobile ? `${leftThickness}px` : 0, marginRight: !isMobile ? `${rightThickness}px` : 0 }}>
+              {/* Left page */}
+              <div
+                className="flex-1 flex cursor-default"
+                onClick={(e) => handlePageClick(e, "left")}
+              >
                 <BookPageView
-                  page={isFlipping && flipDirection === "next" ? flipToPages[1] : isFlipping && flipDirection === "prev" ? flipFromPages[1] : rightPage}
+                  page={isFlipping && flipDirection === "next" ? flipFromPages[0] : isFlipping && flipDirection === "prev" ? flipToPages[0] : leftPage}
                   totalPages={pages.length}
-                  side="right"
+                  side={isMobile ? "single" : "left"}
                   darkMode={darkMode}
                   fontSize={fontSize}
                   watermark={userEmail || undefined}
@@ -446,211 +628,290 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
                   sentences={!isFlipping ? tts.sentences : []}
                 />
               </div>
+              {/* Right page */}
+              {!isMobile && (
+                <div
+                  className="flex-1 flex cursor-default"
+                  onClick={(e) => handlePageClick(e, "right")}
+                >
+                  <BookPageView
+                    page={isFlipping && flipDirection === "next" ? flipToPages[1] : isFlipping && flipDirection === "prev" ? flipFromPages[1] : rightPage}
+                    totalPages={pages.length}
+                    side="right"
+                    darkMode={darkMode}
+                    fontSize={fontSize}
+                    watermark={userEmail || undefined}
+                    highlightSentenceIndex={!isFlipping ? tts.highlightIndex : -1}
+                    sentences={!isFlipping ? tts.sentences : []}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* === FLIPPING PAGE (3D with curl) — NEXT on Desktop === */}
+            {isFlipping && flipDirection === "next" && !isMobile && (
+              <>
+                <div
+                  className="absolute top-0 bottom-0 right-0 z-20 overflow-visible"
+                  style={{
+                    width: "50%",
+                    transformOrigin: "left center",
+                    transform: `rotateY(${-180 * flipProgress}deg)`,
+                    transformStyle: "preserve-3d",
+                    transition: "none",
+                    filter: `drop-shadow(${-4 * curlAmount}px ${2 * curlAmount}px ${12 * curlAmount}px hsl(0 0% 0% / ${shadowIntensity}))`,
+                    marginRight: `${rightThickness}px`,
+                  }}
+                >
+                  {/* Front face */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backfaceVisibility: "hidden",
+                      // Page curl via subtle skewY
+                      transform: `skewY(${curlAmount * 1.5}deg)`,
+                    }}
+                  >
+                    <BookPageView
+                      page={flipFromPages[1]}
+                      totalPages={pages.length}
+                      side="right"
+                      darkMode={darkMode}
+                      fontSize={fontSize}
+                      watermark={userEmail || undefined}
+                    />
+                  </div>
+                  {/* Back face */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backfaceVisibility: "hidden",
+                      transform: `rotateY(180deg) skewY(${-curlAmount * 1.5}deg)`,
+                    }}
+                  >
+                    <BookPageView
+                      page={flipToPages[0]}
+                      totalPages={pages.length}
+                      side="left"
+                      darkMode={darkMode}
+                      fontSize={fontSize}
+                      watermark={userEmail || undefined}
+                    />
+                    {/* Paper texture gradient on back */}
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        background: `linear-gradient(to left, hsl(0 0% 0% / ${0.06 * curlAmount}), transparent 30%)`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Shadow on right page underneath */}
+                <div
+                  className="absolute top-0 bottom-0 z-15 pointer-events-none"
+                  style={{
+                    left: "50%",
+                    width: "50%",
+                    background: `linear-gradient(to right, hsl(0 0% 0% / ${shadowIntensity * 0.6}), transparent 50%)`,
+                    opacity: flipProgress < 0.5 ? 1 : Math.max(0, 1 - (flipProgress - 0.5) * 2.5),
+                  }}
+                />
+                {/* Shadow cast onto left side */}
+                <div
+                  className="absolute top-0 bottom-0 z-15 pointer-events-none"
+                  style={{
+                    right: "50%",
+                    width: "50%",
+                    background: `linear-gradient(to left, hsl(0 0% 0% / ${shadowIntensity * 0.3}), transparent 35%)`,
+                    opacity: flipProgress > 0.5 ? (flipProgress - 0.5) * 2 : 0,
+                  }}
+                />
+                {/* Page edge highlight (simulates light on lifting page) */}
+                <div
+                  className="absolute top-0 bottom-0 z-25 pointer-events-none"
+                  style={{
+                    left: `calc(50% - ${2 + curlAmount * 4}px)`,
+                    width: `${2 + curlAmount * 4}px`,
+                    background: darkMode
+                      ? `linear-gradient(to right, transparent, hsl(36 20% 30% / ${curlAmount * 0.5}), transparent)`
+                      : `linear-gradient(to right, transparent, hsl(36 40% 95% / ${curlAmount * 0.7}), transparent)`,
+                  }}
+                />
+              </>
+            )}
+
+            {/* === FLIPPING PAGE — PREV on Desktop === */}
+            {isFlipping && flipDirection === "prev" && !isMobile && (
+              <>
+                <div
+                  className="absolute top-0 bottom-0 left-0 z-20 overflow-visible"
+                  style={{
+                    width: "50%",
+                    transformOrigin: "right center",
+                    transform: `rotateY(${180 * flipProgress}deg)`,
+                    transformStyle: "preserve-3d",
+                    transition: "none",
+                    filter: `drop-shadow(${4 * curlAmount}px ${2 * curlAmount}px ${12 * curlAmount}px hsl(0 0% 0% / ${shadowIntensity}))`,
+                    marginLeft: `${leftThickness}px`,
+                  }}
+                >
+                  {/* Front face */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backfaceVisibility: "hidden",
+                      transform: `skewY(${-curlAmount * 1.5}deg)`,
+                    }}
+                  >
+                    <BookPageView
+                      page={flipFromPages[0]}
+                      totalPages={pages.length}
+                      side="left"
+                      darkMode={darkMode}
+                      fontSize={fontSize}
+                      watermark={userEmail || undefined}
+                    />
+                  </div>
+                  {/* Back face */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backfaceVisibility: "hidden",
+                      transform: `rotateY(180deg) skewY(${curlAmount * 1.5}deg)`,
+                    }}
+                  >
+                    <BookPageView
+                      page={flipToPages[1]}
+                      totalPages={pages.length}
+                      side="right"
+                      darkMode={darkMode}
+                      fontSize={fontSize}
+                      watermark={userEmail || undefined}
+                    />
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        background: `linear-gradient(to right, hsl(0 0% 0% / ${0.06 * curlAmount}), transparent 30%)`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Shadow on left page underneath */}
+                <div
+                  className="absolute top-0 bottom-0 z-15 pointer-events-none"
+                  style={{
+                    right: "50%",
+                    width: "50%",
+                    background: `linear-gradient(to left, hsl(0 0% 0% / ${shadowIntensity * 0.6}), transparent 50%)`,
+                    opacity: flipProgress < 0.5 ? 1 : Math.max(0, 1 - (flipProgress - 0.5) * 2.5),
+                  }}
+                />
+                {/* Page edge highlight */}
+                <div
+                  className="absolute top-0 bottom-0 z-25 pointer-events-none"
+                  style={{
+                    right: `calc(50% - ${2 + curlAmount * 4}px)`,
+                    width: `${2 + curlAmount * 4}px`,
+                    background: darkMode
+                      ? `linear-gradient(to left, transparent, hsl(36 20% 30% / ${curlAmount * 0.5}), transparent)`
+                      : `linear-gradient(to left, transparent, hsl(36 40% 95% / ${curlAmount * 0.7}), transparent)`,
+                  }}
+                />
+              </>
+            )}
+
+            {/* === MOBILE FLIP === */}
+            {isFlipping && isMobile && (
+              <>
+                <div
+                  className="absolute inset-0 z-20"
+                  style={{
+                    transformOrigin: flipDirection === "next" ? "left center" : "right center",
+                    transform: `rotateY(${flipDirection === "next" ? -180 * flipProgress : 180 * flipProgress}deg)`,
+                    transformStyle: "preserve-3d",
+                    transition: "none",
+                    filter: `drop-shadow(0 ${4 * curlAmount}px ${16 * curlAmount}px hsl(0 0% 0% / ${shadowIntensity}))`,
+                  }}
+                >
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backfaceVisibility: "hidden",
+                      transform: `skewY(${(flipDirection === "next" ? 1 : -1) * curlAmount * 1}deg)`,
+                    }}
+                  >
+                    <BookPageView
+                      page={flipFromPages[0]}
+                      totalPages={pages.length}
+                      side="single"
+                      darkMode={darkMode}
+                      fontSize={fontSize}
+                      watermark={userEmail || undefined}
+                    />
+                  </div>
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backfaceVisibility: "hidden",
+                      transform: `rotateY(180deg) skewY(${(flipDirection === "next" ? -1 : 1) * curlAmount * 1}deg)`,
+                    }}
+                  >
+                    <BookPageView
+                      page={flipToPages[0]}
+                      totalPages={pages.length}
+                      side="single"
+                      darkMode={darkMode}
+                      fontSize={fontSize}
+                      watermark={userEmail || undefined}
+                    />
+                  </div>
+                </div>
+                {/* Shadow overlay */}
+                <div
+                  className="absolute inset-0 z-15 pointer-events-none"
+                  style={{
+                    background: `hsl(0 0% 0% / ${shadowIntensity * 0.3})`,
+                  }}
+                />
+              </>
+            )}
+
+            {/* Corner fold indicators with paper texture */}
+            {!isMobile && !isFlipping && currentSpread < totalSpreads - 1 && (
+              <div
+                className="absolute bottom-0 right-0 z-20 cursor-grab group"
+                style={{ width: "40px", height: "40px", marginRight: `${rightThickness}px` }}
+                title="Drag to turn page"
+              >
+                <div
+                  className="w-full h-full transition-all duration-300 group-hover:scale-[1.6] absolute bottom-0 right-0 origin-bottom-right"
+                  style={{
+                    background: `linear-gradient(135deg, transparent 38%, ${darkMode ? "hsl(36 20% 28%)" : "hsl(36 30% 85%)"} 38%, ${darkMode ? "hsl(36 15% 32%)" : "hsl(36 25% 90%)"})`,
+                    borderRadius: "0 0 4px 0",
+                    boxShadow: `-3px -3px 8px hsl(0 0% 0% / 0.12), inset 1px 1px 2px hsl(0 0% 100% / 0.15)`,
+                  }}
+                />
+              </div>
+            )}
+            {!isMobile && !isFlipping && currentSpread > 0 && (
+              <div
+                className="absolute bottom-0 left-0 z-20 cursor-grab group"
+                style={{ width: "40px", height: "40px", marginLeft: `${leftThickness}px` }}
+                title="Drag to turn back"
+              >
+                <div
+                  className="w-full h-full transition-all duration-300 group-hover:scale-[1.6] absolute bottom-0 left-0 origin-bottom-left"
+                  style={{
+                    background: `linear-gradient(-135deg, transparent 38%, ${darkMode ? "hsl(36 20% 28%)" : "hsl(36 30% 85%)"} 38%, ${darkMode ? "hsl(36 15% 32%)" : "hsl(36 25% 90%)"})`,
+                    borderRadius: "0 0 0 4px",
+                    boxShadow: `3px -3px 8px hsl(0 0% 0% / 0.12), inset -1px 1px 2px hsl(0 0% 100% / 0.15)`,
+                  }}
+                />
+              </div>
             )}
           </div>
-
-          {/* === FLIPPING PAGE (3D animated) === */}
-          {isFlipping && flipDirection === "next" && !isMobile && (
-            <>
-              {/* The right page lifting and flipping to become new left page */}
-              <div
-                className="absolute top-0 bottom-0 right-0 z-20 overflow-hidden"
-                style={{
-                  width: "50%",
-                  transformOrigin: "left center",
-                  transform: `rotateY(${-180 * flipProgress}deg)`,
-                  transformStyle: "preserve-3d",
-                  transition: "none",
-                }}
-              >
-                {/* Front face: current right page */}
-                <div
-                  className="absolute inset-0"
-                  style={{ backfaceVisibility: "hidden" }}
-                >
-                  <BookPageView
-                    page={flipFromPages[1]}
-                    totalPages={pages.length}
-                    side="right"
-                    darkMode={darkMode}
-                    fontSize={fontSize}
-                    watermark={userEmail || undefined}
-                  />
-                </div>
-                {/* Back face: next left page */}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backfaceVisibility: "hidden",
-                    transform: "rotateY(180deg)",
-                  }}
-                >
-                  <BookPageView
-                    page={flipToPages[0]}
-                    totalPages={pages.length}
-                    side="left"
-                    darkMode={darkMode}
-                    fontSize={fontSize}
-                    watermark={userEmail || undefined}
-                  />
-                </div>
-              </div>
-              {/* Shadow on the page underneath */}
-              <div
-                className="absolute top-0 bottom-0 z-15 pointer-events-none"
-                style={{
-                  left: "50%",
-                  width: "50%",
-                  background: `linear-gradient(to right, hsl(0 0% 0% / ${0.3 * Math.sin(flipProgress * Math.PI)}), transparent 60%)`,
-                  opacity: flipProgress < 0.5 ? 1 : 1 - (flipProgress - 0.5) * 2,
-                }}
-              />
-              {/* Shadow from the flipping page onto left side */}
-              <div
-                className="absolute top-0 bottom-0 z-15 pointer-events-none"
-                style={{
-                  right: "50%",
-                  width: "50%",
-                  background: `linear-gradient(to left, hsl(0 0% 0% / ${0.15 * Math.sin(flipProgress * Math.PI)}), transparent 40%)`,
-                }}
-              />
-            </>
-          )}
-
-          {isFlipping && flipDirection === "prev" && !isMobile && (
-            <>
-              {/* The left page flipping back from left to right */}
-              <div
-                className="absolute top-0 bottom-0 left-0 z-20 overflow-hidden"
-                style={{
-                  width: "50%",
-                  transformOrigin: "right center",
-                  transform: `rotateY(${180 * flipProgress}deg)`,
-                  transformStyle: "preserve-3d",
-                  transition: "none",
-                }}
-              >
-                {/* Front face: current left page */}
-                <div
-                  className="absolute inset-0"
-                  style={{ backfaceVisibility: "hidden" }}
-                >
-                  <BookPageView
-                    page={flipFromPages[0]}
-                    totalPages={pages.length}
-                    side="left"
-                    darkMode={darkMode}
-                    fontSize={fontSize}
-                    watermark={userEmail || undefined}
-                  />
-                </div>
-                {/* Back face: prev right page */}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backfaceVisibility: "hidden",
-                    transform: "rotateY(180deg)",
-                  }}
-                >
-                  <BookPageView
-                    page={flipToPages[1]}
-                    totalPages={pages.length}
-                    side="right"
-                    darkMode={darkMode}
-                    fontSize={fontSize}
-                    watermark={userEmail || undefined}
-                  />
-                </div>
-              </div>
-              {/* Shadow */}
-              <div
-                className="absolute top-0 bottom-0 z-15 pointer-events-none"
-                style={{
-                  right: "50%",
-                  width: "50%",
-                  background: `linear-gradient(to left, hsl(0 0% 0% / ${0.3 * Math.sin(flipProgress * Math.PI)}), transparent 60%)`,
-                  opacity: flipProgress < 0.5 ? 1 : 1 - (flipProgress - 0.5) * 2,
-                }}
-              />
-            </>
-          )}
-
-          {/* Mobile: single page flip */}
-          {isFlipping && isMobile && (
-            <>
-              <div
-                className="absolute inset-0 z-20"
-                style={{
-                  transformOrigin: flipDirection === "next" ? "left center" : "right center",
-                  transform: `rotateY(${flipDirection === "next" ? -180 * flipProgress : 180 * flipProgress}deg)`,
-                  transformStyle: "preserve-3d",
-                  transition: "none",
-                }}
-              >
-                <div className="absolute inset-0" style={{ backfaceVisibility: "hidden" }}>
-                  <BookPageView
-                    page={flipFromPages[0]}
-                    totalPages={pages.length}
-                    side="single"
-                    darkMode={darkMode}
-                    fontSize={fontSize}
-                    watermark={userEmail || undefined}
-                  />
-                </div>
-                <div className="absolute inset-0" style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-                  <BookPageView
-                    page={flipToPages[0]}
-                    totalPages={pages.length}
-                    side="single"
-                    darkMode={darkMode}
-                    fontSize={fontSize}
-                    watermark={userEmail || undefined}
-                  />
-                </div>
-              </div>
-              {/* Shadow */}
-              <div
-                className="absolute inset-0 z-15 pointer-events-none"
-                style={{
-                  background: `hsl(0 0% 0% / ${0.15 * Math.sin(flipProgress * Math.PI)})`,
-                }}
-              />
-            </>
-          )}
-
-          {/* Corner fold indicators */}
-          {!isMobile && !isFlipping && currentSpread < totalSpreads - 1 && (
-            <div
-              className="absolute bottom-0 right-0 w-10 h-10 z-20 cursor-pointer group"
-              onClick={goNext}
-              title="Turn page"
-            >
-              <div
-                className="w-full h-full transition-all duration-200 group-hover:w-14 group-hover:h-14 absolute bottom-0 right-0"
-                style={{
-                  background: `linear-gradient(135deg, transparent 40%, ${darkMode ? "hsl(36 25% 25%)" : "hsl(36 30% 82%)"} 40%, ${darkMode ? "hsl(36 20% 30%)" : "hsl(36 25% 88%)"})`,
-                  borderRadius: "0 0 4px 0",
-                  boxShadow: `-2px -2px 4px hsl(0 0% 0% / 0.1)`,
-                }}
-              />
-            </div>
-          )}
-          {!isMobile && !isFlipping && currentSpread > 0 && (
-            <div
-              className="absolute bottom-0 left-0 w-10 h-10 z-20 cursor-pointer group"
-              onClick={goPrev}
-              title="Previous page"
-            >
-              <div
-                className="w-full h-full transition-all duration-200 group-hover:w-14 group-hover:h-14 absolute bottom-0 left-0"
-                style={{
-                  background: `linear-gradient(-135deg, transparent 40%, ${darkMode ? "hsl(36 25% 25%)" : "hsl(36 30% 82%)"} 40%, ${darkMode ? "hsl(36 20% 30%)" : "hsl(36 25% 88%)"})`,
-                  borderRadius: "0 0 0 4px",
-                  boxShadow: `2px -2px 4px hsl(0 0% 0% / 0.1)`,
-                }}
-              />
-            </div>
-          )}
         </div>
       </div>
 
