@@ -43,6 +43,7 @@ import ProductsManager from "./pages/admin/ProductsManager";
 import ProductDetail from "./pages/ProductDetail";
 import ReadBook from "./pages/ReadBook";
 import Newsletter from "./pages/Newsletter";
+import SubscribersManager from "./pages/admin/SubscribersManager";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -103,6 +104,7 @@ const App = () => (
               <Route path="media" element={<MediaLibrary />} />
               <Route path="seo" element={<SEOSettings />} />
               <Route path="products" element={<ProductsManager />} />
+               <Route path="subscribers" element={<SubscribersManager />} />
               <Route path="settings" element={<Settings />} />
             </Route>
  
