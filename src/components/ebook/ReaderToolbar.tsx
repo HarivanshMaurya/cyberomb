@@ -157,7 +157,7 @@ function LanguageDropdown({
               <span>Original (English)</span>
             </button>
           )}
-          {LANGUAGES.map((lang) => (
+          {languages.map((lang) => (
             <button
               key={lang.code}
               onClick={() => { onTranslate(lang.code); setOpen(false); }}
