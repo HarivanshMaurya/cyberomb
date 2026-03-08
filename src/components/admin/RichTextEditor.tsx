@@ -36,7 +36,7 @@ import {
   Heading2,
   Heading3,
   Link as LinkIcon,
-  LinkOff,
+  Link2Off,
   Image as ImageIcon,
   Table as TableIcon,
   Undo,
