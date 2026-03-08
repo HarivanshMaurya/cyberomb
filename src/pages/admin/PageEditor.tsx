@@ -105,6 +105,8 @@ export default function PageEditor() {
     );
   }
 
+  const deviceWidths = { desktop: '100%', tablet: '768px', mobile: '375px' };
+
   // Preview mode
   if (showPreview && editorMode === 'builder') {
     return (
@@ -117,25 +119,44 @@ export default function PageEditor() {
               <p className="text-sm text-muted-foreground">This is how your page will look</p>
             </div>
           </div>
-          <Button variant="outline" onClick={() => setShowPreview(false)} className="gap-2">
-            <EyeOff className="h-4 w-4" />
-            Back to Editor
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Responsive toggle */}
+            <div className="flex items-center bg-muted rounded-lg p-1 gap-0.5">
+              <Button type="button" variant={previewDevice === 'desktop' ? 'default' : 'ghost'} size="icon" className="h-8 w-8" onClick={() => setPreviewDevice('desktop')} title="Desktop">
+                <Monitor className="h-4 w-4" />
+              </Button>
+              <Button type="button" variant={previewDevice === 'tablet' ? 'default' : 'ghost'} size="icon" className="h-8 w-8" onClick={() => setPreviewDevice('tablet')} title="Tablet">
+                <Tablet className="h-4 w-4" />
+              </Button>
+              <Button type="button" variant={previewDevice === 'mobile' ? 'default' : 'ghost'} size="icon" className="h-8 w-8" onClick={() => setPreviewDevice('mobile')} title="Mobile">
+                <Smartphone className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button variant="outline" onClick={() => setShowPreview(false)} className="gap-2">
+              <EyeOff className="h-4 w-4" />
+              Back to Editor
+            </Button>
+          </div>
         </div>
 
-        <div className="border border-border rounded-xl overflow-hidden bg-background shadow-lg">
-          {/* Simulated page header */}
-          <div className="border-b border-border px-6 py-4">
-            <h1 className="text-3xl md:text-4xl font-serif font-bold">{formData.title || 'Untitled Page'}</h1>
-          </div>
-          {/* Rendered blocks */}
-          {sections.length > 0 ? (
-            <BlockRenderer blocks={sections} />
-          ) : (
-            <div className="text-center py-20 text-muted-foreground">
-              <p>No blocks to preview. Add some blocks first!</p>
+        <div className="flex justify-center">
+          <div
+            className="border border-border rounded-xl overflow-hidden bg-background shadow-lg transition-all duration-300"
+            style={{ width: deviceWidths[previewDevice], maxWidth: '100%' }}
+          >
+            {/* Simulated page header */}
+            <div className="border-b border-border px-6 py-4">
+              <h1 className="text-3xl md:text-4xl font-serif font-bold">{formData.title || 'Untitled Page'}</h1>
             </div>
-          )}
+            {/* Rendered blocks */}
+            {sections.length > 0 ? (
+              <BlockRenderer blocks={sections} />
+            ) : (
+              <div className="text-center py-20 text-muted-foreground">
+                <p>No blocks to preview. Add some blocks first!</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
