@@ -43,6 +43,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
   const [isTranslated, setIsTranslated] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [translatedChapters, setTranslatedChapters] = useState<Chapter[] | null>(null);
+  const [translationProgress, setTranslationProgress] = useState({ current: 0, total: 0 });
   const activeChapters = isTranslated && translatedChapters ? translatedChapters : chapters;
 
   // Persisted preferences
@@ -457,7 +458,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     tts.stop();
   }, [tts]);
 
-  // Translation handler
+  // Translation handler - chapter by chapter with progress
   const handleToggleTranslate = useCallback(async () => {
     if (isTranslated) {
       setIsTranslated(false);
@@ -468,20 +469,29 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
       return;
     }
     setIsTranslating(true);
+    setTranslationProgress({ current: 0, total: chapters.length });
+    
     try {
-      const { data, error } = await supabase.functions.invoke('translate-ebook', {
-        body: { chapters, targetLang: 'hi' },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setTranslatedChapters(data.chapters);
+      const translated: Chapter[] = [];
+      for (let i = 0; i < chapters.length; i++) {
+        setTranslationProgress({ current: i, total: chapters.length });
+        const { data, error } = await supabase.functions.invoke('translate-ebook', {
+          body: { chapters: [chapters[i]], targetLang: 'hi' },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        translated.push(data.chapters?.[0] || chapters[i]);
+      }
+      setTranslationProgress({ current: chapters.length, total: chapters.length });
+      setTranslatedChapters(translated);
       setIsTranslated(true);
-      toast({ title: 'अनुवाद पूरा हुआ', description: 'पुस्तक हिंदी में अनुवादित हो गई है' });
+      toast({ title: 'अनुवाद पूरा हुआ ✅', description: `${chapters.length} अध्याय हिंदी में अनुवादित हो गए` });
     } catch (err: any) {
       console.error('Translation error:', err);
       toast({ title: 'Translation Failed', description: err.message || 'Could not translate', variant: 'destructive' });
     } finally {
       setIsTranslating(false);
+      setTranslationProgress({ current: 0, total: 0 });
     }
   }, [isTranslated, translatedChapters, chapters]);
 
@@ -566,7 +576,58 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         onToggleTranslate={handleToggleTranslate}
       />
 
-      {/* Reading progress bar */}
+      {/* Translation progress overlay */}
+      {isTranslating && (
+        <div className="absolute inset-0 z-[60] flex items-center justify-center" style={{ background: darkMode ? "hsla(0,0%,5%,0.92)" : "hsla(0,0%,100%,0.92)", backdropFilter: "blur(8px)" }}>
+          <div className="w-80 max-w-[90vw] space-y-5 text-center">
+            <div className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: darkMode ? "hsl(36 44% 70% / 0.12)" : "hsl(var(--primary) / 0.1)" }}>
+              <svg className="w-7 h-7 animate-spin" style={{ color: darkMode ? "hsl(36 44% 70%)" : "hsl(var(--primary))" }} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" /></svg>
+            </div>
+            <div>
+              <p className="text-lg font-serif font-bold" style={{ color: darkMode ? "hsl(36 44% 92%)" : "hsl(var(--foreground))" }}>
+                हिंदी में अनुवाद हो रहा है...
+              </p>
+              <p className="text-sm mt-1" style={{ color: darkMode ? "hsl(0 0% 55%)" : "hsl(var(--muted-foreground))" }}>
+                Translating to Hindi
+              </p>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-medium" style={{ color: darkMode ? "hsl(36 44% 75%)" : "hsl(var(--foreground))" }}>
+                <span>Chapter {translationProgress.current + 1} of {translationProgress.total}</span>
+                <span>{translationProgress.total > 0 ? Math.round((translationProgress.current / translationProgress.total) * 100) : 0}%</span>
+              </div>
+              <div className="h-3 rounded-full overflow-hidden" style={{ background: darkMode ? "hsl(0 0% 18%)" : "hsl(var(--muted))" }}>
+                <div
+                  className="h-full rounded-full transition-all duration-500 ease-out"
+                  style={{
+                    width: `${translationProgress.total > 0 ? (translationProgress.current / translationProgress.total) * 100 : 0}%`,
+                    background: darkMode
+                      ? "linear-gradient(90deg, hsl(36 44% 55%), hsl(36 60% 65%))"
+                      : "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))",
+                  }}
+                />
+              </div>
+              <div className="flex gap-1 justify-center mt-3">
+                {Array.from({ length: translationProgress.total }, (_, i) => (
+                  <div
+                    key={i}
+                    className="w-2 h-2 rounded-full transition-all duration-300"
+                    style={{
+                      background: i < translationProgress.current
+                        ? darkMode ? "hsl(36 44% 65%)" : "hsl(var(--primary))"
+                        : i === translationProgress.current
+                        ? darkMode ? "hsl(36 60% 75%)" : "hsl(var(--primary) / 0.5)"
+                        : darkMode ? "hsl(0 0% 22%)" : "hsl(var(--muted))",
+                      transform: i === translationProgress.current ? "scale(1.4)" : "scale(1)",
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="h-[2px] w-full" style={{ background: darkMode ? "hsl(0 0% 12%)" : "hsl(var(--muted))" }}>
         <div
           className="h-full transition-all duration-500 ease-out"
