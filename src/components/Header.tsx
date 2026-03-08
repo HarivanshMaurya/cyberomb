@@ -29,6 +29,10 @@ const Header = () => {
     const shouldBeDark = savedTheme === "dark" || (!savedTheme && prefersDark);
     setIsDark(shouldBeDark);
     if (shouldBeDark) document.documentElement.classList.add("dark");
+
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleTheme = () => {
