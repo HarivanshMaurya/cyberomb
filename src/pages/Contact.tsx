@@ -4,20 +4,50 @@ import { Mail, MapPin, Phone, Send, MessageSquare, ArrowRight, ChevronDown } fro
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
+import { usePageSection } from "@/hooks/usePageSections";
+import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
+  const { data: pageSection } = usePageSection('contact');
+  const content = pageSection?.content as Record<string, any> | null;
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     subject: "",
     message: "",
   });
+  const [submitting, setSubmitting] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Message sent! We'll get back to you soon.");
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from('contact_messages').insert({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+      });
+      if (error) throw error;
+
+      // Try to send email notification via edge function
+      try {
+        await supabase.functions.invoke('send-contact-email', {
+          body: formData,
+        });
+      } catch {
+        // Email notification is optional
+      }
+
+      toast.success("Message sent! We'll get back to you soon.");
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (err: any) {
+      toast.error("Failed to send message. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -25,16 +55,17 @@ const Contact = () => {
   };
 
   const contactInfo = [
-    { icon: Mail, title: "Email", value: "hello@cyberom.blog", sub: "We'll respond within 24 hours", color: "text-[#EA4335]", bg: "bg-[#EA4335]/10" },
-    { icon: MapPin, title: "Location", value: "India", sub: "Remote-first team", color: "text-accent", bg: "bg-accent/10" },
-    { icon: Phone, title: "Phone", value: "+91 98765 43210", sub: "Mon-Fri, 9am-6pm IST", color: "text-[#34A853]", bg: "bg-[#34A853]/10" },
+    { icon: Mail, title: "Email", value: content?.email || "hello@cyberom.blog", sub: content?.email_sub || "We'll respond within 24 hours", color: "text-[#EA4335]", bg: "bg-[#EA4335]/10" },
+    { icon: MapPin, title: "Location", value: content?.location || "India", sub: content?.location_sub || "Remote-first team", color: "text-accent", bg: "bg-accent/10" },
+    { icon: Phone, title: "Phone", value: content?.phone || "+91 98765 43210", sub: content?.phone_sub || "Mon-Fri, 9am-6pm IST", color: "text-[#34A853]", bg: "bg-[#34A853]/10" },
   ];
 
-  const faqs = [
+  const defaultFaqs = [
     { q: "Can I contribute to Cyberom?", a: "Yes! We welcome guest contributions. Please use the form to submit your pitch or article idea." },
     { q: "How do I advertise with you?", a: "For advertising inquiries, email us with details about your brand and goals." },
     { q: "Can I republish your content?", a: "Please contact us for permissions and licensing. We're generally open to republishing with proper attribution." },
   ];
+  const faqs = content?.faqs?.length ? content.faqs : defaultFaqs;
 
   return (
     <div className="min-h-screen bg-background animate-fade-in">
@@ -55,15 +86,17 @@ const Contact = () => {
           <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border/60 mb-8 animate-slide-down">
               <MessageSquare className="w-3.5 h-3.5 text-accent" />
-              <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Contact</span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                {content?.hero_badge || 'Contact'}
+              </span>
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] mb-6 animate-slide-down font-serif">
-              Get in Touch
+              {pageSection?.title || 'Get in Touch'}
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto animate-slide-up stagger-1">
-              Have a question, suggestion, or just want to say hello? We'd love to hear from you.
+              {pageSection?.subtitle || "Have a question, suggestion, or just want to say hello? We'd love to hear from you."}
             </p>
           </div>
         </section>
@@ -99,7 +132,7 @@ const Contact = () => {
                     <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
                       <Send className="w-4.5 h-4.5 text-accent" />
                     </div>
-                    <h2 className="text-2xl font-bold font-serif">Send a Message</h2>
+                    <h2 className="text-2xl font-bold font-serif">{content?.form_title || 'Send a Message'}</h2>
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-5">
@@ -159,9 +192,10 @@ const Contact = () => {
                     </div>
                     <Button
                       type="submit"
+                      disabled={submitting}
                       className="w-full py-6 rounded-2xl text-base font-semibold bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
                     >
-                      Send Message
+                      {submitting ? 'Sending...' : (content?.button_text || 'Send Message')}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </form>
@@ -176,11 +210,11 @@ const Contact = () => {
                   <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
                     <MessageSquare className="w-4.5 h-4.5 text-accent" />
                   </div>
-                  <h2 className="text-2xl font-bold font-serif">FAQ</h2>
+                  <h2 className="text-2xl font-bold font-serif">{content?.faq_title || 'FAQ'}</h2>
                 </div>
 
                 <div className="space-y-3">
-                  {faqs.map((faq, i) => (
+                  {faqs.map((faq: any, i: number) => (
                     <div
                       key={i}
                       className="rounded-2xl bg-card border border-border/40 overflow-hidden hover:border-accent/20 transition-colors duration-300"
