@@ -8,11 +8,13 @@ import { useMedia } from '@/hooks/useMedia';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRealtimeInvalidation } from '@/hooks/useRealtimeQuery';
 import {
   Newspaper, FileText, Image, Globe, Mail, Users, BookOpen,
   ShoppingCart, MessageSquare, TrendingUp, Clock, Plus,
   ArrowUpRight, Activity, Eye, Heart, BarChart3, Zap,
   CalendarDays, Sparkles, ExternalLink, PenLine, Settings,
+  Radio,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
@@ -71,6 +73,14 @@ export default function AdminDashboard() {
     },
   });
 
+  // Real-time subscriptions — auto-invalidate on DB changes
+  useRealtimeInvalidation('articles', ['dash-articles']);
+  useRealtimeInvalidation('newsletter_subscribers', ['dash-subscribers']);
+  useRealtimeInvalidation('contact_messages', ['dash-contacts']);
+  useRealtimeInvalidation('products', ['dash-products']);
+  useRealtimeInvalidation('wellness_articles', ['dash-wellness']);
+  useRealtimeInvalidation('profiles', ['dash-profiles']);
+
   const publishedArticles = articles?.filter(a => a.status === 'published') ?? [];
   const draftArticles = articles?.filter(a => a.status === 'draft') ?? [];
   const unreadMessages = contactMessages?.filter(m => !m.is_read) ?? [];
@@ -100,10 +110,10 @@ export default function AdminDashboard() {
   const recentWellness = wellnessArticles?.slice(0, 3) ?? [];
 
   const quickActions = [
-    { label: 'New Article', icon: PenLine, href: '/admin/articles/new', color: 'bg-primary/10 text-primary' },
-    { label: 'Add Product', icon: ShoppingCart, href: '/admin/products', color: 'bg-accent/20 text-accent-foreground' },
-    { label: 'Media Library', icon: Image, href: '/admin/media', color: 'bg-primary/10 text-primary' },
-    { label: 'Site Settings', icon: Settings, href: '/admin/site-settings', color: 'bg-muted text-muted-foreground' },
+    { label: 'New Article', icon: PenLine, href: '/admin/articles/new' },
+    { label: 'Add Product', icon: ShoppingCart, href: '/admin/products' },
+    { label: 'Media Library', icon: Image, href: '/admin/media' },
+    { label: 'Site Settings', icon: Settings, href: '/admin/site-settings' },
   ];
 
   return (
@@ -121,9 +131,15 @@ export default function AdminDashboard() {
               <p className="text-muted-foreground mt-1">
                 Here's what's happening with your site today
               </p>
-              <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-                <CalendarDays className="h-4 w-4" />
-                {new Date().toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+              <div className="flex items-center gap-4 mt-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <CalendarDays className="h-4 w-4" />
+                  {new Date().toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                </div>
+                <div className="flex items-center gap-1.5 text-xs font-medium text-green-600">
+                  <Radio className="h-3 w-3 animate-pulse" />
+                  Live Updates
+                </div>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
