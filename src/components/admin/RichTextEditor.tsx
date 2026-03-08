@@ -482,7 +482,12 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
           [&_.ProseMirror_pre]:bg-muted [&_.ProseMirror_pre]:rounded-lg [&_.ProseMirror_pre]:p-4 [&_.ProseMirror_pre]:font-mono [&_.ProseMirror_pre]:text-sm
           [&_.ProseMirror_hr]:border-border
           [&_.ProseMirror_img]:rounded-lg [&_.ProseMirror_img]:max-w-full
-          [&_iframe]:rounded-lg [&_iframe]:max-w-full"
+          [&_iframe]:rounded-lg [&_iframe]:max-w-full
+          [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:my-2
+          [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:my-2
+          [&_.ProseMirror_li]:my-0.5
+          [&_.ProseMirror_ul_ul]:list-[circle] [&_.ProseMirror_ul_ul_ul]:list-[square]
+          [&_.ProseMirror_li_p]:my-0"
       />
 
       {/* Footer: word/char count */}
