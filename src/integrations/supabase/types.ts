@@ -411,6 +411,7 @@ export type Database = {
           sort_order: number
           table_of_contents: Json | null
           title: string
+          translations: Json | null
           updated_at: string
         }
         Insert: {
@@ -431,6 +432,7 @@ export type Database = {
           sort_order?: number
           table_of_contents?: Json | null
           title: string
+          translations?: Json | null
           updated_at?: string
         }
         Update: {
@@ -451,6 +453,7 @@ export type Database = {
           sort_order?: number
           table_of_contents?: Json | null
           title?: string
+          translations?: Json | null
           updated_at?: string
         }
         Relationships: []
