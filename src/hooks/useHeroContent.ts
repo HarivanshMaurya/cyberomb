@@ -2,17 +2,20 @@
  import { supabase } from '@/integrations/supabase/client';
  import { toast } from '@/hooks/use-toast';
  
- export interface HeroContent {
-   id: string;
-   title: string;
-   subtitle: string;
-   background_image: string;
-   button_text: string;
-   button_link: string;
-   is_active: boolean;
-   created_at: string;
-   updated_at: string;
- }
+export interface HeroContent {
+  id: string;
+  title: string;
+  subtitle: string;
+  background_image: string;
+  button_text: string;
+  button_link: string;
+  instagram_url: string;
+  facebook_url: string;
+  linkedin_url: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
  
  export function useHeroContent() {
    return useQuery({

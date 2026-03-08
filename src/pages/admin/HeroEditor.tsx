@@ -11,23 +11,29 @@
    const { data: hero, isLoading } = useHeroContent();
    const updateHero = useUpdateHeroContent();
  
-   const [formData, setFormData] = useState({
-     title: '',
-     subtitle: '',
-     background_image: '',
-     button_text: '',
-     button_link: '',
-   });
+  const [formData, setFormData] = useState({
+    title: '',
+    subtitle: '',
+    background_image: '',
+    button_text: '',
+    button_link: '',
+    instagram_url: '',
+    facebook_url: '',
+    linkedin_url: '',
+  });
  
    useEffect(() => {
      if (hero) {
-       setFormData({
-         title: hero.title,
-         subtitle: hero.subtitle,
-         background_image: hero.background_image,
-         button_text: hero.button_text,
-         button_link: hero.button_link,
-       });
+        setFormData({
+          title: hero.title,
+          subtitle: hero.subtitle,
+          background_image: hero.background_image,
+          button_text: hero.button_text,
+          button_link: hero.button_link,
+          instagram_url: hero.instagram_url || '',
+          facebook_url: hero.facebook_url || '',
+          linkedin_url: hero.linkedin_url || '',
+        });
      }
    }, [hero]);
  
@@ -127,7 +133,42 @@
                      placeholder="#signup"
                    />
                  </div>
-               </div>
+                </div>
+
+                <div className="space-y-2 pt-4 border-t">
+                  <Label className="text-base font-semibold">Social Media Links</Label>
+                  <p className="text-sm text-muted-foreground">Leave empty to hide the icon</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="instagram_url">Instagram URL</Label>
+                  <Input
+                    id="instagram_url"
+                    value={formData.instagram_url}
+                    onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
+                    placeholder="https://instagram.com/yourpage"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="facebook_url">Facebook URL</Label>
+                  <Input
+                    id="facebook_url"
+                    value={formData.facebook_url}
+                    onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
+                    placeholder="https://facebook.com/yourpage"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="linkedin_url">LinkedIn URL</Label>
+                  <Input
+                    id="linkedin_url"
+                    value={formData.linkedin_url}
+                    onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+                    placeholder="https://linkedin.com/in/yourprofile"
+                  />
+                </div>
  
                <Button type="submit" disabled={updateHero.isPending} className="w-full">
                  {updateHero.isPending ? (
