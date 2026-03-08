@@ -478,7 +478,7 @@ const ProductsManager = () => {
                     <div className="mt-2 space-y-1">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Loader2 className="w-3 h-3 animate-spin" />
-                        <span>Translating {preTranslateProgress.langName} ({preTranslateProgress.langIdx}/{preTranslateProgress.totalLangs}) — batch {preTranslateProgress.batchIdx}/{preTranslateProgress.totalBatches}</span>
+                        <span>Translating {preTranslateProgress.langName} ({preTranslateProgress.langIdx}/{preTranslateProgress.totalLangs}) — chapter {preTranslateProgress.batchIdx}/{preTranslateProgress.totalBatches}</span>
                       </div>
                       <Progress value={preTranslateProgress.totalBatches > 0 ? (preTranslateProgress.batchIdx / preTranslateProgress.totalBatches) * 100 : 0} className="h-1.5" />
                     </div>
