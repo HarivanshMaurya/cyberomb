@@ -109,9 +109,34 @@ export function PageBuilder({ blocks, onChange }: PageBuilderProps) {
   return (
     <div className="space-y-3">
       {blocks.length === 0 && (
-        <div className="text-center py-16 border-2 border-dashed border-border rounded-xl bg-muted/20">
-          <p className="text-muted-foreground mb-4 text-lg">No blocks added yet</p>
-          <p className="text-muted-foreground text-sm mb-6">Click the button below to start building your page</p>
+        <div className="space-y-6">
+          <div className="text-center py-8 border-2 border-dashed border-border rounded-xl bg-muted/20">
+            <p className="text-muted-foreground mb-2 text-lg">No blocks added yet</p>
+            <p className="text-muted-foreground text-sm">Start from a template or add blocks manually</p>
+          </div>
+          {/* Template picker */}
+          <div>
+            <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2"><LayoutTemplate className="h-4 w-4" />Quick Start Templates</p>
+            <div className="grid grid-cols-2 gap-3">
+              {PAGE_TEMPLATES.map((tpl) => (
+                <button
+                  key={tpl.name}
+                  type="button"
+                  className="text-left border border-border rounded-xl p-4 hover:bg-accent/50 hover:border-primary/30 transition-all group"
+                  onClick={() => {
+                    // Deep clone to get fresh IDs
+                    const fresh = JSON.parse(JSON.stringify(tpl.blocks)).map((b: any) => ({ ...b, id: crypto.randomUUID() }));
+                    onChange(fresh);
+                    toast.success(`"${tpl.name}" template loaded`);
+                  }}
+                >
+                  <div className="text-2xl mb-2">{tpl.icon}</div>
+                  <p className="font-medium text-sm">{tpl.name}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{tpl.description}</p>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
