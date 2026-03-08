@@ -39,19 +39,31 @@ function BlockWrapper({ style, children }: { style?: BlockStyleSettings; childre
   const { ref, isVisible } = useScrollAnimation(animation);
   const animClass = ANIMATION_CLASSES[animation];
 
+  const shadowMap: Record<string, string> = {
+    none: '', sm: '0 1px 3px rgba(0,0,0,0.12)', md: '0 4px 12px rgba(0,0,0,0.1)',
+    lg: '0 10px 30px rgba(0,0,0,0.12)', xl: '0 20px 50px rgba(0,0,0,0.15)',
+  };
+
+  const widthClass = s.width === 'narrow' ? 'max-w-3xl mx-auto' : s.width === 'contained' ? 'max-w-6xl mx-auto' : '';
+
   const inlineStyle: React.CSSProperties = {
     paddingTop: s.spacing.paddingTop ? `${s.spacing.paddingTop}px` : undefined,
     paddingBottom: s.spacing.paddingBottom ? `${s.spacing.paddingBottom}px` : undefined,
     marginTop: s.spacing.marginTop ? `${s.spacing.marginTop}px` : undefined,
     marginBottom: s.spacing.marginBottom ? `${s.spacing.marginBottom}px` : undefined,
     backgroundColor: s.backgroundColor || undefined,
+    borderStyle: s.borderStyle && s.borderStyle !== 'none' ? s.borderStyle : undefined,
+    borderWidth: s.borderWidth && s.borderStyle !== 'none' ? `${s.borderWidth}px` : undefined,
+    borderColor: s.borderColor && s.borderStyle !== 'none' ? s.borderColor : undefined,
+    borderRadius: s.borderRadius ? `${s.borderRadius}px` : undefined,
+    boxShadow: s.shadow && s.shadow !== 'none' ? shadowMap[s.shadow] : undefined,
   };
 
   return (
     <div
       ref={ref}
       style={inlineStyle}
-      className={`transition-all duration-700 ease-out ${isVisible ? animClass.visible : animClass.initial}`}
+      className={`${widthClass} transition-all duration-700 ease-out ${isVisible ? animClass.visible : animClass.initial}`}
     >
       {children}
     </div>

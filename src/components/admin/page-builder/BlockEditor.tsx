@@ -296,6 +296,68 @@ function StyleSettingsEditor({ style, onChange }: { style: BlockStyleSettings; o
           </div>
         </div>
 
+        {/* Width */}
+        <div className="space-y-1.5">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Block Width</p>
+          <Select value={style.width || 'full'} onValueChange={(v) => onChange({ ...style, width: v as BlockWidth })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="full">Full Width</SelectItem>
+              <SelectItem value="contained">Contained (max-w-6xl)</SelectItem>
+              <SelectItem value="narrow">Narrow (max-w-3xl)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Border */}
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Border</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Style</Label>
+              <Select value={style.borderStyle || 'none'} onValueChange={(v) => onChange({ ...style, borderStyle: v as BlockBorderStyle })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="solid">Solid</SelectItem>
+                  <SelectItem value="dashed">Dashed</SelectItem>
+                  <SelectItem value="dotted">Dotted</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Width: {style.borderWidth || 0}px</Label>
+              <Slider min={0} max={8} step={1} value={[style.borderWidth || 0]} onValueChange={([v]) => onChange({ ...style, borderWidth: v })} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center gap-2">
+              <Label className="text-xs shrink-0">Color:</Label>
+              <input type="color" value={style.borderColor || '#e2e8f0'} onChange={(e) => onChange({ ...style, borderColor: e.target.value })} className="w-7 h-7 rounded cursor-pointer border border-border" />
+              <Input value={style.borderColor || ''} onChange={(e) => onChange({ ...style, borderColor: e.target.value })} placeholder="#e2e8f0" className="h-8 text-xs flex-1" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Radius: {style.borderRadius || 0}px</Label>
+              <Slider min={0} max={32} step={2} value={[style.borderRadius || 0]} onValueChange={([v]) => onChange({ ...style, borderRadius: v })} />
+            </div>
+          </div>
+        </div>
+
+        {/* Shadow */}
+        <div className="space-y-1.5">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Shadow</p>
+          <Select value={style.shadow || 'none'} onValueChange={(v) => onChange({ ...style, shadow: v as BlockShadow })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">None</SelectItem>
+              <SelectItem value="sm">Small</SelectItem>
+              <SelectItem value="md">Medium</SelectItem>
+              <SelectItem value="lg">Large</SelectItem>
+              <SelectItem value="xl">Extra Large</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Animation */}
         <div className="space-y-1.5">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Animation</p>

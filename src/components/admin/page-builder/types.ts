@@ -17,14 +17,24 @@ export interface BlockSpacing {
   marginBottom: number;
 }
 
+export type BlockWidth = 'full' | 'contained' | 'narrow';
+export type BlockBorderStyle = 'none' | 'solid' | 'dashed' | 'dotted';
+export type BlockShadow = 'none' | 'sm' | 'md' | 'lg' | 'xl';
+
 export interface BlockStyleSettings {
   spacing: BlockSpacing;
   animation: BlockAnimation;
   backgroundColor?: string;
+  width?: BlockWidth;
+  borderStyle?: BlockBorderStyle;
+  borderColor?: string;
+  borderWidth?: number;
+  borderRadius?: number;
+  shadow?: BlockShadow;
 }
 
 export const DEFAULT_SPACING: BlockSpacing = { paddingTop: 0, paddingBottom: 0, marginTop: 0, marginBottom: 0 };
-export const DEFAULT_STYLE: BlockStyleSettings = { spacing: DEFAULT_SPACING, animation: 'none', backgroundColor: '' };
+export const DEFAULT_STYLE: BlockStyleSettings = { spacing: DEFAULT_SPACING, animation: 'none', backgroundColor: '', width: 'full', borderStyle: 'none', borderColor: '', borderWidth: 0, borderRadius: 0, shadow: 'none' };
 
 export interface HeroBlock {
   type: 'hero';
