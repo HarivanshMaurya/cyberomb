@@ -24,13 +24,16 @@
  
    useEffect(() => {
      if (hero) {
-       setFormData({
-         title: hero.title,
-         subtitle: hero.subtitle,
-         background_image: hero.background_image,
-         button_text: hero.button_text,
-         button_link: hero.button_link,
-       });
+        setFormData({
+          title: hero.title,
+          subtitle: hero.subtitle,
+          background_image: hero.background_image,
+          button_text: hero.button_text,
+          button_link: hero.button_link,
+          instagram_url: hero.instagram_url || '',
+          facebook_url: hero.facebook_url || '',
+          linkedin_url: hero.linkedin_url || '',
+        });
      }
    }, [hero]);
  
