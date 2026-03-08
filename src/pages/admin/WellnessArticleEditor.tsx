@@ -57,6 +57,11 @@ export default function WellnessArticleEditor() {
         meta_description: article.meta_description || '',
         og_image: article.og_image || '',
       });
+      if (article.status === 'scheduled' && article.published_at) {
+        const d = new Date(article.published_at);
+        setScheduledDate(d);
+        setScheduledTime(format(d, 'HH:mm'));
+      }
     }
   }, [article, isNew]);
 
