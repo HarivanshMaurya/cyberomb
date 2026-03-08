@@ -87,7 +87,7 @@ const Index = () => {
                 Cyberom
               </a>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-                Exploring ideas, finding inspiration. A space for wellness, creativity, travel, and personal growth.
+                {footerContent?.brand_description || 'Exploring ideas, finding inspiration. A space for wellness, creativity, travel, and personal growth.'}
               </p>
               {/* Newsletter mini */}
               <div className="flex gap-2 max-w-xs">
