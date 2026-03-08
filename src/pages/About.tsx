@@ -26,6 +26,25 @@ const About = () => {
   const { data: pageData, isLoading } = usePageSection('about');
   const { data: authors } = useActiveAuthors();
   const content = pageData?.content as AboutContent | undefined;
+  const [ctaEmail, setCtaEmail] = useState('');
+  const [ctaLoading, setCtaLoading] = useState(false);
+
+  const handleCtaSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ctaEmail.trim()) { toast.error('Please enter your email'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ctaEmail)) { toast.error('Please enter a valid email'); return; }
+    setCtaLoading(true);
+    try {
+      const { error } = await supabase.from('newsletter_subscribers').upsert({ email: ctaEmail.trim(), categories: [] }, { onConflict: 'email' });
+      if (error) throw error;
+      toast.success('Subscribed successfully! 🎉');
+      setCtaEmail('');
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong');
+    } finally {
+      setCtaLoading(false);
+    }
+  };
 
   if (isLoading) {
     return (
