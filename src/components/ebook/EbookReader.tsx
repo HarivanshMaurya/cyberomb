@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { BookPage, useBookPagination } from "./useBookPagination";
 import { BookPageView } from "./BookPageView";
+import { BookCover } from "./BookCover";
 import { ReaderToolbar } from "./ReaderToolbar";
 import { ChapterTocPanel } from "./ChapterTocPanel";
 import { BookmarksPanel, BookmarkEntry } from "./BookmarksPanel";
+import { useTextToSpeech } from "./TextToSpeech";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, BookOpen, Bookmark } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -17,6 +19,7 @@ interface EbookReaderProps {
   chapters: Chapter[];
   bookTitle: string;
   bookSlug?: string;
+  coverImage?: string | null;
   onClose: () => void;
 }
 
@@ -24,8 +27,9 @@ function getStorageKey(slug: string, key: string) {
   return `ebook_${slug}_${key}`;
 }
 
-export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose }: EbookReaderProps) {
+export function EbookReader({ chapters, bookTitle, bookSlug = "default", coverImage, onClose }: EbookReaderProps) {
   const isMobile = useIsMobile();
+  const [showCover, setShowCover] = useState(true);
 
   // Persisted preferences
   const [darkMode, setDarkMode] = useState(() => {
@@ -51,6 +55,9 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
   const touchStartX = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // TTS
+  const tts = useTextToSpeech();
+
   // Fullscreen toggle
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
@@ -62,7 +69,6 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
     }
   }, []);
 
-  // Sync fullscreen state on external exit (Esc key)
   useEffect(() => {
     const handler = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", handler);
@@ -80,7 +86,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
     try { localStorage.setItem(getStorageKey(bookSlug, "bookmarks"), JSON.stringify(bookmarks)); } catch {}
   }, [bookmarks, bookSlug]);
 
-  // Clamp spread when pages change (font size change)
+  // Clamp spread when pages change
   useEffect(() => {
     if (currentSpread >= totalSpreads && totalSpreads > 0) {
       setCurrentSpread(totalSpreads - 1);
@@ -131,6 +137,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
 
   // Keyboard
   useEffect(() => {
+    if (showCover) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === " ") goNext();
       if (e.key === "ArrowLeft") goPrev();
@@ -138,13 +145,23 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [goNext, goPrev, onClose]);
+  }, [goNext, goPrev, onClose, showCover]);
 
   // Touch
   const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
   const handleTouchEnd = (e: React.TouchEvent) => {
     const diff = touchStartX.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 50) { diff > 0 ? goNext() : goPrev(); }
+  };
+
+  // Page corner click zones for turning
+  const handlePageClick = (e: React.MouseEvent, side: "left" | "right") => {
+    if (isMobile) return;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const cornerZone = rect.width * 0.15;
+    if (side === "left" && x < cornerZone) goPrev();
+    if (side === "right" && x > rect.width - cornerZone) goNext();
   };
 
   // Bookmarks
@@ -163,7 +180,20 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
     }
   };
 
+  // TTS: read current page
+  const handleTtsPlay = useCallback(() => {
+    const [left, right] = getSpreadPages(currentSpread);
+    const text = [left?.content, right?.content].filter(Boolean).join(" ");
+    tts.speak(text);
+  }, [currentSpread, getSpreadPages, tts]);
+
+  // Stop TTS on page change
+  useEffect(() => { tts.stop(); }, [currentSpread]);
+
   const [leftPage, rightPage] = getSpreadPages(currentSpread);
+
+  // Reading progress
+  const progressPercent = totalSpreads > 1 ? Math.round((currentSpread / (totalSpreads - 1)) * 100) : 100;
 
   const readerBg = darkMode ? "hsl(0 0% 8%)" : "hsl(var(--background))";
   const navBg = darkMode ? "hsl(0 0% 12%)" : "hsl(var(--card))";
@@ -171,6 +201,11 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
   const navText = darkMode ? "hsl(0 0% 55%)" : "hsl(var(--muted-foreground))";
   const primaryBar = darkMode ? "hsl(36 44% 70%)" : "hsl(var(--primary))";
   const spineShadow = darkMode ? "hsl(0 0% 0% / 0.25)" : "hsl(var(--shadow-soft) / 0.15)";
+
+  // Show cover first
+  if (showCover && pages.length > 0) {
+    return <BookCover bookTitle={bookTitle} coverImage={coverImage} onOpen={() => setShowCover(false)} />;
+  }
 
   if (pages.length === 0) {
     return (
@@ -202,21 +237,34 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
         onOpenToc={() => setShowToc(true)}
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullscreen}
+        ttsPlaying={tts.isPlaying}
+        ttsPaused={tts.isPaused}
+        ttsSpeed={tts.speed}
+        onTtsPlay={handleTtsPlay}
+        onTtsPause={tts.pause}
+        onTtsResume={tts.resume}
+        onTtsStop={tts.stop}
+        onTtsCycleSpeed={tts.cycleSpeed}
       />
+
+      {/* Reading progress bar (top edge) */}
+      <div className="h-0.5 w-full" style={{ background: darkMode ? "hsl(0 0% 15%)" : "hsl(var(--muted))" }}>
+        <div
+          className="h-full transition-all duration-500 ease-out"
+          style={{ width: `${progressPercent}%`, background: primaryBar }}
+        />
+      </div>
 
       {/* Book container */}
       <div
         className="flex-1 flex items-center justify-center p-4 md:p-8 lg:p-12"
-        style={{ height: "calc(100vh - 3.5rem - 4rem)" }}
+        style={{ height: "calc(100vh - 3.5rem - 4.5rem)" }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         <div
           className="w-full max-w-5xl h-full max-h-[85vh] flex relative"
-          style={{
-            perspective: "2500px",
-            borderRadius: "4px",
-          }}
+          style={{ perspective: "2500px", borderRadius: "4px" }}
         >
           {/* Book spine */}
           {!isMobile && (
@@ -239,9 +287,40 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
             }`}
             style={{ transformStyle: "preserve-3d" }}
           >
-            <BookPageView page={leftPage} totalPages={pages.length} side={isMobile ? "single" : "left"} darkMode={darkMode} fontSize={fontSize} />
-            {!isMobile && <BookPageView page={rightPage} totalPages={pages.length} side="right" darkMode={darkMode} fontSize={fontSize} />}
+            {/* Left page with corner click zone */}
+            <div className="flex-1 flex cursor-default" onClick={(e) => handlePageClick(e, "left")}>
+              <BookPageView page={leftPage} totalPages={pages.length} side={isMobile ? "single" : "left"} darkMode={darkMode} fontSize={fontSize} />
+            </div>
+            {!isMobile && (
+              <div className="flex-1 flex cursor-default" onClick={(e) => handlePageClick(e, "right")}>
+                <BookPageView page={rightPage} totalPages={pages.length} side="right" darkMode={darkMode} fontSize={fontSize} />
+              </div>
+            )}
           </div>
+
+          {/* Corner fold indicators */}
+          {!isMobile && !isFlipping && currentSpread < totalSpreads - 1 && (
+            <div
+              className="absolute bottom-0 right-0 w-8 h-8 z-20 cursor-pointer opacity-40 hover:opacity-80 transition-opacity"
+              onClick={goNext}
+              title="Turn page"
+              style={{
+                background: `linear-gradient(135deg, transparent 50%, ${darkMode ? "hsl(36 30% 30%)" : "hsl(36 30% 80%)"} 50%)`,
+                borderRadius: "0 0 4px 0",
+              }}
+            />
+          )}
+          {!isMobile && !isFlipping && currentSpread > 0 && (
+            <div
+              className="absolute bottom-0 left-0 w-8 h-8 z-20 cursor-pointer opacity-40 hover:opacity-80 transition-opacity"
+              onClick={goPrev}
+              title="Previous page"
+              style={{
+                background: `linear-gradient(-135deg, transparent 50%, ${darkMode ? "hsl(36 30% 30%)" : "hsl(36 30% 80%)"} 50%)`,
+                borderRadius: "0 0 0 4px",
+              }}
+            />
+          )}
         </div>
       </div>
 
@@ -274,6 +353,9 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
         </Button>
 
         <div className="flex items-center gap-2">
+          <span className="text-xs font-mono" style={{ color: navText }}>
+            {progressPercent}%
+          </span>
           <span className="text-sm font-mono" style={{ color: navText }}>
             {currentSpread + 1} / {totalSpreads}
           </span>
@@ -283,10 +365,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
           >
             <div
               className="h-full rounded-full transition-all duration-400"
-              style={{
-                width: `${((currentSpread + 1) / totalSpreads) * 100}%`,
-                background: primaryBar,
-              }}
+              style={{ width: `${progressPercent}%`, background: primaryBar }}
             />
           </div>
         </div>

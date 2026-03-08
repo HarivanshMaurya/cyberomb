@@ -11,6 +11,7 @@ import SEOHead from "@/components/SEOHead";
 interface ReaderProduct {
   title: string;
   slug: string | null;
+  image: string | null;
   chapters: { title: string; content: string }[];
 }
 
@@ -22,7 +23,7 @@ const ReadBook = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products" as any)
-        .select("title, slug, chapters")
+        .select("title, slug, chapters, image")
         .eq("slug", slug)
         .eq("is_active", true)
         .single();
@@ -31,6 +32,7 @@ const ReadBook = () => {
       return {
         title: raw.title,
         slug: raw.slug,
+        image: raw.image,
         chapters: Array.isArray(raw.chapters) ? raw.chapters : [],
       } as ReaderProduct;
     },
@@ -79,6 +81,7 @@ const ReadBook = () => {
         chapters={product.chapters}
         bookTitle={product.title}
         bookSlug={product.slug || slug || "default"}
+        coverImage={product.image}
         onClose={() => window.history.back()}
       />
     </>

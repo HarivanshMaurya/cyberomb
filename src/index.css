@@ -298,4 +298,26 @@ All colors MUST be HSL.
   .animate-slide-in-right {
     animation: slideInRight 0.25s ease-out;
   }
+
+  /* Book cover opening animation */
+  @keyframes bookCoverOpen {
+    0% { transform: rotateY(0deg); }
+    60% { transform: rotateY(-160deg); }
+    80% { transform: rotateY(-170deg); }
+    100% { transform: rotateY(-180deg); }
+  }
+
+  .book-cover-front-flip {
+    animation: bookCoverOpen 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .book-cover-opening {
+    animation: coverFadeOut 0.9s ease-in-out forwards;
+  }
+
+  @keyframes coverFadeOut {
+    0% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; }
+  }
 }

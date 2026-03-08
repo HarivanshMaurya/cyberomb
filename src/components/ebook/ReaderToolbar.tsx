@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { TTSControls } from "./TextToSpeech";
 import {
   BookOpen,
   X,
@@ -28,6 +29,15 @@ interface ReaderToolbarProps {
   onOpenToc: () => void;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
+  // TTS
+  ttsPlaying: boolean;
+  ttsPaused: boolean;
+  ttsSpeed: number;
+  onTtsPlay: () => void;
+  onTtsPause: () => void;
+  onTtsResume: () => void;
+  onTtsStop: () => void;
+  onTtsCycleSpeed: () => void;
 }
 
 const FONT_SIZES = [14, 16, 18, 20, 22];
@@ -45,6 +55,14 @@ export function ReaderToolbar({
   onOpenToc,
   isFullscreen,
   onToggleFullscreen,
+  ttsPlaying,
+  ttsPaused,
+  ttsSpeed,
+  onTtsPlay,
+  onTtsPause,
+  onTtsResume,
+  onTtsStop,
+  onTtsCycleSpeed,
 }: ReaderToolbarProps) {
   const currentIdx = FONT_SIZES.indexOf(fontSize);
   const canDecrease = currentIdx > 0;
@@ -109,6 +127,19 @@ export function ReaderToolbar({
         >
           {isBookmarked ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
         </Button>
+
+        {/* TTS */}
+        <TTSControls
+          isPlaying={ttsPlaying}
+          isPaused={ttsPaused}
+          speed={ttsSpeed}
+          onPlay={onTtsPlay}
+          onPause={onTtsPause}
+          onResume={onTtsResume}
+          onStop={onTtsStop}
+          onCycleSpeed={onTtsCycleSpeed}
+          darkMode={darkMode}
+        />
 
         {/* Font size */}
         <div className="hidden sm:flex items-center gap-0.5 px-1">
