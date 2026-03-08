@@ -7,6 +7,7 @@ interface ArticleHeaderProps {
   category: string;
   authorName: string | null;
   authorImage: string | null;
+  authorId?: string | null;
   formattedDate: string;
   readTime: string | null;
   getCategoryClass: (cat: string) => string;
@@ -18,6 +19,7 @@ const ArticleHeader = ({
   category,
   authorName,
   authorImage,
+  authorId,
   formattedDate,
   readTime,
   getCategoryClass,
@@ -54,21 +56,21 @@ const ArticleHeader = ({
  
        {/* Author Info */}
        <div className="flex items-center justify-between border-t border-b border-border py-6">
-         <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-              {authorImage ? (
-                <img src={authorImage} alt={authorName || 'Author'} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-xl font-bold text-muted-foreground">
-                  {authorName?.charAt(0) || 'A'}
-                </span>
-              )}
-            </div>
-           <div>
-             <p className="font-semibold">{authorName || 'Anonymous'}</p>
-             <p className="text-sm text-muted-foreground">Author</p>
+        <a href={authorId ? `/authors#${authorId}` : '/authors'} className="flex items-center gap-4 group">
+           <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-primary/30 transition-all">
+             {authorImage ? (
+               <img src={authorImage} alt={authorName || 'Author'} className="w-full h-full object-cover" />
+             ) : (
+               <span className="text-xl font-bold text-muted-foreground">
+                 {authorName?.charAt(0) || 'A'}
+               </span>
+             )}
            </div>
-         </div>
+          <div>
+            <p className="font-semibold group-hover:text-primary transition-colors">{authorName || 'Anonymous'}</p>
+            <p className="text-sm text-muted-foreground">Author</p>
+          </div>
+        </a>
  
           <ShareButtons title={title} variant="inline" />
        </div>

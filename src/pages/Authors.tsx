@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 import SEOHead from "@/components/SEOHead";
 import { useActiveAuthors } from "@/hooks/useAuthors";
@@ -6,7 +8,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const Authors = () => {
   const { data: authors, isLoading } = useActiveAuthors();
+  const location = useLocation();
 
+  useEffect(() => {
+    if (authors && location.hash) {
+      const id = location.hash.replace('#', '');
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [authors, location.hash]);
   return (
     <div className="min-h-screen bg-background animate-fade-in">
       <SEOHead title="Our Authors" description="Meet the voices behind Cyberom." canonical="/authors" />
@@ -38,7 +49,8 @@ const Authors = () => {
             {authors.map((author, index) => (
               <div
                 key={author.id}
-                className={`rounded-2xl bg-card p-8 hover:shadow-xl transition-all duration-300 animate-slide-up stagger-${Math.min(index + 2, 6)}`}
+                id={author.id}
+                className={`rounded-2xl bg-card p-8 hover:shadow-xl transition-all duration-300 animate-slide-up stagger-${Math.min(index + 2, 6)} scroll-mt-20 ${location.hash === `#${author.id}` ? 'ring-2 ring-primary/40' : ''}`}
               >
                 <div className="flex items-start gap-6 mb-6">
                   {author.image ? (
