@@ -73,44 +73,120 @@ const Index = () => {
         </section>
       </main>
 
-      <footer className="border-t border-border mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <nav className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8" aria-label="Footer navigation">
-            <div>
-              <h3 className="font-semibold mb-4">Explore</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/wellness" className="hover:text-accent transition-colors">Wellness</a></li>
-                <li><a href="/travel" className="hover:text-accent transition-colors">Travel</a></li>
-                <li><a href="/creativity" className="hover:text-accent transition-colors">Creativity</a></li>
-                <li><a href="/growth" className="hover:text-accent transition-colors">Growth</a></li>
-              </ul>
+      <footer className="relative mt-16 bg-card border-t border-border overflow-hidden">
+        {/* Decorative blurs */}
+        <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-accent/5 rounded-full blur-3xl" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Main footer content */}
+          <div className="py-16 grid grid-cols-1 md:grid-cols-12 gap-12">
+            {/* Brand column */}
+            <div className="md:col-span-4 space-y-5">
+              <a href="/" className="inline-block text-2xl font-bold tracking-tight hover:text-primary transition-colors">
+                Cyberom
+              </a>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+                Exploring ideas, finding inspiration. A space for wellness, creativity, travel, and personal growth.
+              </p>
+              {/* Newsletter mini */}
+              <div className="flex gap-2 max-w-xs">
+                <input
+                  type="email"
+                  placeholder="Your email"
+                  className="flex-1 px-4 py-2.5 rounded-full border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                />
+                <button className="px-4 py-2.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all">
+                  <Mail className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold mb-4">About</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/about" className="hover:text-accent transition-colors">Our Story</a></li>
-                <li><a href="/authors" className="hover:text-accent transition-colors">Authors</a></li>
-                <li><a href="/contact" className="hover:text-accent transition-colors">Contact</a></li>
-              </ul>
+
+            {/* Nav columns */}
+            <nav className="md:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-8" aria-label="Footer navigation">
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/70 mb-4">Explore</h3>
+                <ul className="space-y-3">
+                  {[
+                    { label: "Wellness", href: "/wellness" },
+                    { label: "Travel", href: "/travel" },
+                    { label: "Creativity", href: "/creativity" },
+                    { label: "Growth", href: "/growth" },
+                  ].map(link => (
+                    <li key={link.href}>
+                      <a href={link.href} className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        {link.label}
+                        <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-0.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/70 mb-4">About</h3>
+                <ul className="space-y-3">
+                  {[
+                    { label: "Our Story", href: "/about" },
+                    { label: "Authors", href: "/authors" },
+                    { label: "Contact", href: "/contact" },
+                  ].map(link => (
+                    <li key={link.href}>
+                      <a href={link.href} className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        {link.label}
+                        <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-0.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/70 mb-4">Connect</h3>
+                <ul className="space-y-3">
+                  {[
+                    { label: "Newsletter", href: "/newsletter" },
+                    { label: "Shop", href: "/travel" },
+                    { label: "All Articles", href: "/articles" },
+                  ].map(link => (
+                    <li key={link.href}>
+                      <a href={link.href} className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        {link.label}
+                        <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-0.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/70 mb-4">Legal</h3>
+                <ul className="space-y-3">
+                  {[
+                    { label: "Privacy Policy", href: "/privacy" },
+                    { label: "Terms of Service", href: "/terms" },
+                  ].map(link => (
+                    <li key={link.href}>
+                      <a href={link.href} className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        {link.label}
+                        <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-0.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </nav>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="py-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-muted-foreground">
+              {footerContent?.copyright || '© 2025 Cyberom. All rights reserved.'}
+            </p>
+            <div className="flex items-center gap-4">
+              <a href="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy</a>
+              <span className="text-muted-foreground/30">·</span>
+              <a href="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms</a>
+              <span className="text-muted-foreground/30">·</span>
+              <a href="/contact" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Contact</a>
             </div>
-            <div>
-              <h3 className="font-semibold mb-4">Connect</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/newsletter" className="hover:text-accent transition-colors">Newsletter</a></li>
-                <li><a href="/travel" className="hover:text-accent transition-colors">Shop</a></li>
-                <li><a href="/articles" className="hover:text-accent transition-colors">All Articles</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/privacy" className="hover:text-accent transition-colors">Privacy Policy</a></li>
-                <li><a href="/terms" className="hover:text-accent transition-colors">Terms of Service</a></li>
-              </ul>
-            </div>
-          </nav>
-          <div className="pt-8 border-t border-border text-center text-sm text-muted-foreground">
-            <p>{footerContent?.copyright || '© 2025 Cyberom. All rights reserved.'}</p>
           </div>
         </div>
       </footer>
