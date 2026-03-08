@@ -44,6 +44,7 @@ function BlockWrapper({ style, children }: { style?: BlockStyleSettings; childre
     paddingBottom: s.spacing.paddingBottom ? `${s.spacing.paddingBottom}px` : undefined,
     marginTop: s.spacing.marginTop ? `${s.spacing.marginTop}px` : undefined,
     marginBottom: s.spacing.marginBottom ? `${s.spacing.marginBottom}px` : undefined,
+    backgroundColor: s.backgroundColor || undefined,
   };
 
   return (
