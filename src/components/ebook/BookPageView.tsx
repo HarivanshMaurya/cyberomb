@@ -98,6 +98,7 @@ export function BookPageView({
 
       {/* Page content */}
       <div
+        ref={scrollRef}
         className={`flex-1 overflow-y-auto px-8 md:px-12 ${page.isChapterStart && page.chapterTitle ? "pt-2" : "pt-10 md:pt-12"} pb-16`}
         style={{
           scrollbarWidth: "none",
