@@ -14,6 +14,8 @@ import {
   Type,
   Maximize,
   Minimize,
+  Languages,
+  Loader2,
 } from "lucide-react";
 
 interface ReaderToolbarProps {
@@ -37,6 +39,9 @@ interface ReaderToolbarProps {
   onTtsResume: () => void;
   onTtsStop: () => void;
   onTtsCycleSpeed: () => void;
+  isTranslated: boolean;
+  isTranslating: boolean;
+  onToggleTranslate: () => void;
 }
 
 const FONT_SIZES = [14, 16, 18, 20, 22];
