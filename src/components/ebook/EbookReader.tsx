@@ -42,9 +42,10 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
   const [showCover, setShowCover] = useState(true);
   const [isTranslated, setIsTranslated] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
-  const [translatedChapters, setTranslatedChapters] = useState<Chapter[] | null>(null);
+  const [selectedLang, setSelectedLang] = useState<string>("");
+  const [translationCache, setTranslationCache] = useState<Record<string, Chapter[]>>({});
   const [translationProgress, setTranslationProgress] = useState({ current: 0, total: 0 });
-  const activeChapters = isTranslated && translatedChapters ? translatedChapters : chapters;
+  const activeChapters = isTranslated && selectedLang && translationCache[selectedLang] ? translationCache[selectedLang] : chapters;
 
   // Persisted preferences
   const [darkMode, setDarkMode] = useState(() => {
