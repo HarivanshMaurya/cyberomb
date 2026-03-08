@@ -34,12 +34,14 @@ export interface HeroBlock {
   buttonText: string;
   buttonLink: string;
   overlay: boolean;
+  style?: BlockStyleSettings;
 }
 
 export interface RichTextBlock {
   type: 'richtext';
   id: string;
   content: string;
+  style?: BlockStyleSettings;
 }
 
 export interface TextImageBlock {
