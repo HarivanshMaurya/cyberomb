@@ -122,6 +122,7 @@ export interface CTABlock {
   buttonText: string;
   buttonLink: string;
   variant: 'default' | 'accent' | 'dark';
+  style?: BlockStyleSettings;
 }
 
 export type PageBlock =
