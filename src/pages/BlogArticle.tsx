@@ -174,6 +174,7 @@ const BlogArticle = () => {
                 excerpt={displayExcerpt}
                 category={article.category}
                 authorName={article.author_name}
+                authorImage={author?.image || null}
                 formattedDate={formattedDate}
                 readTime={article.read_time}
                 getCategoryClass={getCategoryClass}
