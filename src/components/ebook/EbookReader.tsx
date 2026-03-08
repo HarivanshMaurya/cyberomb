@@ -460,7 +460,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     tts.stop();
   }, [tts]);
 
-  // Translation handler - langName passed from toolbar
+  // Translation handler - batch translate 3 chapters at a time with real progress
   const handleTranslate = useCallback(async (langCode: string, langName?: string) => {
     if (isTranslating) return;
     
@@ -478,26 +478,40 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     
     setIsTranslating(true);
     setSelectedLang(langCode);
-    setTranslationProgress({ current: 0, total: 1 });
+    
+    const BATCH_SIZE = 3;
+    const totalBatches = Math.ceil(chapters.length / BATCH_SIZE);
+    setTranslationProgress({ current: 0, total: chapters.length });
     
     try {
-      const { data, error } = await supabase.functions.invoke('translate-ebook', {
-        body: { chapters, targetLang: langCode, langName: langName || langCode },
-      });
+      const allTranslated: { title: string; content: string }[] = [];
       
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      for (let batchIdx = 0; batchIdx < totalBatches; batchIdx++) {
+        const start = batchIdx * BATCH_SIZE;
+        const batchChapters = chapters.slice(start, start + BATCH_SIZE);
+        
+        const { data, error } = await supabase.functions.invoke('translate-ebook', {
+          body: { chapters: batchChapters, targetLang: langCode, langName: langName || langCode },
+        });
+        
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        
+        const translated = data?.chapters || batchChapters;
+        allTranslated.push(...translated);
+        
+        // Update real progress
+        setTranslationProgress({ current: allTranslated.length, total: chapters.length });
+      }
       
-      const translated = data?.chapters || chapters;
-      setTranslationProgress({ current: 1, total: 1 });
-      setTranslationCache(prev => ({ ...prev, [langCode]: translated }));
+      setTranslationCache(prev => ({ ...prev, [langCode]: allTranslated }));
       setIsTranslated(true);
       const langLabel = langName || langCode;
       toast({ title: 'अनुवाद पूरा हुआ ✅', description: `${chapters.length} अध्याय ${langLabel} में अनुवादित हो गए` });
       
-      // Save translation to DB for instant access next time (fire and forget)
+      // Save translation to DB for instant access next time
       if (productId) {
-        const updatedTranslations = { ...translationCache, [langCode]: translated };
+        const updatedTranslations = { ...translationCache, [langCode]: allTranslated };
         supabase
           .from("products" as any)
           .update({ translations: updatedTranslations } as any)
