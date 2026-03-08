@@ -1,15 +1,16 @@
  import { Facebook, Twitter, Linkedin, Link2 } from "lucide-react";
  import { toast } from "sonner";
  
- interface ArticleHeaderProps {
-   title: string;
-   excerpt: string | null;
-   category: string;
-   authorName: string | null;
-   formattedDate: string;
-   readTime: string | null;
-   getCategoryClass: (cat: string) => string;
- }
+interface ArticleHeaderProps {
+  title: string;
+  excerpt: string | null;
+  category: string;
+  authorName: string | null;
+  authorImage: string | null;
+  formattedDate: string;
+  readTime: string | null;
+  getCategoryClass: (cat: string) => string;
+}
  
  const ArticleHeader = ({
    title,
