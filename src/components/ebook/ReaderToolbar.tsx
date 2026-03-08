@@ -234,7 +234,7 @@ export function ReaderToolbar({
 
   return (
     <div
-      className="h-14 md:h-16 flex items-center justify-between px-3 md:px-5"
+      className="h-14 md:h-16 flex items-center justify-between px-3 md:px-5 relative z-[50]"
       style={{
         borderBottom: `1px solid ${borderColor}`,
         background: toolbarBg,
