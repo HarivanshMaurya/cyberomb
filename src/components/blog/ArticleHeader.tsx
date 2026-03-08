@@ -19,6 +19,7 @@ const ArticleHeader = ({
   category,
   authorName,
   authorImage,
+  authorId,
   formattedDate,
   readTime,
   getCategoryClass,
