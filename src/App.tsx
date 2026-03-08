@@ -70,7 +70,7 @@ const App = () => (
              <Route path="/about" element={<About />} />
               <Route path="/authors" element={<Authors />} />
               <Route path="/contact" element={<Contact />} />
-              <Route path="/style-guide" element={<StyleGuide />} />
+              
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/page/:slug" element={<DynamicPage />} />
