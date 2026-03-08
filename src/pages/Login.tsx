@@ -82,6 +82,23 @@ export default function Login() {
     setIsLoading(false);
   };
 
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error('Google sign in failed');
+      }
+    } catch {
+      toast.error('Google sign in failed');
+    }
+    setGoogleLoading(false);
+  };
+
   const passwordStrength = (() => {
     let score = 0;
     if (password.length >= 6) score++;
