@@ -32,6 +32,20 @@ const BlogArticle = () => {
     enabled: !!slug,
   });
 
+  const { data: author } = useQuery({
+    queryKey: ['article-author', article?.author_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('authors')
+        .select('*')
+        .eq('id', article!.author_id!)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!article?.author_id,
+  });
+
   const { data: relatedArticles } = useQuery({
     queryKey: ['related-articles', article?.category],
     queryFn: async () => {
