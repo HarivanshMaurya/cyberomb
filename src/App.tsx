@@ -44,6 +44,10 @@ import ProductDetail from "./pages/ProductDetail";
 import ReadBook from "./pages/ReadBook";
 import Newsletter from "./pages/Newsletter";
 import SubscribersManager from "./pages/admin/SubscribersManager";
+import DatabaseBrowser from "./pages/admin/DatabaseBrowser";
+import UserManagement from "./pages/admin/UserManagement";
+import AnalyticsDashboard from "./pages/admin/AnalyticsDashboard";
+import SiteSettingsHub from "./pages/admin/SiteSettingsHub";
 const queryClient = new QueryClient();
 
 const App = () => (
