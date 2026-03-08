@@ -6,6 +6,7 @@ import SEOHead, { buildWebsiteJsonLd } from "@/components/SEOHead";
 import { useSiteSection } from "@/hooks/useSiteSections";
 import { useArticles } from "@/hooks/useArticles";
 import { articles as staticArticles } from "@/data/articles";
+import { Mail, ArrowUpRight } from "lucide-react";
 
 const Index = () => {
   const { data: dbArticles } = useArticles('published');
