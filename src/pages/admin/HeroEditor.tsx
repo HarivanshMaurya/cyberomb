@@ -11,13 +11,16 @@
    const { data: hero, isLoading } = useHeroContent();
    const updateHero = useUpdateHeroContent();
  
-   const [formData, setFormData] = useState({
-     title: '',
-     subtitle: '',
-     background_image: '',
-     button_text: '',
-     button_link: '',
-   });
+  const [formData, setFormData] = useState({
+    title: '',
+    subtitle: '',
+    background_image: '',
+    button_text: '',
+    button_link: '',
+    instagram_url: '',
+    facebook_url: '',
+    linkedin_url: '',
+  });
  
    useEffect(() => {
      if (hero) {
