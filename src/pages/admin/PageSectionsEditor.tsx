@@ -173,6 +173,18 @@ const PageSectionsEditor = () => {
                   />
                 )}
 
+                {page.page_key === 'contact' && (
+                  <ContactEditor 
+                    content={editingPage?.page_key === 'contact' ? editingPage.content : page.content}
+                    onChange={(key, value) => {
+                      if (editingPage?.page_key !== 'contact') {
+                        setEditingPage({ ...page });
+                      }
+                      updateContent(key, value);
+                    }}
+                  />
+                )}
+
                 <Button 
                   onClick={handleSave} 
                   disabled={updatePage.isPending || !editingPage}
