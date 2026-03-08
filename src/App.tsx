@@ -104,6 +104,7 @@ const App = () => (
               <Route path="media" element={<MediaLibrary />} />
               <Route path="seo" element={<SEOSettings />} />
               <Route path="products" element={<ProductsManager />} />
+               <Route path="subscribers" element={<SubscribersManager />} />
               <Route path="settings" element={<Settings />} />
             </Route>
  
