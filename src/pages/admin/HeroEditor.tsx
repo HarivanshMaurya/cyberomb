@@ -34,6 +34,7 @@
           instagram_url: hero.instagram_url || '',
           facebook_url: hero.facebook_url || '',
           linkedin_url: hero.linkedin_url || '',
+          twitter_url: hero.twitter_url || '',
         });
      }
    }, [hero]);
