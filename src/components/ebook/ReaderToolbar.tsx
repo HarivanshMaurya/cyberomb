@@ -11,6 +11,8 @@ import {
   Plus,
   List,
   Type,
+  Maximize,
+  Minimize,
 } from "lucide-react";
 
 interface ReaderToolbarProps {
@@ -24,6 +26,8 @@ interface ReaderToolbarProps {
   isBookmarked: boolean;
   onToggleBookmark: () => void;
   onOpenToc: () => void;
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
 }
 
 const FONT_SIZES = [14, 16, 18, 20, 22];
@@ -39,6 +43,8 @@ export function ReaderToolbar({
   isBookmarked,
   onToggleBookmark,
   onOpenToc,
+  isFullscreen,
+  onToggleFullscreen,
 }: ReaderToolbarProps) {
   const currentIdx = FONT_SIZES.indexOf(fontSize);
   const canDecrease = currentIdx > 0;
@@ -128,6 +134,18 @@ export function ReaderToolbar({
             <Plus className="w-3 h-3" />
           </Button>
         </div>
+
+        {/* Fullscreen */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggleFullscreen}
+          className="h-8 w-8"
+          title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+          style={{ color: darkMode ? "hsl(36 44% 80%)" : undefined }}
+        >
+          {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+        </Button>
 
         {/* Dark mode */}
         <div className="flex items-center gap-1.5">
