@@ -86,12 +86,12 @@ const Index = () => {
             <p className="text-xl text-muted-foreground leading-relaxed">
               {newsletterContent?.description || 'Subscribe to receive our latest articles and insights directly in your inbox.'}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input type="email" placeholder="Your email" aria-label="Email address" className="flex-1 px-6 py-4 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-all" />
-              <button className="px-10 py-4 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 hover:scale-105 transition-all">
-                {newsletterContent?.button_text || 'Subscribe'}
+            <form onSubmit={(e) => { e.preventDefault(); handleSubscribe(newsletterEmail, setNewsletterEmail, setIsSubscribing); }} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <input type="email" placeholder="Your email" aria-label="Email address" value={newsletterEmail} onChange={e => setNewsletterEmail(e.target.value)} className="flex-1 px-6 py-4 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-all" />
+              <button type="submit" disabled={isSubscribing} className="px-10 py-4 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 hover:scale-105 transition-all disabled:opacity-50">
+                {isSubscribing ? 'Subscribing...' : (newsletterContent?.button_text || 'Subscribe')}
               </button>
-            </div>
+            </form>
           </div>
         </section>
       </main>
