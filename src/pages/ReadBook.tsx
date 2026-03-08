@@ -11,6 +11,7 @@ import SEOHead from "@/components/SEOHead";
 interface ReaderProduct {
   title: string;
   slug: string | null;
+  image: string | null;
   chapters: { title: string; content: string }[];
 }
 
