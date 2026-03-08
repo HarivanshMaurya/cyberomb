@@ -133,13 +133,11 @@ export function ReaderToolbar({
           isPlaying={ttsPlaying}
           isPaused={ttsPaused}
           speed={ttsSpeed}
-          langLabel={ttsLangLabel}
           onPlay={onTtsPlay}
           onPause={onTtsPause}
           onResume={onTtsResume}
           onStop={onTtsStop}
           onCycleSpeed={onTtsCycleSpeed}
-          onCycleLang={onTtsCycleLang}
           darkMode={darkMode}
         />
 
