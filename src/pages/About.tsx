@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import SEOHead from "@/components/SEOHead";
 import { Mail, ArrowRight, Sparkles, Heart, Eye, Users, BookOpen, Globe } from "lucide-react";
@@ -5,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { usePageSection } from "@/hooks/usePageSections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAuthors } from "@/hooks/useAuthors";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface AboutContent {
   story_title?: string;
@@ -23,6 +26,25 @@ const About = () => {
   const { data: pageData, isLoading } = usePageSection('about');
   const { data: authors } = useActiveAuthors();
   const content = pageData?.content as AboutContent | undefined;
+  const [ctaEmail, setCtaEmail] = useState('');
+  const [ctaLoading, setCtaLoading] = useState(false);
+
+  const handleCtaSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ctaEmail.trim()) { toast.error('Please enter your email'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ctaEmail)) { toast.error('Please enter a valid email'); return; }
+    setCtaLoading(true);
+    try {
+      const { error } = await supabase.from('newsletter_subscribers').upsert({ email: ctaEmail.trim(), categories: [] }, { onConflict: 'email' });
+      if (error) throw error;
+      toast.success('Subscribed successfully! 🎉');
+      setCtaEmail('');
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong');
+    } finally {
+      setCtaLoading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -218,17 +240,19 @@ const About = () => {
               <p className="text-primary-foreground/70 mb-8 max-w-xl mx-auto text-lg leading-relaxed">
                 {content?.cta_description || 'Subscribe to receive our latest articles, insights, and inspiration directly in your inbox.'}
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <form onSubmit={handleCtaSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
                 <input
                   type="email"
                   placeholder="Your email address"
+                  value={ctaEmail}
+                  onChange={e => setCtaEmail(e.target.value)}
                   className="flex-1 px-5 py-3.5 rounded-xl bg-primary-foreground/10 border border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:ring-2 focus:ring-accent/50 backdrop-blur-sm"
                 />
-                <Button className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl px-6 py-3.5 font-semibold">
-                  Subscribe
+                <Button type="submit" disabled={ctaLoading} className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl px-6 py-3.5 font-semibold disabled:opacity-50">
+                  {ctaLoading ? 'Subscribing...' : 'Subscribe'}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-              </div>
+              </form>
             </div>
           </div>
         </section>

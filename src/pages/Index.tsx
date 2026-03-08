@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import ArticleCard from "@/components/ArticleCard";
 import HeroSection from "@/components/HeroSection";
@@ -6,12 +7,34 @@ import SEOHead, { buildWebsiteJsonLd } from "@/components/SEOHead";
 import { useSiteSection } from "@/hooks/useSiteSections";
 import { useArticles } from "@/hooks/useArticles";
 import { articles as staticArticles } from "@/data/articles";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Mail, ArrowUpRight } from "lucide-react";
 
 const Index = () => {
   const { data: dbArticles } = useArticles('published');
   const { data: newsletterSection } = useSiteSection('newsletter');
   const { data: footerSection } = useSiteSection('footer');
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [footerEmail, setFooterEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [isFooterSubscribing, setIsFooterSubscribing] = useState(false);
+
+  const handleSubscribe = async (email: string, setEmail: (v: string) => void, setLoading: (v: boolean) => void) => {
+    if (!email.trim()) { toast.error('Please enter your email'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast.error('Please enter a valid email'); return; }
+    setLoading(true);
+    try {
+      const { error } = await supabase.from('newsletter_subscribers').upsert({ email: email.trim(), categories: [] }, { onConflict: 'email' });
+      if (error) throw error;
+      toast.success('Subscribed successfully! 🎉');
+      setEmail('');
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const featuredArticles = dbArticles?.length
     ? dbArticles.slice(0, 6).map((article) => ({
@@ -63,12 +86,12 @@ const Index = () => {
             <p className="text-xl text-muted-foreground leading-relaxed">
               {newsletterContent?.description || 'Subscribe to receive our latest articles and insights directly in your inbox.'}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input type="email" placeholder="Your email" aria-label="Email address" className="flex-1 px-6 py-4 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-all" />
-              <button className="px-10 py-4 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 hover:scale-105 transition-all">
-                {newsletterContent?.button_text || 'Subscribe'}
+            <form onSubmit={(e) => { e.preventDefault(); handleSubscribe(newsletterEmail, setNewsletterEmail, setIsSubscribing); }} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <input type="email" placeholder="Your email" aria-label="Email address" value={newsletterEmail} onChange={e => setNewsletterEmail(e.target.value)} className="flex-1 px-6 py-4 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-all" />
+              <button type="submit" disabled={isSubscribing} className="px-10 py-4 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 hover:scale-105 transition-all disabled:opacity-50">
+                {isSubscribing ? 'Subscribing...' : (newsletterContent?.button_text || 'Subscribe')}
               </button>
-            </div>
+            </form>
           </div>
         </section>
       </main>
@@ -90,16 +113,18 @@ const Index = () => {
                 {footerContent?.brand_description || 'Exploring ideas, finding inspiration. A space for wellness, creativity, travel, and personal growth.'}
               </p>
               {/* Newsletter mini */}
-              <div className="flex gap-2 max-w-xs">
+              <form onSubmit={(e) => { e.preventDefault(); handleSubscribe(footerEmail, setFooterEmail, setIsFooterSubscribing); }} className="flex gap-2 max-w-xs">
                 <input
                   type="email"
                   placeholder={footerContent?.newsletter_placeholder || "Your email"}
+                  value={footerEmail}
+                  onChange={e => setFooterEmail(e.target.value)}
                   className="flex-1 px-4 py-2.5 rounded-full border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
                 />
-                <button className="px-4 py-2.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all">
+                <button type="submit" disabled={isFooterSubscribing} className="px-4 py-2.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50">
                   <Mail className="w-4 h-4" />
                 </button>
-              </div>
+              </form>
             </div>
 
             {/* Nav columns */}
