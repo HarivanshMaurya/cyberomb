@@ -101,7 +101,7 @@ export function useTextToSpeech() {
   return {
     isPlaying, isPaused, speed, lang, highlightIndex, currentLangLabel,
     sentences: sentencesRef.current,
-    speak, pause, resume, stop, cycleSpeed, cycleLang,
+    speak, pause, resume, stop, cycleSpeed, cycleLang, setLang,
   };
 }
 
