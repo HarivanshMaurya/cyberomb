@@ -95,6 +95,9 @@ export function ReaderToolbar({
   onTtsResume,
   onTtsStop,
   onTtsCycleSpeed,
+  isTranslated,
+  isTranslating,
+  onToggleTranslate,
 }: ReaderToolbarProps) {
   const currentIdx = FONT_SIZES.indexOf(fontSize);
   const canDecrease = currentIdx > 0;
