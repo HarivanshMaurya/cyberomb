@@ -132,7 +132,7 @@ const BlogArticle = () => {
         description={article.meta_description || article.excerpt || `Read ${article.title} on Cyberom.`}
         canonical={`/blog/${article.slug}`}
         ogType="article"
-        ogImage={article.og_image || article.featured_image || undefined}
+        ogImage={article.og_image || article.featured_image || `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-image?slug=${article.slug}`}
         article={{
           publishedTime: article.published_at || article.created_at,
           modifiedTime: article.updated_at,
