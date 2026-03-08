@@ -45,7 +45,7 @@ interface ReaderToolbarProps {
   isTranslated: boolean;
   isTranslating: boolean;
   selectedLang: string;
-  onTranslate: (langCode: string) => void;
+  onTranslate: (langCode: string, langName?: string) => void;
   onShowOriginal: () => void;
 }
 
