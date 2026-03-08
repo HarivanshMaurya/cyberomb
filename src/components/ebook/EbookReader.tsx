@@ -458,7 +458,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     tts.stop();
   }, [tts]);
 
-  // Translation handler - chapter by chapter with progress
+  // Translation handler - sequential with retry to avoid rate limits
   const handleToggleTranslate = useCallback(async () => {
     if (isTranslated) {
       setIsTranslated(false);
@@ -472,37 +472,75 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     setTranslationProgress({ current: 0, total: chapters.length });
     
     try {
-      const translated: Chapter[] = new Array(chapters.length);
-      let completedCount = 0;
-      const BATCH_SIZE = 3;
+      const translated: Chapter[] = [];
       
-      for (let batchStart = 0; batchStart < chapters.length; batchStart += BATCH_SIZE) {
-        const batchEnd = Math.min(batchStart + BATCH_SIZE, chapters.length);
-        const batchPromises = [];
+      for (let i = 0; i < chapters.length; i++) {
+        setTranslationProgress({ current: i, total: chapters.length });
         
-        for (let i = batchStart; i < batchEnd; i++) {
-          batchPromises.push(
-            supabase.functions.invoke('translate-ebook', {
+        let success = false;
+        let retries = 0;
+        const MAX_RETRIES = 4;
+        
+        while (!success && retries < MAX_RETRIES) {
+          try {
+            const { data, error } = await supabase.functions.invoke('translate-ebook', {
               body: { chapters: [chapters[i]], targetLang: 'hi' },
-            }).then(({ data, error }) => {
-              if (error) throw error;
-              if (data?.error) throw new Error(data.error);
-              translated[i] = data.chapters?.[0] || chapters[i];
-              completedCount++;
-              setTranslationProgress({ current: completedCount, total: chapters.length });
-            })
-          );
+            });
+            
+            if (error) {
+              // Check if it's a rate limit from edge function response
+              const errBody = error?.context?.body ? await error.context.text?.() : null;
+              if (error.message?.includes('non-2xx') || errBody?.includes('Rate limit')) {
+                retries++;
+                if (retries < MAX_RETRIES) {
+                  // Wait longer each retry: 3s, 6s, 12s
+                  await new Promise(r => setTimeout(r, 3000 * Math.pow(2, retries - 1)));
+                  continue;
+                }
+              }
+              // Non-rate-limit error or max retries: use original chapter silently
+              translated.push(chapters[i]);
+              success = true;
+              continue;
+            }
+            
+            if (data?.error && data.error.includes('Rate limit')) {
+              retries++;
+              if (retries < MAX_RETRIES) {
+                await new Promise(r => setTimeout(r, 3000 * Math.pow(2, retries - 1)));
+                continue;
+              }
+              translated.push(chapters[i]);
+              success = true;
+              continue;
+            }
+            
+            translated.push(data?.chapters?.[0] || chapters[i]);
+            success = true;
+          } catch {
+            retries++;
+            if (retries < MAX_RETRIES) {
+              await new Promise(r => setTimeout(r, 3000 * Math.pow(2, retries - 1)));
+            } else {
+              translated.push(chapters[i]);
+              success = true;
+            }
+          }
         }
         
-        await Promise.all(batchPromises);
+        // Small delay between chapters to avoid rate limits
+        if (i < chapters.length - 1) {
+          await new Promise(r => setTimeout(r, 1500));
+        }
       }
+      
       setTranslationProgress({ current: chapters.length, total: chapters.length });
       setTranslatedChapters(translated);
       setIsTranslated(true);
       toast({ title: 'अनुवाद पूरा हुआ ✅', description: `${chapters.length} अध्याय हिंदी में अनुवादित हो गए` });
     } catch (err: any) {
       console.error('Translation error:', err);
-      toast({ title: 'Translation Failed', description: err.message || 'Could not translate', variant: 'destructive' });
+      toast({ title: 'अनुवाद में समस्या', description: 'कृपया कुछ देर बाद पुनः प्रयास करें', variant: 'destructive' });
     } finally {
       setIsTranslating(false);
       setTranslationProgress({ current: 0, total: 0 });
