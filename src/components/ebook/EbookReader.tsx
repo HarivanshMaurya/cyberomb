@@ -470,13 +470,11 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
   const handleTranslate = useCallback(async (langCode: string) => {
     if (isTranslating) return;
     
-    // If already showing this language, toggle back to original
     if (isTranslated && selectedLang === langCode) {
       setIsTranslated(false);
       return;
     }
     
-    // If cached, switch instantly
     if (translationCache[langCode]) {
       setSelectedLang(langCode);
       setIsTranslated(true);
@@ -485,68 +483,19 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     
     setIsTranslating(true);
     setSelectedLang(langCode);
-    setTranslationProgress({ current: 0, total: chapters.length });
+    setTranslationProgress({ current: 0, total: 1 });
     
     try {
-      const translated: Chapter[] = [];
+      // Single API call with ALL chapters
+      const { data, error } = await supabase.functions.invoke('translate-ebook', {
+        body: { chapters, targetLang: langCode },
+      });
       
-      for (let i = 0; i < chapters.length; i++) {
-        setTranslationProgress({ current: i, total: chapters.length });
-        
-        let success = false;
-        let retries = 0;
-        const MAX_RETRIES = 4;
-        
-        while (!success && retries < MAX_RETRIES) {
-          try {
-            const { data, error } = await supabase.functions.invoke('translate-ebook', {
-              body: { chapters: [chapters[i]], targetLang: langCode },
-            });
-            
-            if (error) {
-              const errBody = error?.context?.body ? await error.context.text?.() : null;
-              if (error.message?.includes('non-2xx') || errBody?.includes('Rate limit')) {
-                retries++;
-                if (retries < MAX_RETRIES) {
-                  await new Promise(r => setTimeout(r, 3000 * Math.pow(2, retries - 1)));
-                  continue;
-                }
-              }
-              translated.push(chapters[i]);
-              success = true;
-              continue;
-            }
-            
-            if (data?.error && data.error.includes('Rate limit')) {
-              retries++;
-              if (retries < MAX_RETRIES) {
-                await new Promise(r => setTimeout(r, 3000 * Math.pow(2, retries - 1)));
-                continue;
-              }
-              translated.push(chapters[i]);
-              success = true;
-              continue;
-            }
-            
-            translated.push(data?.chapters?.[0] || chapters[i]);
-            success = true;
-          } catch {
-            retries++;
-            if (retries < MAX_RETRIES) {
-              await new Promise(r => setTimeout(r, 3000 * Math.pow(2, retries - 1)));
-            } else {
-              translated.push(chapters[i]);
-              success = true;
-            }
-          }
-        }
-        
-        if (i < chapters.length - 1) {
-          await new Promise(r => setTimeout(r, 1500));
-        }
-      }
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       
-      setTranslationProgress({ current: chapters.length, total: chapters.length });
+      const translated = data?.chapters || chapters;
+      setTranslationProgress({ current: 1, total: 1 });
       setTranslationCache(prev => ({ ...prev, [langCode]: translated }));
       setIsTranslated(true);
       const langLabel = LANGUAGES[langCode] || langCode;
@@ -659,41 +608,19 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
                 {selectedLang === "hi" ? "हिंदी में अनुवाद हो रहा है..." : selectedLang === "mr" ? "मराठी मध्ये अनुवाद होत आहे..." : selectedLang === "ta" ? "தமிழில் மொழிபெயர்க்கப்படுகிறது..." : selectedLang === "bn" ? "বাংলায় অনুবাদ হচ্ছে..." : "Translating..."}
               </p>
               <p className="text-sm mt-1" style={{ color: darkMode ? "hsl(0 0% 55%)" : "hsl(var(--muted-foreground))" }}>
-                Translating to {selectedLang === "hi" ? "Hindi" : selectedLang === "mr" ? "Marathi" : selectedLang === "ta" ? "Tamil" : selectedLang === "bn" ? "Bengali" : selectedLang}
+                {chapters.length} chapters • Please wait a moment
               </p>
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-medium" style={{ color: darkMode ? "hsl(36 44% 75%)" : "hsl(var(--foreground))" }}>
-                <span>Chapter {translationProgress.current + 1} of {translationProgress.total}</span>
-                <span>{translationProgress.total > 0 ? Math.round((translationProgress.current / translationProgress.total) * 100) : 0}%</span>
-              </div>
-              <div className="h-3 rounded-full overflow-hidden" style={{ background: darkMode ? "hsl(0 0% 18%)" : "hsl(var(--muted))" }}>
-                <div
-                  className="h-full rounded-full transition-all duration-500 ease-out"
-                  style={{
-                    width: `${translationProgress.total > 0 ? (translationProgress.current / translationProgress.total) * 100 : 0}%`,
-                    background: darkMode
-                      ? "linear-gradient(90deg, hsl(36 44% 55%), hsl(36 60% 65%))"
-                      : "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))",
-                  }}
-                />
-              </div>
-              <div className="flex gap-1 justify-center mt-3">
-                {Array.from({ length: translationProgress.total }, (_, i) => (
-                  <div
-                    key={i}
-                    className="w-2 h-2 rounded-full transition-all duration-300"
-                    style={{
-                      background: i < translationProgress.current
-                        ? darkMode ? "hsl(36 44% 65%)" : "hsl(var(--primary))"
-                        : i === translationProgress.current
-                        ? darkMode ? "hsl(36 60% 75%)" : "hsl(var(--primary) / 0.5)"
-                        : darkMode ? "hsl(0 0% 22%)" : "hsl(var(--muted))",
-                      transform: i === translationProgress.current ? "scale(1.4)" : "scale(1)",
-                    }}
-                  />
-                ))}
-              </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: darkMode ? "hsl(0 0% 18%)" : "hsl(var(--muted))" }}>
+              <div
+                className="h-full rounded-full animate-pulse"
+                style={{
+                  width: "70%",
+                  background: darkMode
+                    ? "linear-gradient(90deg, hsl(36 44% 55%), hsl(36 60% 65%))"
+                    : "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))",
+                }}
+              />
             </div>
           </div>
         </div>
