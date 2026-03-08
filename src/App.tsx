@@ -48,6 +48,7 @@ import DatabaseBrowser from "./pages/admin/DatabaseBrowser";
 import UserManagement from "./pages/admin/UserManagement";
 import AnalyticsDashboard from "./pages/admin/AnalyticsDashboard";
 import SiteSettingsHub from "./pages/admin/SiteSettingsHub";
+import ResetPassword from "./pages/ResetPassword";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -79,6 +80,7 @@ const App = () => (
                 <Route path="/read/:slug" element={<ReadBook />} />
                 <Route path="/newsletter" element={<Newsletter />} />
                <Route path="/login" element={<Login />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/404" element={<NotFound />} />
  
               {/* Admin Login - redirect to unified login */}
