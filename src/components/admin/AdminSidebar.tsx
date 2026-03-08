@@ -61,6 +61,7 @@ const navGroups: NavGroup[] = [
     label: 'System',
     items: [
       { to: '/admin/media', icon: Image, label: 'Media Library' },
+      { to: '/admin/languages', icon: Languages, label: 'Languages' },
       { to: '/admin/sections', icon: Globe, label: 'Site Content' },
       { to: '/admin/seo', icon: Search, label: 'SEO Settings' },
       { to: '/admin/database', icon: Database, label: 'Database' },

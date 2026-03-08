@@ -124,6 +124,7 @@ const App = () => (
               <Route path="wellness-articles" element={<WellnessArticlesList />} />
               <Route path="wellness-articles/:id" element={<WellnessArticleEditor />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="languages" element={<LanguagesManager />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
