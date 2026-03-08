@@ -23,6 +23,7 @@ import {
   BarChart3,
   Shield,
   Settings2,
+  Heart,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -34,6 +35,7 @@ const navItems = [
   { to: '/admin/navbar', icon: Navigation, label: 'Navbar' },
   { to: '/admin/hero', icon: Palette, label: 'Hero Section' },
   { to: '/admin/articles', icon: Newspaper, label: 'Articles' },
+  { to: '/admin/wellness-articles', icon: Heart, label: 'Wellness Articles' },
   { to: '/admin/categories', icon: Tags, label: 'Categories' },
   { to: '/admin/pages', icon: FileText, label: 'Pages' },
   { to: '/admin/page-sections', icon: Layers, label: 'Page Sections' },

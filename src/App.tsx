@@ -49,6 +49,9 @@ import UserManagement from "./pages/admin/UserManagement";
 import AnalyticsDashboard from "./pages/admin/AnalyticsDashboard";
 import SiteSettingsHub from "./pages/admin/SiteSettingsHub";
 import ResetPassword from "./pages/ResetPassword";
+import WellnessArticlesList from "./pages/admin/WellnessArticlesList";
+import WellnessArticleEditor from "./pages/admin/WellnessArticleEditor";
+import WellnessArticlePage from "./pages/WellnessArticle";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -63,8 +66,9 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/article/:id" element={<Article />} />
-             <Route path="/wellness" element={<Wellness />} />
-             <Route path="/travel" element={<Travel />} />
+              <Route path="/wellness" element={<Wellness />} />
+              <Route path="/wellness/:slug" element={<WellnessArticlePage />} />
+              <Route path="/travel" element={<Travel />} />
              <Route path="/creativity" element={<Creativity />} />
              <Route path="/growth" element={<Growth />} />
              <Route path="/about" element={<About />} />
@@ -114,8 +118,10 @@ const App = () => (
               <Route path="database" element={<DatabaseBrowser />} />
                <Route path="users" element={<UserManagement />} />
                <Route path="analytics" element={<AnalyticsDashboard />} />
-               <Route path="site-settings" element={<SiteSettingsHub />} />
-               <Route path="settings" element={<Settings />} />
+                <Route path="site-settings" element={<SiteSettingsHub />} />
+                <Route path="wellness-articles" element={<WellnessArticlesList />} />
+                <Route path="wellness-articles/:id" element={<WellnessArticleEditor />} />
+                <Route path="settings" element={<Settings />} />
             </Route>
  
              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
