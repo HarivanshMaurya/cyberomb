@@ -69,7 +69,7 @@ const ArticleCard = ({ id, title, category, date, image, size = "small" }: Artic
           <ArrowUpRight className="w-5 h-5" />
         </div>
       </div>
-    </a>
+    </Link>
   );
 };
 
