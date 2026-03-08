@@ -33,13 +33,11 @@ interface ReaderToolbarProps {
   ttsPlaying: boolean;
   ttsPaused: boolean;
   ttsSpeed: number;
-  ttsLangLabel: string;
   onTtsPlay: () => void;
   onTtsPause: () => void;
   onTtsResume: () => void;
   onTtsStop: () => void;
   onTtsCycleSpeed: () => void;
-  onTtsCycleLang: () => void;
 }
 
 const FONT_SIZES = [14, 16, 18, 20, 22];

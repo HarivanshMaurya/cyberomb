@@ -508,7 +508,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
 
       {showToc && (
         <ChapterTocPanel
-          chapters={activeChapters}
+          chapters={chapters}
           pages={pages}
           currentPage={currentPageNum}
           onJumpToChapter={jumpToChapter}
