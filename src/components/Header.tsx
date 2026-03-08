@@ -9,6 +9,7 @@ import cyberomLogo from "@/assets/cyberom-logo.png";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
