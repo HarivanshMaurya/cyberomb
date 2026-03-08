@@ -642,7 +642,9 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         onTtsCycleSpeed={tts.cycleSpeed}
         isTranslated={isTranslated}
         isTranslating={isTranslating}
-        onToggleTranslate={handleToggleTranslate}
+        selectedLang={selectedLang}
+        onTranslate={handleTranslate}
+        onShowOriginal={handleShowOriginal}
       />
 
       {/* Translation progress overlay */}
