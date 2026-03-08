@@ -24,8 +24,8 @@ const ArticleCard = ({ id, title, category, date, image, size = "small" }: Artic
   };
 
   return (
-    <a
-      href={`/blog/${id}`}
+    <Link
+      to={`/blog/${id}`}
       className={`group relative block rounded-[2.5rem] overflow-hidden card-hover ${
         size === "large" ? "col-span-1 md:col-span-2 row-span-2" : ""
       }`}
