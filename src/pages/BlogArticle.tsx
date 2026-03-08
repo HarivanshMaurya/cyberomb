@@ -206,7 +206,7 @@ const BlogArticle = () => {
                 />
               ) : null}
 
-              <MobileShareButtons title={article.title} />
+              <ShareButtons title={article.title} variant="floating" />
 
               <aside className="mb-16 rounded-2xl bg-card p-8 md:p-12 text-center">
                 <h3 className="text-2xl md:text-3xl font-bold mb-4">Enjoyed this article?</h3>
