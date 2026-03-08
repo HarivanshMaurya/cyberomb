@@ -224,7 +224,8 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <StatusBar label="Published" count={publishedArticles.length} total={totalContent} variant="primary" />
+             <StatusBar label="Published" count={publishedArticles.length} total={totalContent} variant="primary" />
+              <StatusBar label="Scheduled" count={totalScheduled} total={totalContent} variant="accent" />
               <StatusBar label="Drafts" count={draftArticles.length} total={totalContent} variant="warning" />
               <StatusBar label="Wellness" count={wellnessArticles?.filter(a => a.status === 'published').length ?? 0} total={totalContent} variant="accent" />
             </div>
