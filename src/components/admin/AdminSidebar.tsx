@@ -36,6 +36,7 @@ const navItems = [
   { to: '/admin/section-cards', icon: LayoutGrid, label: 'Section Cards' },
   { to: '/admin/authors', icon: Users, label: 'Authors' },
   { to: '/admin/products', icon: ShoppingCart, label: 'Products' },
+  { to: '/admin/subscribers', icon: Mail, label: 'Subscribers' },
   { to: '/admin/sections', icon: Globe, label: 'Site Content' },
   { to: '/admin/media', icon: Image, label: 'Media Library' },
   { to: '/admin/seo', icon: Search, label: 'SEO Settings' },
