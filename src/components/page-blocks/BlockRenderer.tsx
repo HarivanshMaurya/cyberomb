@@ -1,7 +1,61 @@
-import { PageBlock } from '@/components/admin/page-builder/types';
+import { PageBlock, BlockStyleSettings, DEFAULT_STYLE, BlockAnimation } from '@/components/admin/page-builder/types';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+
+// Intersection Observer hook for scroll-triggered animations
+function useScrollAnimation(animation: BlockAnimation) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (animation === 'none') { setIsVisible(true); return; }
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setIsVisible(true); obs.unobserve(el); }
+    }, { threshold: 0.15 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [animation]);
+
+  return { ref, isVisible };
+}
+
+const ANIMATION_CLASSES: Record<BlockAnimation, { initial: string; visible: string }> = {
+  'none': { initial: '', visible: '' },
+  'fade-in': { initial: 'opacity-0 translate-y-6', visible: 'opacity-100 translate-y-0' },
+  'slide-up': { initial: 'opacity-0 translate-y-12', visible: 'opacity-100 translate-y-0' },
+  'slide-left': { initial: 'opacity-0 -translate-x-12', visible: 'opacity-100 translate-x-0' },
+  'slide-right': { initial: 'opacity-0 translate-x-12', visible: 'opacity-100 translate-x-0' },
+  'scale-in': { initial: 'opacity-0 scale-90', visible: 'opacity-100 scale-100' },
+  'zoom-in': { initial: 'opacity-0 scale-75', visible: 'opacity-100 scale-100' },
+};
+
+function BlockWrapper({ style, children }: { style?: BlockStyleSettings; children: React.ReactNode }) {
+  const s = style || DEFAULT_STYLE;
+  const animation = s.animation || 'none';
+  const { ref, isVisible } = useScrollAnimation(animation);
+  const animClass = ANIMATION_CLASSES[animation];
+
+  const inlineStyle: React.CSSProperties = {
+    paddingTop: s.spacing.paddingTop ? `${s.spacing.paddingTop}px` : undefined,
+    paddingBottom: s.spacing.paddingBottom ? `${s.spacing.paddingBottom}px` : undefined,
+    marginTop: s.spacing.marginTop ? `${s.spacing.marginTop}px` : undefined,
+    marginBottom: s.spacing.marginBottom ? `${s.spacing.marginBottom}px` : undefined,
+  };
+
+  return (
+    <div
+      ref={ref}
+      style={inlineStyle}
+      className={`transition-all duration-700 ease-out ${isVisible ? animClass.visible : animClass.initial}`}
+    >
+      {children}
+    </div>
+  );
+}
 
 function HeroRenderer({ block }: { block: any }) {
   return (
@@ -158,17 +212,24 @@ export function BlockRenderer({ blocks }: BlockRendererProps) {
   return (
     <div>
       {blocks.map((block) => {
-        switch (block.type) {
-          case 'hero': return <HeroRenderer key={block.id} block={block} />;
-          case 'richtext': return <RichTextRenderer key={block.id} block={block} />;
-          case 'text_image': return <TextImageRenderer key={block.id} block={block} />;
-          case 'feature_cards': return <FeatureCardsRenderer key={block.id} block={block} />;
-          case 'image_gallery': return <ImageGalleryRenderer key={block.id} block={block} />;
-          case 'testimonials': return <TestimonialsRenderer key={block.id} block={block} />;
-          case 'faq': return <FAQRenderer key={block.id} block={block} />;
-          case 'cta': return <CTARenderer key={block.id} block={block} />;
-          default: return null;
-        }
+        const content = (() => {
+          switch (block.type) {
+            case 'hero': return <HeroRenderer block={block} />;
+            case 'richtext': return <RichTextRenderer block={block} />;
+            case 'text_image': return <TextImageRenderer block={block} />;
+            case 'feature_cards': return <FeatureCardsRenderer block={block} />;
+            case 'image_gallery': return <ImageGalleryRenderer block={block} />;
+            case 'testimonials': return <TestimonialsRenderer block={block} />;
+            case 'faq': return <FAQRenderer block={block} />;
+            case 'cta': return <CTARenderer block={block} />;
+            default: return null;
+          }
+        })();
+        return (
+          <BlockWrapper key={block.id} style={block.style}>
+            {content}
+          </BlockWrapper>
+        );
       })}
     </div>
   );

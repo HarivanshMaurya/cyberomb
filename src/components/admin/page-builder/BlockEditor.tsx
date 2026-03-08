@@ -206,15 +206,83 @@ function CTAEditor({ block, onChange }: { block: CTABlock; onChange: (b: CTABloc
   );
 }
 
+const ANIMATION_OPTIONS: { value: BlockAnimation; label: string }[] = [
+  { value: 'none', label: 'None' },
+  { value: 'fade-in', label: 'Fade In' },
+  { value: 'slide-up', label: 'Slide Up' },
+  { value: 'slide-left', label: 'Slide from Left' },
+  { value: 'slide-right', label: 'Slide from Right' },
+  { value: 'scale-in', label: 'Scale In' },
+  { value: 'zoom-in', label: 'Zoom In' },
+];
+
+function StyleSettingsEditor({ style, onChange }: { style: BlockStyleSettings; onChange: (s: BlockStyleSettings) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className="mt-4 border border-border rounded-lg">
+      <CollapsibleTrigger asChild>
+        <Button type="button" variant="ghost" size="sm" className="w-full justify-between gap-2 px-3 py-2">
+          <span className="flex items-center gap-2 text-sm font-medium"><Settings2 className="h-4 w-4" />Spacing & Animation</span>
+          <span className="text-xs text-muted-foreground">{open ? '▲' : '▼'}</span>
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="px-3 pb-3 space-y-4">
+        <div className="space-y-3 pt-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Spacing (px)</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Padding Top: {style.spacing.paddingTop}px</Label>
+              <Slider min={0} max={120} step={4} value={[style.spacing.paddingTop]} onValueChange={([v]) => onChange({ ...style, spacing: { ...style.spacing, paddingTop: v } })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Padding Bottom: {style.spacing.paddingBottom}px</Label>
+              <Slider min={0} max={120} step={4} value={[style.spacing.paddingBottom]} onValueChange={([v]) => onChange({ ...style, spacing: { ...style.spacing, paddingBottom: v } })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Margin Top: {style.spacing.marginTop}px</Label>
+              <Slider min={0} max={120} step={4} value={[style.spacing.marginTop]} onValueChange={([v]) => onChange({ ...style, spacing: { ...style.spacing, marginTop: v } })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Margin Bottom: {style.spacing.marginBottom}px</Label>
+              <Slider min={0} max={120} step={4} value={[style.spacing.marginBottom]} onValueChange={([v]) => onChange({ ...style, spacing: { ...style.spacing, marginBottom: v } })} />
+            </div>
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Animation</p>
+          <Select value={style.animation} onValueChange={(v) => onChange({ ...style, animation: v as BlockAnimation })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {ANIMATION_OPTIONS.map(a => <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
 export function BlockEditor({ block, onChange }: BlockEditorProps) {
-  switch (block.type) {
-    case 'hero': return <HeroEditor block={block} onChange={(b) => onChange(b)} />;
-    case 'richtext': return <RichTextBlockEditor block={block} onChange={(b) => onChange(b)} />;
-    case 'text_image': return <TextImageEditor block={block} onChange={(b) => onChange(b)} />;
-    case 'feature_cards': return <FeatureCardsEditor block={block} onChange={(b) => onChange(b)} />;
-    case 'image_gallery': return <ImageGalleryEditor block={block} onChange={(b) => onChange(b)} />;
-    case 'testimonials': return <TestimonialsEditor block={block} onChange={(b) => onChange(b)} />;
-    case 'faq': return <FAQEditor block={block} onChange={(b) => onChange(b)} />;
-    case 'cta': return <CTAEditor block={block} onChange={(b) => onChange(b)} />;
-  }
+  const style = block.style || DEFAULT_STYLE;
+  const updateStyle = (s: BlockStyleSettings) => onChange({ ...block, style: s } as PageBlock);
+
+  const renderEditor = () => {
+    switch (block.type) {
+      case 'hero': return <HeroEditor block={block} onChange={(b) => onChange(b)} />;
+      case 'richtext': return <RichTextBlockEditor block={block} onChange={(b) => onChange(b)} />;
+      case 'text_image': return <TextImageEditor block={block} onChange={(b) => onChange(b)} />;
+      case 'feature_cards': return <FeatureCardsEditor block={block} onChange={(b) => onChange(b)} />;
+      case 'image_gallery': return <ImageGalleryEditor block={block} onChange={(b) => onChange(b)} />;
+      case 'testimonials': return <TestimonialsEditor block={block} onChange={(b) => onChange(b)} />;
+      case 'faq': return <FAQEditor block={block} onChange={(b) => onChange(b)} />;
+      case 'cta': return <CTAEditor block={block} onChange={(b) => onChange(b)} />;
+    }
+  };
+
+  return (
+    <div>
+      {renderEditor()}
+      <StyleSettingsEditor style={style} onChange={updateStyle} />
+    </div>
+  );
 }
