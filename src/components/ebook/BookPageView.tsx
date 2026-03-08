@@ -16,11 +16,19 @@ export function BookPageView({
   page, totalPages, side = "single", darkMode = false, fontSize = 16,
   watermark, highlightSentenceIndex = -1, sentences = [],
 }: BookPageViewProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const bg = darkMode ? "hsl(0 0% 11%)" : "hsl(38 40% 97%)";
   const fg = darkMode ? "hsl(36 30% 88%)" : "hsl(0 0% 15%)";
   const mutedFg = darkMode ? "hsl(0 0% 40%)" : "hsl(0 0% 55%)";
   const chapterAccent = darkMode ? "hsl(36 44% 55%)" : "hsl(var(--accent))";
   const innerShadow = darkMode ? "hsl(0 0% 0% / 0.2)" : "hsl(0 0% 0% / 0.06)";
+
+  // Scroll to top whenever page changes
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [page?.pageNumber]);
 
   const borderRadius = side === "left" ? "6px 0 0 6px" : side === "right" ? "0 6px 6px 0" : "6px";
 
