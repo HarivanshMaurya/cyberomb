@@ -202,7 +202,7 @@ export default function Login() {
                         <CheckCircle2 className="h-8 w-8 text-accent" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">Check Your Inbox</h1>
+                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">Check Your Inbox</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">A reset link has been sent</p>
                   </>
                 )}

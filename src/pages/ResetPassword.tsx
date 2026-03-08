@@ -136,7 +136,7 @@ export default function ResetPassword() {
                         <ShieldCheck className="h-8 w-8 text-primary" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">New Password</h1>
+                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">New Password</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">Create a strong and unique password</p>
                   </>
                 )}
