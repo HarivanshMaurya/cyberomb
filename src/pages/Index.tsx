@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import ArticleCard from "@/components/ArticleCard";
 import HeroSection from "@/components/HeroSection";
@@ -6,6 +7,8 @@ import SEOHead, { buildWebsiteJsonLd } from "@/components/SEOHead";
 import { useSiteSection } from "@/hooks/useSiteSections";
 import { useArticles } from "@/hooks/useArticles";
 import { articles as staticArticles } from "@/data/articles";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Mail, ArrowUpRight } from "lucide-react";
 
 const Index = () => {
