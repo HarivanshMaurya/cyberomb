@@ -457,6 +457,34 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     tts.stop();
   }, [tts]);
 
+  // Translation handler
+  const handleToggleTranslate = useCallback(async () => {
+    if (isTranslated) {
+      setIsTranslated(false);
+      return;
+    }
+    if (translatedChapters) {
+      setIsTranslated(true);
+      return;
+    }
+    setIsTranslating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-ebook', {
+        body: { chapters, targetLang: 'hi' },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setTranslatedChapters(data.chapters);
+      setIsTranslated(true);
+      toast({ title: 'अनुवाद पूरा हुआ', description: 'पुस्तक हिंदी में अनुवादित हो गई है' });
+    } catch (err: any) {
+      console.error('Translation error:', err);
+      toast({ title: 'Translation Failed', description: err.message || 'Could not translate', variant: 'destructive' });
+    } finally {
+      setIsTranslating(false);
+    }
+  }, [isTranslated, translatedChapters, chapters]);
+
   // Cleanup animation frame on unmount
   useEffect(() => {
     return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
