@@ -14,11 +14,15 @@ const resolveCardLink = (raw?: string) => {
   return { kind: "internal" as const, to: `/blog/${link}` };
 };
 
-const wellnessPillars = [
-  { icon: Heart, title: "Mind", description: "Mental clarity, mindfulness, and emotional balance for inner peace." },
-  { icon: Leaf, title: "Body", description: "Nutrition, movement, and rest to fuel your physical vitality." },
-  { icon: Sun, title: "Soul", description: "Purpose, connection, and spiritual practices that nurture wholeness." },
-  { icon: Sparkles, title: "Lifestyle", description: "Daily rituals, habits, and environments that support your wellbeing." },
+const iconMap: Record<string, React.ElementType> = {
+  Heart, Leaf, Sun, Sparkles,
+};
+
+const defaultPillars = [
+  { icon: "Heart", title: "Mind", description: "Mental clarity, mindfulness, and emotional balance for inner peace." },
+  { icon: "Leaf", title: "Body", description: "Nutrition, movement, and rest to fuel your physical vitality." },
+  { icon: "Sun", title: "Soul", description: "Purpose, connection, and spiritual practices that nurture wholeness." },
+  { icon: "Sparkles", title: "Lifestyle", description: "Daily rituals, habits, and environments that support your wellbeing." },
 ];
 
 const Wellness = () => {
@@ -26,9 +30,21 @@ const Wellness = () => {
   const { data: sectionCards } = useSectionCards("wellness_cards");
 
   const featuredCards = sectionCards?.content?.cards || [];
-  const content = pageData?.content as
-    | { section_title?: string; section_content?: string }
-    | undefined;
+  const content = pageData?.content as Record<string, any> | undefined;
+
+  const pillars = content?.pillars?.length ? content.pillars : defaultPillars;
+  const heroBadge = content?.hero_badge || "Nurture Your Wellbeing";
+  const pillarsHeading = content?.pillars_heading || "The Four Pillars";
+  const pillarsSubheading = content?.pillars_subheading || "A holistic approach to living well, inside and out.";
+  const sectionBadge = content?.section_badge || "Wellness Philosophy";
+  const sectionTitle = content?.section_title || "Why Wellness Matters";
+  const sectionContent = content?.section_content || "Taking care of yourself isn't a luxury — it's a necessity. Wellness encompasses every dimension of your life, from the food you eat and the way you move, to how you manage stress and nurture your relationships.\n\nWhen we prioritize wellbeing, we don't just feel better — we think more clearly, connect more deeply, and live more fully. It's about small, intentional choices that compound into a life of balance and vitality.";
+  const ctaTitle = content?.cta_title || "Start Your Wellness Journey";
+  const ctaDescription = content?.cta_description || "Explore our articles, guides, and curated resources to build a healthier, more balanced life.";
+  const ctaButtonText = content?.cta_button_text || "Explore Articles";
+  const ctaButtonLink = content?.cta_button_link || "/articles";
+  const ctaSecondaryText = content?.cta_secondary_text || "Join Newsletter";
+  const ctaSecondaryLink = content?.cta_secondary_link || "/newsletter";
 
   if (isLoading) {
     return (
@@ -55,7 +71,6 @@ const Wellness = () => {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-accent/10 to-secondary/20 py-20 md:py-32">
-        {/* Decorative elements */}
         <div className="absolute top-10 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-secondary/5 rounded-full blur-3xl" />
@@ -63,7 +78,7 @@ const Wellness = () => {
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 animate-slide-down">
             <Heart className="h-4 w-4" />
-            Nurture Your Wellbeing
+            {heroBadge}
           </div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 animate-slide-down">
             {pageData?.title || "Wellness & Self-Care"}
@@ -80,22 +95,25 @@ const Wellness = () => {
         {/* Wellness Pillars */}
         <section className="py-16 md:py-20">
           <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">The Four Pillars</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">A holistic approach to living well, inside and out.</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">{pillarsHeading}</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">{pillarsSubheading}</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {wellnessPillars.map((pillar, index) => (
-              <div
-                key={pillar.title}
-                className={`group relative rounded-2xl bg-card border border-border p-6 text-center hover:shadow-xl hover:-translate-y-1 transition-all duration-300 animate-slide-up stagger-${index + 1}`}
-              >
-                <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <pillar.icon className="h-7 w-7 text-primary" />
+            {pillars.map((pillar: any, index: number) => {
+              const Icon = iconMap[pillar.icon] || Heart;
+              return (
+                <div
+                  key={pillar.title || index}
+                  className={`group relative rounded-2xl bg-card border border-border p-6 text-center hover:shadow-xl hover:-translate-y-1 transition-all duration-300 animate-slide-up stagger-${index + 1}`}
+                >
+                  <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                    <Icon className="h-7 w-7 text-primary" />
+                  </div>
+                  <h3 className="font-bold text-lg mb-2">{pillar.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{pillar.description}</p>
                 </div>
-                <h3 className="font-bold text-lg mb-2">{pillar.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{pillar.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -109,7 +127,7 @@ const Wellness = () => {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredCards.map((card, index) => {
+              {featuredCards.map((card: any, index: number) => {
                 const resolved = resolveCardLink(card.link);
                 const body = (
                   <div className="group/card relative rounded-2xl overflow-hidden bg-card border border-border hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
@@ -160,7 +178,7 @@ const Wellness = () => {
           </section>
         )}
 
-        {/* Why Wellness Matters - Content Section */}
+        {/* Philosophy / Content Section */}
         <section className="pb-16 md:pb-20">
           <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-primary/5 via-card to-accent/5 border border-border">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/60 via-accent/40 to-primary/60" />
@@ -168,13 +186,11 @@ const Wellness = () => {
               <div className="max-w-3xl mx-auto">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-6">
                   <Leaf className="h-3.5 w-3.5" />
-                  Wellness Philosophy
+                  {sectionBadge}
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-8">
-                  {content?.section_title || "Why Wellness Matters"}
-                </h2>
+                <h2 className="text-3xl md:text-4xl font-bold mb-8">{sectionTitle}</h2>
                 <div className="space-y-5 text-muted-foreground text-lg leading-relaxed">
-                  {(content?.section_content || "Taking care of yourself isn't a luxury — it's a necessity. Wellness encompasses every dimension of your life, from the food you eat and the way you move, to how you manage stress and nurture your relationships.\n\nWhen we prioritize wellbeing, we don't just feel better — we think more clearly, connect more deeply, and live more fully. It's about small, intentional choices that compound into a life of balance and vitality.").split("\n\n").map((paragraph, index) => (
+                  {sectionContent.split("\n\n").map((paragraph: string, index: number) => (
                     <p key={index}>{paragraph}</p>
                   ))}
                 </div>
@@ -187,22 +203,20 @@ const Wellness = () => {
         <section className="pb-20 md:pb-28">
           <div className="text-center rounded-3xl bg-card border border-border p-10 md:p-16">
             <Sun className="h-10 w-10 text-primary mx-auto mb-6" />
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">Start Your Wellness Journey</h2>
-            <p className="text-muted-foreground max-w-lg mx-auto mb-8">
-              Explore our articles, guides, and curated resources to build a healthier, more balanced life.
-            </p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">{ctaTitle}</h2>
+            <p className="text-muted-foreground max-w-lg mx-auto mb-8">{ctaDescription}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                to="/articles"
+                to={ctaButtonLink}
                 className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
               >
-                Explore Articles <ArrowRight className="h-4 w-4" />
+                {ctaButtonText} <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                to="/newsletter"
+                to={ctaSecondaryLink}
                 className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl border border-border bg-card text-foreground font-medium hover:bg-accent transition-colors"
               >
-                Join Newsletter
+                {ctaSecondaryText}
               </Link>
             </div>
           </div>
