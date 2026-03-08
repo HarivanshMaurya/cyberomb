@@ -198,6 +198,7 @@ export default function AdminDashboard() {
         <MiniStat icon={FileText} label="Pages" value={pages?.length ?? 0} />
         <MiniStat icon={Image} label="Media Files" value={media?.length ?? 0} />
         <MiniStat icon={MessageSquare} label="Messages" value={contactMessages?.length ?? 0} badge={unreadMessages.length > 0 ? `${unreadMessages.length} new` : undefined} />
+        <MiniStat icon={CalendarDays} label="Scheduled" value={totalScheduled} badge={totalScheduled > 0 ? `${totalScheduled} pending` : undefined} />
         <MiniStat icon={Heart} label="Wellness Posts" value={wellnessArticles?.length ?? 0} />
       </div>
 
