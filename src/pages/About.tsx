@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import SEOHead from "@/components/SEOHead";
 import { Mail, ArrowRight, Sparkles, Heart, Eye, Users, BookOpen, Globe } from "lucide-react";
@@ -5,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { usePageSection } from "@/hooks/usePageSections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAuthors } from "@/hooks/useAuthors";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface AboutContent {
   story_title?: string;
