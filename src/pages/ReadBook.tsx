@@ -81,6 +81,7 @@ const ReadBook = () => {
         chapters={product.chapters}
         bookTitle={product.title}
         bookSlug={product.slug || slug || "default"}
+        coverImage={product.image}
         onClose={() => window.history.back()}
       />
     </>
