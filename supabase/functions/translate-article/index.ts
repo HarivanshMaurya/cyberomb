@@ -3,8 +3,56 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+function sanitizeJsonString(raw: string): string {
+  // Strip markdown code fences
+  raw = raw.replace(/^```json?\s*/i, "").replace(/\s*```$/i, "").trim();
+  
+  // Remove control characters that break JSON.parse
+  // Replace literal control chars inside string values (tabs, newlines, etc.)
+  // but preserve the JSON structure
+  raw = raw.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, "");
+  
+  // Fix unescaped newlines inside JSON string values
+  // Strategy: replace actual newlines that are inside strings with \\n
+  let result = "";
+  let inString = false;
+  let escaped = false;
+  for (let i = 0; i < raw.length; i++) {
+    const ch = raw[i];
+    if (escaped) {
+      result += ch;
+      escaped = false;
+      continue;
+    }
+    if (ch === "\\") {
+      result += ch;
+      escaped = true;
+      continue;
+    }
+    if (ch === '"') {
+      inString = !inString;
+      result += ch;
+      continue;
+    }
+    if (inString && ch === "\n") {
+      result += "\\n";
+      continue;
+    }
+    if (inString && ch === "\r") {
+      result += "\\r";
+      continue;
+    }
+    if (inString && ch === "\t") {
+      result += "\\t";
+      continue;
+    }
+    result += ch;
+  }
+  return result;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -23,7 +71,10 @@ serve(async (req) => {
 
     const langName = targetLang === "hi" ? "Hindi" : "English";
 
-    const prompt = `Translate this blog article to ${langName}. Keep ALL HTML tags intact. Only translate text content. Return JSON: {"title":"...","content":"...","excerpt":"..."}
+    const prompt = `Translate this content to ${langName}. Keep ALL HTML tags exactly as they are. Only translate the visible text content inside tags. Do NOT translate content inside <pre> or <code> tags - keep those exactly as-is.
+
+Return a valid JSON object with these keys: "title", "content", "excerpt"
+Make sure all strings are properly escaped for JSON (no raw newlines inside strings, use \\n instead).
 
 Title: ${title || ""}
 Excerpt: ${excerpt || ""}
@@ -36,11 +87,11 @@ Content: ${content}`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
+        model: "google/gemini-2.5-flash",
         messages: [
           {
             role: "system",
-            content: "You are a translation assistant. Always respond with valid JSON only, no markdown code blocks.",
+            content: "You are a translation assistant. Always respond with valid JSON only, no markdown code blocks. Ensure all string values have properly escaped special characters (newlines as \\n, tabs as \\t). Never put raw newlines inside JSON string values.",
           },
           { role: "user", content: prompt },
         ],
@@ -57,10 +108,30 @@ Content: ${content}`;
     const data = await response.json();
     let raw = data.choices?.[0]?.message?.content || "";
 
-    // Strip markdown code fences if present
-    raw = raw.replace(/^```json?\s*/i, "").replace(/\s*```$/i, "").trim();
-
-    const translated = JSON.parse(raw);
+    // Sanitize and parse
+    const sanitized = sanitizeJsonString(raw);
+    
+    let translated;
+    try {
+      translated = JSON.parse(sanitized);
+    } catch (parseErr) {
+      console.error("JSON parse failed after sanitization, raw length:", raw.length);
+      console.error("Parse error:", (parseErr as Error).message);
+      // Last resort: try to extract fields with regex
+      const titleMatch = sanitized.match(/"title"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+      const contentMatch = sanitized.match(/"content"\s*:\s*"((?:[^"\\]|\\.)*)"/s);
+      const excerptMatch = sanitized.match(/"excerpt"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+      
+      if (contentMatch) {
+        translated = {
+          title: titleMatch ? titleMatch[1] : title,
+          content: contentMatch[1],
+          excerpt: excerptMatch ? excerptMatch[1] : excerpt,
+        };
+      } else {
+        throw parseErr;
+      }
+    }
 
     return new Response(JSON.stringify(translated), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

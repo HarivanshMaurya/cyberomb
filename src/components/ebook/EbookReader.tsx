@@ -63,14 +63,12 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
       setTranslatedChapters(translationCacheRef.current[contentLang]);
       return;
     }
-    // Translate all chapters
+    // Translate all chapters in parallel
     let cancelled = false;
     (async () => {
       setIsTranslating(true);
       try {
-        const translated: Chapter[] = [];
-        for (const chapter of chapters) {
-          if (cancelled) break;
+        const translationPromises = chapters.map(async (chapter) => {
           const { data, error } = await supabase.functions.invoke("translate-article", {
             body: {
               title: chapter.title,
@@ -80,18 +78,18 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
             },
           });
           if (error) throw error;
-          translated.push({
+          return {
             title: data.title || chapter.title,
             content: data.content || chapter.content,
-          });
-        }
+          } as Chapter;
+        });
+        const translated = await Promise.all(translationPromises);
         if (!cancelled) {
           translationCacheRef.current[contentLang] = translated;
           setTranslatedChapters(translated);
         }
       } catch (err) {
         console.error("Translation error:", err);
-        // Fallback to original
         if (!cancelled) setTranslatedChapters(null);
       } finally {
         if (!cancelled) setIsTranslating(false);
