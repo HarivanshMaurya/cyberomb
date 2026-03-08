@@ -290,6 +290,7 @@ export type Database = {
           meta_description: string | null
           meta_title: string | null
           og_image: string | null
+          sections: Json | null
           slug: string
           title: string
           updated_at: string
@@ -302,6 +303,7 @@ export type Database = {
           meta_description?: string | null
           meta_title?: string | null
           og_image?: string | null
+          sections?: Json | null
           slug: string
           title: string
           updated_at?: string
@@ -314,6 +316,7 @@ export type Database = {
           meta_description?: string | null
           meta_title?: string | null
           og_image?: string | null
+          sections?: Json | null
           slug?: string
           title?: string
           updated_at?: string
