@@ -52,6 +52,7 @@ import SiteSettingsHub from "./pages/admin/SiteSettingsHub";
 import WellnessArticlesList from "./pages/admin/WellnessArticlesList";
 import WellnessArticleEditor from "./pages/admin/WellnessArticleEditor";
 import Settings from "./pages/admin/Settings";
+import LanguagesManager from "./pages/admin/LanguagesManager";
 
 const queryClient = new QueryClient();
 
@@ -123,6 +124,7 @@ const App = () => (
               <Route path="wellness-articles" element={<WellnessArticlesList />} />
               <Route path="wellness-articles/:id" element={<WellnessArticleEditor />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="languages" element={<LanguagesManager />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

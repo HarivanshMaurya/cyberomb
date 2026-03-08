@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { TTSControls } from "./TextToSpeech";
+import { useActiveTranslationLanguages } from "@/hooks/useTranslationLanguages";
 import {
   BookOpen,
   X,
@@ -44,18 +45,13 @@ interface ReaderToolbarProps {
   isTranslated: boolean;
   isTranslating: boolean;
   selectedLang: string;
-  onTranslate: (langCode: string) => void;
+  onTranslate: (langCode: string, langName?: string) => void;
   onShowOriginal: () => void;
 }
 
 const FONT_SIZES = [14, 16, 18, 20, 22];
 
-const LANGUAGES = [
-  { code: "hi", label: "हिंदी", sublabel: "Hindi" },
-  { code: "mr", label: "मराठी", sublabel: "Marathi" },
-  { code: "ta", label: "தமிழ்", sublabel: "Tamil" },
-  { code: "bn", label: "বাংলা", sublabel: "Bengali" },
-];
+// Languages are now fetched from database
 
 const ToolbarButton = ({ 
   onClick, title, darkMode, active, children, className = "" 
@@ -97,11 +93,12 @@ function LanguageDropdown({
   isTranslated: boolean;
   isTranslating: boolean;
   selectedLang: string;
-  onTranslate: (code: string) => void;
+  onTranslate: (code: string, langName?: string) => void;
   onShowOriginal: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { data: languages = [] } = useActiveTranslationLanguages();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -110,8 +107,6 @@ function LanguageDropdown({
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
-
-  const activeLang = LANGUAGES.find((l) => l.code === selectedLang);
 
   return (
     <div ref={ref} className="relative">
@@ -161,10 +156,10 @@ function LanguageDropdown({
               <span>Original (English)</span>
             </button>
           )}
-          {LANGUAGES.map((lang) => (
+          {languages.map((lang) => (
             <button
               key={lang.code}
-              onClick={() => { onTranslate(lang.code); setOpen(false); }}
+              onClick={() => { onTranslate(lang.code, `${lang.label} (${lang.sublabel})`); setOpen(false); }}
               className="w-full flex items-center justify-between px-3 py-2.5 text-left text-sm transition-colors"
               style={{
                 color: isTranslated && selectedLang === lang.code

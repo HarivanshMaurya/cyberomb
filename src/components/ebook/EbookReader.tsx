@@ -460,15 +460,8 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     tts.stop();
   }, [tts]);
 
-  // Multi-language translation handler
-  const LANGUAGES: Record<string, string> = {
-    hi: "हिंदी (Hindi)",
-    mr: "मराठी (Marathi)",
-    ta: "தமிழ் (Tamil)",
-    bn: "বাংলা (Bengali)",
-  };
-
-  const handleTranslate = useCallback(async (langCode: string) => {
+  // Translation handler - langName passed from toolbar
+  const handleTranslate = useCallback(async (langCode: string, langName?: string) => {
     if (isTranslating) return;
     
     if (isTranslated && selectedLang === langCode) {
@@ -489,7 +482,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     
     try {
       const { data, error } = await supabase.functions.invoke('translate-ebook', {
-        body: { chapters, targetLang: langCode },
+        body: { chapters, targetLang: langCode, langName: langName || langCode },
       });
       
       if (error) throw error;
@@ -499,7 +492,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
       setTranslationProgress({ current: 1, total: 1 });
       setTranslationCache(prev => ({ ...prev, [langCode]: translated }));
       setIsTranslated(true);
-      const langLabel = LANGUAGES[langCode] || langCode;
+      const langLabel = langName || langCode;
       toast({ title: 'अनुवाद पूरा हुआ ✅', description: `${chapters.length} अध्याय ${langLabel} में अनुवादित हो गए` });
       
       // Save translation to DB for instant access next time (fire and forget)
