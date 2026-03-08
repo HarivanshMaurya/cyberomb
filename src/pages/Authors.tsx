@@ -49,7 +49,8 @@ const Authors = () => {
             {authors.map((author, index) => (
               <div
                 key={author.id}
-                className={`rounded-2xl bg-card p-8 hover:shadow-xl transition-all duration-300 animate-slide-up stagger-${Math.min(index + 2, 6)}`}
+                id={author.id}
+                className={`rounded-2xl bg-card p-8 hover:shadow-xl transition-all duration-300 animate-slide-up stagger-${Math.min(index + 2, 6)} scroll-mt-20 ${location.hash === `#${author.id}` ? 'ring-2 ring-primary/40' : ''}`}
               >
                 <div className="flex items-start gap-6 mb-6">
                   {author.image ? (
