@@ -157,26 +157,56 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     [pages, pagesPerSpread]
   );
 
+  const FLIP_DURATION = 600;
+
   const goNext = useCallback(() => {
     if (currentSpread >= totalSpreads - 1 || isFlipping) return;
+    setPrevSpreadIdx(currentSpread);
     setFlipDirection("next");
     setIsFlipping(true);
-    setTimeout(() => {
-      setCurrentSpread((s) => s + 1);
-      setIsFlipping(false);
-      setFlipDirection(null);
-    }, 500);
+    setFlipProgress(0);
+    // Animate progress
+    const start = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(elapsed / FLIP_DURATION, 1);
+      // Ease-in-out cubic
+      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      setFlipProgress(eased);
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setCurrentSpread((s) => s + 1);
+        setIsFlipping(false);
+        setFlipDirection(null);
+        setFlipProgress(0);
+      }
+    };
+    requestAnimationFrame(animate);
   }, [currentSpread, totalSpreads, isFlipping]);
 
   const goPrev = useCallback(() => {
     if (currentSpread <= 0 || isFlipping) return;
+    setPrevSpreadIdx(currentSpread);
     setFlipDirection("prev");
     setIsFlipping(true);
-    setTimeout(() => {
-      setCurrentSpread((s) => s - 1);
-      setIsFlipping(false);
-      setFlipDirection(null);
-    }, 500);
+    setFlipProgress(0);
+    const start = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(elapsed / FLIP_DURATION, 1);
+      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      setFlipProgress(eased);
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setCurrentSpread((s) => s - 1);
+        setIsFlipping(false);
+        setFlipDirection(null);
+        setFlipProgress(0);
+      }
+    };
+    requestAnimationFrame(animate);
   }, [currentSpread, isFlipping]);
 
   const jumpToPage = useCallback((pageNumber: number) => {
