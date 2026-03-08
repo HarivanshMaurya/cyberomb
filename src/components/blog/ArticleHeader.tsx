@@ -7,6 +7,7 @@ interface ArticleHeaderProps {
   category: string;
   authorName: string | null;
   authorImage: string | null;
+  authorId?: string | null;
   formattedDate: string;
   readTime: string | null;
   getCategoryClass: (cat: string) => string;
