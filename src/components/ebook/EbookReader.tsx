@@ -25,6 +25,7 @@ interface EbookReaderProps {
   productId?: string;
   coverImage?: string | null;
   userEmail?: string | null;
+  cachedTranslations?: Record<string, Chapter[]>;
   onClose: () => void;
 }
 
@@ -37,13 +38,13 @@ function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-export function EbookReader({ chapters, bookTitle, bookSlug = "default", productId, coverImage, userEmail, onClose }: EbookReaderProps) {
+export function EbookReader({ chapters, bookTitle, bookSlug = "default", productId, coverImage, userEmail, cachedTranslations, onClose }: EbookReaderProps) {
   const isMobile = useIsMobile();
   const [showCover, setShowCover] = useState(true);
   const [isTranslated, setIsTranslated] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [selectedLang, setSelectedLang] = useState<string>("");
-  const [translationCache, setTranslationCache] = useState<Record<string, Chapter[]>>({});
+  const [translationCache, setTranslationCache] = useState<Record<string, Chapter[]>>(cachedTranslations || {});
   const [translationProgress, setTranslationProgress] = useState({ current: 0, total: 0 });
   const activeChapters = isTranslated && selectedLang && translationCache[selectedLang] ? translationCache[selectedLang] : chapters;
 
