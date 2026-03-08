@@ -319,6 +319,18 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
   }, [tts]);
 
   const [leftPage, rightPage] = getSpreadPages(currentSpread);
+  
+  // Pages for flip animation - show current + next/prev spread
+  const nextSpreadPages = getSpreadPages(currentSpread + 1);
+  const prevSpreadPages = getSpreadPages(currentSpread - 1);
+  
+  // During animation, show the spread we're coming from
+  const flipFromPages = isFlipping ? getSpreadPages(prevSpreadIdx) : [null, null];
+  const flipToPages = isFlipping && flipDirection === "next" 
+    ? getSpreadPages(prevSpreadIdx + 1) 
+    : isFlipping && flipDirection === "prev" 
+      ? getSpreadPages(prevSpreadIdx - 1) 
+      : [null, null];
 
   // Reading progress
   const progressPercent = totalSpreads > 1 ? Math.round((currentSpread / (totalSpreads - 1)) * 100) : 100;
