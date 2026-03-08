@@ -51,6 +51,75 @@ const ProductsManager = () => {
   const [preTranslating, setPreTranslating] = useState<string | null>(null);
   const [preTranslateProgress, setPreTranslateProgress] = useState({ langIdx: 0, batchIdx: 0, totalBatches: 0, langName: "", totalLangs: 0 });
 
+  // Pre-translate all chapters for all active languages
+  const handlePreTranslate = async (product: Product) => {
+    if (preTranslating || !product.chapters?.length || !activeLangs.length) return;
+    setPreTranslating(product.id);
+    
+    const BATCH_SIZE = 3;
+    const allTranslations: Record<string, { title: string; content: string }[]> = {};
+    
+    // Load existing translations from DB
+    try {
+      const { data: existing } = await supabase
+        .from("products" as any)
+        .select("translations")
+        .eq("id", product.id)
+        .single();
+      if (existing && (existing as any).translations) {
+        Object.assign(allTranslations, (existing as any).translations);
+      }
+    } catch {}
+    
+    let failed = false;
+    
+    for (let langIdx = 0; langIdx < activeLangs.length; langIdx++) {
+      const lang = activeLangs[langIdx];
+      
+      // Skip if already translated
+      if (allTranslations[lang.code]?.length === product.chapters.length) continue;
+      
+      const totalBatches = Math.ceil(product.chapters.length / BATCH_SIZE);
+      setPreTranslateProgress({ langIdx: langIdx + 1, batchIdx: 0, totalBatches, langName: lang.sublabel, totalLangs: activeLangs.length });
+      
+      const translated: { title: string; content: string }[] = [];
+      
+      for (let b = 0; b < totalBatches; b++) {
+        setPreTranslateProgress(prev => ({ ...prev, batchIdx: b + 1 }));
+        const batch = product.chapters.slice(b * BATCH_SIZE, (b + 1) * BATCH_SIZE);
+        
+        try {
+          const { data, error } = await supabase.functions.invoke('translate-ebook', {
+            body: { chapters: batch, targetLang: lang.code, langName: `${lang.label} (${lang.sublabel})` },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          translated.push(...(data?.chapters || batch));
+        } catch (err: any) {
+          console.error(`Pre-translate failed for ${lang.code} batch ${b}:`, err);
+          toast.error(`Failed translating ${lang.sublabel}: ${err.message}`);
+          failed = true;
+          break;
+        }
+      }
+      
+      if (failed) break;
+      allTranslations[lang.code] = translated;
+      
+      // Save after each language completes
+      await supabase
+        .from("products" as any)
+        .update({ translations: allTranslations } as any)
+        .eq("id", product.id);
+    }
+    
+    setPreTranslating(null);
+    if (!failed) {
+      toast.success(`All ${activeLangs.length} languages pre-translated & saved! Users will get instant translation now.`);
+      refetch();
+    }
+  };
+
   const openCreate = () => {
     setEditingId(null);
     setForm(emptyForm);
