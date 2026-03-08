@@ -203,7 +203,7 @@ const Index = () => {
           {/* Bottom bar */}
           <div className="py-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-muted-foreground">
-              {footerContent?.copyright || '© 2025 Cyberom. All rights reserved.'}
+              {footerContent?.copyright || `© ${new Date().getFullYear()} Cyberom. All rights reserved.`}
             </p>
             <div className="flex items-center gap-4">
               <a href="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy</a>
