@@ -48,7 +48,8 @@ const HeroSection = () => {
   const instagramUrl = hero?.instagram_url || "";
   const facebookUrl = hero?.facebook_url || "";
   const linkedinUrl = hero?.linkedin_url || "";
-  const hasSocials = !!(instagramUrl || facebookUrl || linkedinUrl);
+  const twitterUrl = hero?.twitter_url || "";
+  const hasSocials = !!(instagramUrl || facebookUrl || linkedinUrl || twitterUrl);
 
   return (
     <section
