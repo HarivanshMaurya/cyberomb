@@ -530,17 +530,20 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
       />
 
       {/* Reading progress bar */}
-      <div className="h-0.5 w-full" style={{ background: darkMode ? "hsl(0 0% 15%)" : "hsl(var(--muted))" }}>
+      <div className="h-[2px] w-full" style={{ background: darkMode ? "hsl(0 0% 12%)" : "hsl(var(--muted))" }}>
         <div
           className="h-full transition-all duration-500 ease-out"
-          style={{ width: `${progressPercent}%`, background: primaryBar }}
+          style={{
+            width: `${progressPercent}%`,
+            background: `linear-gradient(90deg, ${primaryBar}, ${darkMode ? "hsl(36 60% 55%)" : "hsl(var(--accent))"})`,
+          }}
         />
       </div>
 
       {/* Book container */}
       <div
         className="flex-1 flex items-center justify-center p-4 md:p-8 lg:p-12"
-        style={{ height: "calc(100vh - 3.5rem - 4.5rem)" }}
+        style={{ height: "calc(100vh - 4rem - 5rem)" }}
       >
         <div
           ref={bookRef}
@@ -915,73 +918,92 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         </div>
       </div>
 
-      {/* Bottom nav */}
-      <div
-        className="fixed bottom-0 inset-x-0 h-16 flex items-center justify-center gap-4 md:gap-6 px-4"
-        style={{ background: navBg, borderTop: `1px solid ${navBorder}` }}
-      >
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={goPrev}
-          disabled={currentSpread <= 0 || isFlipping}
-          className="gap-1.5 rounded-full px-5"
-          style={{ borderColor: navBorder, color: darkMode ? "hsl(36 44% 85%)" : undefined }}
+      {/* Bottom nav — floating glass bar */}
+      <div className="fixed bottom-0 inset-x-0 flex justify-center pb-4 px-4 pointer-events-none">
+        <div
+          className="flex items-center gap-2 md:gap-4 px-4 md:px-6 py-3 rounded-2xl pointer-events-auto"
+          style={{
+            background: darkMode ? "hsl(0 0% 10% / 0.92)" : "hsl(var(--background) / 0.88)",
+            backdropFilter: "blur(24px) saturate(1.5)",
+            WebkitBackdropFilter: "blur(24px) saturate(1.5)",
+            border: `1px solid ${darkMode ? "hsl(0 0% 20%)" : "hsl(var(--border) / 0.5)"}`,
+            boxShadow: darkMode
+              ? "0 8px 32px -8px hsl(0 0% 0% / 0.5)"
+              : "0 8px 32px -8px hsl(0 0% 0% / 0.12)",
+          }}
         >
-          <ChevronLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Previous</span>
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 sm:hidden"
-          onClick={() => setShowBookmarks(true)}
-          style={{ color: bookmarks.length > 0 ? "hsl(45 90% 55%)" : navText }}
-        >
-          <Bookmark className="w-4 h-4" />
-        </Button>
-
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono" style={{ color: navText }}>
-            {progressPercent}%
-          </span>
-          <span className="text-sm font-mono" style={{ color: navText }}>
-            {currentSpread + 1} / {totalSpreads}
-          </span>
-          <div
-            className="w-24 md:w-40 h-1.5 rounded-full overflow-hidden"
-            style={{ background: darkMode ? "hsl(0 0% 20%)" : "hsl(var(--muted))" }}
+          {/* Prev button */}
+          <button
+            onClick={goPrev}
+            disabled={currentSpread <= 0 || isFlipping}
+            className="h-9 w-9 flex items-center justify-center rounded-xl transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-30 disabled:hover:scale-100"
+            style={{
+              color: darkMode ? "hsl(36 44% 80%)" : "hsl(var(--foreground))",
+              background: darkMode ? "hsl(0 0% 18%)" : "hsl(var(--muted) / 0.5)",
+            }}
           >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          {/* Bookmarks (mobile) */}
+          <button
+            className="h-8 w-8 flex items-center justify-center rounded-lg sm:hidden transition-all duration-300"
+            onClick={() => setShowBookmarks(true)}
+            style={{ color: bookmarks.length > 0 ? "hsl(45 90% 55%)" : navText }}
+          >
+            <Bookmark className="w-4 h-4" />
+          </button>
+
+          {/* Progress section */}
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] font-mono tabular-nums" style={{ color: navText }}>
+              {progressPercent}%
+            </span>
             <div
-              className="h-full rounded-full transition-all duration-400"
-              style={{ width: `${progressPercent}%`, background: primaryBar }}
-            />
+              className="w-20 md:w-36 h-1.5 rounded-full overflow-hidden"
+              style={{ background: darkMode ? "hsl(0 0% 20%)" : "hsl(var(--muted))" }}
+            >
+              <div
+                className="h-full rounded-full transition-all duration-500 ease-out"
+                style={{
+                  width: `${progressPercent}%`,
+                  background: `linear-gradient(90deg, ${primaryBar}, ${darkMode ? "hsl(36 60% 55%)" : "hsl(var(--accent))"})`,
+                }}
+              />
+            </div>
+            <span className="text-[11px] font-mono tabular-nums hidden sm:block" style={{ color: navText }}>
+              {currentSpread + 1}/{totalSpreads}
+            </span>
           </div>
+
+          {/* Bookmarks (desktop) */}
+          <button
+            className="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-xl transition-all duration-300 hover:scale-105"
+            onClick={() => setShowBookmarks(true)}
+            style={{
+              color: bookmarks.length > 0 ? "hsl(45 90% 55%)" : navText,
+              background: bookmarks.length > 0
+                ? darkMode ? "hsl(45 90% 55% / 0.1)" : "hsl(45 90% 55% / 0.08)"
+                : "transparent",
+            }}
+          >
+            <Bookmark className="w-3.5 h-3.5" />
+            <span className="text-xs font-medium">{bookmarks.length}</span>
+          </button>
+
+          {/* Next button */}
+          <button
+            onClick={goNext}
+            disabled={currentSpread >= totalSpreads - 1 || isFlipping}
+            className="h-9 w-9 flex items-center justify-center rounded-xl transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-30 disabled:hover:scale-100"
+            style={{
+              color: darkMode ? "hsl(36 44% 80%)" : "hsl(var(--foreground))",
+              background: darkMode ? "hsl(0 0% 18%)" : "hsl(var(--muted) / 0.5)",
+            }}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          className="hidden sm:flex gap-1.5"
-          onClick={() => setShowBookmarks(true)}
-          style={{ color: bookmarks.length > 0 ? "hsl(45 90% 55%)" : navText }}
-        >
-          <Bookmark className="w-4 h-4" />
-          <span className="text-xs">{bookmarks.length}</span>
-        </Button>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={goNext}
-          disabled={currentSpread >= totalSpreads - 1 || isFlipping}
-          className="gap-1.5 rounded-full px-5"
-          style={{ borderColor: navBorder, color: darkMode ? "hsl(36 44% 85%)" : undefined }}
-        >
-          <span className="hidden sm:inline">Next</span>
-          <ChevronRight className="w-4 h-4" />
-        </Button>
       </div>
 
       {showToc && (

@@ -16,90 +16,104 @@ export function BookPageView({
   page, totalPages, side = "single", darkMode = false, fontSize = 16,
   watermark, highlightSentenceIndex = -1, sentences = [],
 }: BookPageViewProps) {
-  const bg = darkMode ? "hsl(0 0% 14%)" : "hsl(var(--surface-elevated))";
-  const fg = darkMode ? "hsl(36 44% 88%)" : "hsl(var(--foreground))";
-  const mutedFg = darkMode ? "hsl(0 0% 45%)" : "hsl(var(--muted-foreground))";
-  const borderAlpha = darkMode ? "hsl(0 0% 30% / 0.15)" : "hsl(var(--border) / 0.15)";
-  const borderAlpha2 = darkMode ? "hsl(0 0% 30% / 0.2)" : "hsl(var(--border) / 0.2)";
-  const borderAlpha05 = darkMode ? "hsl(0 0% 30% / 0.05)" : "hsl(var(--border) / 0.05)";
-  const shadowSoft = darkMode ? "hsl(0 0% 0% / 0.15)" : "hsl(var(--shadow-soft) / 0.08)";
-  const chapterBorder = darkMode ? "hsl(0 0% 25%)" : "hsl(var(--border))";
-  const primaryC = darkMode ? "hsl(36 44% 70%)" : "hsl(var(--primary))";
+  const bg = darkMode ? "hsl(0 0% 11%)" : "hsl(38 40% 97%)";
+  const fg = darkMode ? "hsl(36 30% 88%)" : "hsl(0 0% 15%)";
+  const mutedFg = darkMode ? "hsl(0 0% 40%)" : "hsl(0 0% 55%)";
+  const chapterAccent = darkMode ? "hsl(36 44% 55%)" : "hsl(var(--accent))";
+  const innerShadow = darkMode ? "hsl(0 0% 0% / 0.2)" : "hsl(0 0% 0% / 0.06)";
+
+  const borderRadius = side === "left" ? "6px 0 0 6px" : side === "right" ? "0 6px 6px 0" : "6px";
 
   if (!page) {
     return (
       <div
-        className={`flex-1 flex items-center justify-center
-          ${side === "left" ? "rounded-l-sm" : side === "right" ? "rounded-r-sm" : "rounded-sm"}`}
+        className="flex-1 flex items-center justify-center"
         style={{
           background: bg,
-          backgroundImage: `linear-gradient(to right, ${borderAlpha} 0%, transparent 3%, transparent 97%, ${borderAlpha} 100%)`,
+          borderRadius,
         }}
       >
-        <span className="text-sm italic" style={{ color: mutedFg }}>End of book</span>
+        <div className="text-center space-y-2">
+          <span className="text-2xl">📖</span>
+          <p className="text-sm font-medium" style={{ color: mutedFg }}>End of book</p>
+        </div>
       </div>
     );
   }
 
-  // Build highlighted content if TTS is active
-  let displayContent = page.content;
-  if (highlightSentenceIndex >= 0 && sentences.length > 0 && highlightSentenceIndex < sentences.length) {
-    const currentSentence = sentences[highlightSentenceIndex];
-    // Try to find and highlight in the clean text
-    const escapedSentence = currentSentence.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    // We'll add a highlight class via CSS instead of modifying HTML directly
-  }
-
   return (
     <div
-      className={`flex-1 flex flex-col overflow-hidden relative ebook-protected
-        ${side === "left" ? "rounded-l-sm" : side === "right" ? "rounded-r-sm" : "rounded-sm"}`}
+      className="flex-1 flex flex-col overflow-hidden relative ebook-protected"
       style={{
         background: bg,
-        backgroundImage: `
-          linear-gradient(to right, ${borderAlpha2} 0%, transparent 2%, transparent 98%, ${borderAlpha2} 100%),
-          linear-gradient(to bottom, ${borderAlpha05} 0%, transparent 5%)
-        `,
+        borderRadius,
         boxShadow:
           side === "left"
-            ? `inset -4px 0 8px -4px ${shadowSoft}`
+            ? `inset -6px 0 12px -6px ${innerShadow}`
             : side === "right"
-              ? `inset 4px 0 8px -4px ${shadowSoft}`
+              ? `inset 6px 0 12px -6px ${innerShadow}`
               : "none",
       }}
       onContextMenu={(e) => e.preventDefault()}
     >
-      {/* Chapter title at start */}
+      {/* Top decorative line */}
+      <div
+        className="absolute top-0 left-6 right-6 h-[1px]"
+        style={{
+          background: `linear-gradient(to right, transparent, ${darkMode ? "hsl(36 30% 30% / 0.3)" : "hsl(36 30% 70% / 0.3)"}, transparent)`,
+        }}
+      />
+
+      {/* Chapter header */}
       {page.isChapterStart && page.chapterTitle && (
-        <div className="px-8 pt-8 pb-2 md:px-10 md:pt-10">
+        <div className="px-8 pt-10 pb-4 md:px-12 md:pt-12">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-[2px] rounded-full" style={{ background: chapterAccent }} />
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em]" style={{ color: chapterAccent }}>
+              Chapter
+            </span>
+          </div>
           <h2
-            className="font-serif text-xl md:text-2xl font-bold leading-tight pb-3 mb-2"
-            style={{ color: fg, borderBottom: `1px solid ${chapterBorder}` }}
+            className="font-serif text-xl md:text-2xl font-bold leading-tight"
+            style={{ color: fg }}
           >
             {page.chapterTitle}
           </h2>
+          <div
+            className="w-full h-[1px] mt-5"
+            style={{
+              background: `linear-gradient(to right, ${darkMode ? "hsl(0 0% 25%)" : "hsl(var(--border))"}, transparent 80%)`,
+            }}
+          />
         </div>
       )}
 
       {/* Page content */}
       <div
-        className={`flex-1 overflow-y-auto px-8 md:px-10 ${page.isChapterStart && page.chapterTitle ? "pt-2" : "pt-8 md:pt-10"} pb-14`}
+        className={`flex-1 overflow-y-auto px-8 md:px-12 ${page.isChapterStart && page.chapterTitle ? "pt-2" : "pt-10 md:pt-12"} pb-16`}
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
       >
+        <style>{`div::-webkit-scrollbar { display: none; }`}</style>
         <div
-          className="prose prose-sm md:prose-base max-w-none leading-[1.85] md:leading-[1.9]"
+          className="prose prose-sm md:prose-base max-w-none"
           style={{
-            fontFamily: "'Georgia', 'Times New Roman', serif",
+            fontFamily: "'Georgia', 'Palatino Linotype', 'Book Antiqua', serif",
             fontSize: `${fontSize * 0.059}rem`,
+            lineHeight: "2",
+            letterSpacing: "0.01em",
             color: fg,
             ...(darkMode ? {
               '--tw-prose-headings': fg,
               '--tw-prose-body': fg,
               '--tw-prose-bold': fg,
               '--tw-prose-quotes': mutedFg,
-              '--tw-prose-quote-borders': primaryC,
+              '--tw-prose-quote-borders': chapterAccent,
             } as React.CSSProperties : {}),
           }}
-          dangerouslySetInnerHTML={{ __html: displayContent }}
+          dangerouslySetInnerHTML={{ __html: page.content }}
         />
       </div>
 
@@ -109,7 +123,7 @@ export function BookPageView({
           className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
           style={{
             transform: "rotate(-30deg)",
-            opacity: 0.04,
+            opacity: 0.03,
             fontSize: "3rem",
             fontFamily: "monospace",
             color: fg,
@@ -121,10 +135,18 @@ export function BookPageView({
         </div>
       )}
 
-      {/* Page number */}
-      <div className="absolute bottom-0 inset-x-0 py-3 text-center">
-        <span className="text-xs font-mono tracking-wider" style={{ color: mutedFg }}>
-          {page.pageNumber} / {totalPages}
+      {/* Page number - refined */}
+      <div className="absolute bottom-0 inset-x-0 py-3.5 flex items-center justify-center"
+        style={{
+          background: `linear-gradient(to top, ${bg}, ${bg}90, transparent)`,
+        }}
+      >
+        <span
+          className="text-[11px] font-mono tracking-[0.15em]"
+          style={{ color: mutedFg }}
+        >
+          {page.pageNumber}
+          <span style={{ opacity: 0.4 }}> / {totalPages}</span>
         </span>
       </div>
     </div>
