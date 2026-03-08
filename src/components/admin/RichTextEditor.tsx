@@ -132,7 +132,6 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
-        codeBlock: false,
       }),
       Link.configure({ openOnClick: false, HTMLAttributes: { class: 'text-primary underline cursor-pointer' } }),
       Image.configure({ HTMLAttributes: { class: 'rounded-lg max-w-full mx-auto' } }),
