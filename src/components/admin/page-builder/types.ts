@@ -67,6 +67,7 @@ export interface FeatureCardsBlock {
   subtitle: string;
   columns: 2 | 3 | 4;
   cards: FeatureCard[];
+  style?: BlockStyleSettings;
 }
 
 export interface GalleryImage {
