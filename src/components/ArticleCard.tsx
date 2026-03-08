@@ -25,48 +25,35 @@ const ArticleCard = ({ id, title, category, date, image, size = "small" }: Artic
   return (
     <a
       href={`/blog/${id}`}
-      className={`group relative block rounded-[2.5rem] overflow-hidden card-hover ${
-        size === "large" ? "col-span-1 md:col-span-2 row-span-2" : ""
-      }`}
+      className={`group block ${size === "large" ? "col-span-1 md:col-span-2 row-span-2" : ""}`}
     >
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted rounded-[2.5rem]">
+      <div className="relative aspect-[3/2] rounded-xl overflow-hidden bg-muted mb-4">
         <img
           src={image}
           alt={title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        
-        {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-        
-        {/* Content overlay */}
-        <div className="absolute inset-0 p-8 flex flex-col justify-between">
-          {/* Top section - Category and Date */}
-          <div className="flex items-start justify-between">
-            <span className={`px-4 py-1.5 rounded-full text-xs font-medium backdrop-blur-md ${getCategoryClass(category)} bg-opacity-80`}>
-              {category}
-            </span>
-            <span className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-medium text-white border border-white/30">
-              {date}
-            </span>
-          </div>
+        {/* Subtle overlay on hover */}
+        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors duration-300" />
 
-          {/* Bottom section - Title and Arrow */}
-          <div className="flex items-end justify-between gap-4">
-            <div className="flex-1">
-              <span className="text-white/50 text-xs font-medium tracking-wider block mb-3">{id}</span>
-              <h3 className="text-white text-xl md:text-2xl lg:text-3xl font-bold leading-tight tracking-tight">
-                {title}
-              </h3>
-            </div>
-          </div>
+        {/* Arrow button */}
+        <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
+          <ArrowUpRight className="w-3.5 h-3.5" />
         </div>
+      </div>
 
-        {/* Floating circular arrow button - positioned outside content overlay */}
-        <div className="absolute bottom-6 right-6 floating-button">
-          <ArrowUpRight className="w-5 h-5" />
+      {/* Meta */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium ${getCategoryClass(category)}`}>
+            {category}
+          </span>
+          <span className="text-xs text-muted-foreground">{date}</span>
         </div>
+        <h3 className="text-base font-medium leading-snug group-hover:text-muted-foreground transition-colors line-clamp-2">
+          {title}
+        </h3>
       </div>
     </a>
   );

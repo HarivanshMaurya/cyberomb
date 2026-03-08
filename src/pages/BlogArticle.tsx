@@ -73,7 +73,7 @@ const BlogArticle = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       </div>
     );
@@ -126,22 +126,25 @@ const BlogArticle = () => {
       <Header />
       
       <main>
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" aria-label="Breadcrumb">
-          <a href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors">
-            <ArrowLeft className="w-4 h-4" />
+        {/* Breadcrumb */}
+        <nav className="max-w-6xl mx-auto px-4 sm:px-6 py-6" aria-label="Breadcrumb">
+          <a href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" />
             Back to articles
           </a>
         </nav>
 
+        {/* Featured image */}
         {article.featured_image && (
-          <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] mb-12">
-            <img src={article.featured_image} alt={article.title} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-10">
+            <div className="relative w-full aspect-[2/1] rounded-2xl overflow-hidden bg-muted">
+              <img src={article.featured_image} alt={article.title} className="w-full h-full object-cover" />
+            </div>
           </div>
         )}
 
-        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${article.featured_image ? '-mt-32 relative z-10' : 'pt-8'}`}>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             <article className="lg:col-span-8">
               {/* Language Toggle */}
               <div className="mb-6 flex justify-end">
@@ -166,39 +169,31 @@ const BlogArticle = () => {
               />
 
               {isTranslatingContent ? (
-                <div className="space-y-4 mb-16 animate-pulse">
-                  <div className="h-6 bg-muted rounded w-3/4" />
+                <div className="space-y-3 mb-16 animate-pulse">
+                  <div className="h-5 bg-muted rounded w-3/4" />
                   <div className="h-4 bg-muted rounded w-full" />
                   <div className="h-4 bg-muted rounded w-full" />
                   <div className="h-4 bg-muted rounded w-5/6" />
-                  <div className="h-6 bg-muted rounded w-2/3 mt-6" />
-                  <div className="h-4 bg-muted rounded w-full" />
-                  <div className="h-4 bg-muted rounded w-full" />
-                  <div className="h-4 bg-muted rounded w-4/5" />
-                  <div className="h-6 bg-muted rounded w-1/2 mt-6" />
-                  <div className="h-4 bg-muted rounded w-full" />
-                  <div className="h-4 bg-muted rounded w-3/4" />
                   <p className="text-sm text-muted-foreground text-center pt-4">Translating to Hindi… please wait</p>
                 </div>
               ) : displayContent ? (
                 <div 
-                  className="prose prose-lg max-w-none mb-16 animate-slide-up stagger-2"
+                  className="prose prose-neutral dark:prose-invert prose-lg max-w-none mb-16 animate-slide-up stagger-2"
                   dangerouslySetInnerHTML={{ __html: displayContent }}
                 />
               ) : null}
 
               <MobileShareButtons title={article.title} />
 
-              <aside className="mb-16 rounded-2xl bg-card p-8 md:p-12 text-center">
-                <h3 className="text-2xl md:text-3xl font-bold mb-4">Enjoyed this article?</h3>
-                <p className="text-muted-foreground mb-6">
-                  Subscribe to receive more insights like this directly in your inbox.
+              {/* Subscribe CTA */}
+              <aside className="mb-16 rounded-xl border border-border/50 p-8 md:p-10 text-center">
+                <h3 className="text-xl font-semibold mb-2">Enjoyed this article?</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Subscribe to receive more insights directly in your inbox.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                  <input type="email" placeholder="Your email" aria-label="Email address" className="flex-1 px-4 py-3 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8">
-                    Subscribe
-                  </Button>
+                <div className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto">
+                  <input type="email" placeholder="Your email" aria-label="Email address" className="flex-1 px-4 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring/20" />
+                  <Button size="sm" className="rounded-lg px-6">Subscribe</Button>
                 </div>
               </aside>
             </article>
@@ -209,11 +204,12 @@ const BlogArticle = () => {
           </div>
         </div>
 
+        {/* Related articles */}
         {relatedArticles && relatedArticles.length > 0 && (
-          <section className="bg-muted py-16 animate-fade-in" aria-label="Related articles">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-3xl font-bold mb-8 animate-slide-up">You might also like</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <section className="border-t border-border/50 py-16 mt-8 animate-fade-in" aria-label="Related articles">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6">
+              <h2 className="text-xl font-semibold mb-8 animate-slide-up">You might also like</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
                 {relatedArticles.map((relatedArticle, index) => (
                   <div key={relatedArticle.id} className={`animate-slide-up stagger-${Math.min(index + 1, 3)}`}>
                     <ArticleCard
