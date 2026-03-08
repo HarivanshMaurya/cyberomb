@@ -20,6 +20,7 @@
     instagram_url: '',
     facebook_url: '',
     linkedin_url: '',
+    twitter_url: '',
   });
  
    useEffect(() => {
