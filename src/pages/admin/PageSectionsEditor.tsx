@@ -194,28 +194,170 @@ const PageSectionsEditor = () => {
 };
 
 // Wellness page editor
-const WellnessEditor = ({ content, onChange }: { content: any; onChange: (key: string, value: any) => void }) => (
-  <div className="space-y-4 border-t pt-4">
-    <h3 className="font-semibold">Featured Section</h3>
-    <div>
-      <Label>Section Title</Label>
-      <Input
-        value={content?.section_title || ''}
-        onChange={(e) => onChange('section_title', e.target.value)}
-        className="mt-1"
-      />
+const WellnessEditor = ({ content, onChange }: { content: any; onChange: (key: string, value: any) => void }) => {
+  const pillars = content?.pillars || [
+    { icon: "Heart", title: "Mind", description: "" },
+    { icon: "Leaf", title: "Body", description: "" },
+    { icon: "Sun", title: "Soul", description: "" },
+    { icon: "Sparkles", title: "Lifestyle", description: "" },
+  ];
+
+  const updatePillar = (index: number, field: string, value: string) => {
+    const updated = [...pillars];
+    updated[index] = { ...updated[index], [field]: value };
+    onChange('pillars', updated);
+  };
+
+  return (
+    <div className="space-y-6 border-t pt-4">
+      {/* Hero Badge */}
+      <div className="space-y-4">
+        <h3 className="font-semibold">Hero Section</h3>
+        <div>
+          <Label>Hero Badge Text</Label>
+          <Input
+            value={content?.hero_badge || ''}
+            onChange={(e) => onChange('hero_badge', e.target.value)}
+            placeholder="e.g. Nurture Your Wellbeing"
+            className="mt-1"
+          />
+        </div>
+      </div>
+
+      {/* Four Pillars */}
+      <div className="space-y-4">
+        <h3 className="font-semibold">Four Pillars Section</h3>
+        <div>
+          <Label>Pillars Heading</Label>
+          <Input
+            value={content?.pillars_heading || ''}
+            onChange={(e) => onChange('pillars_heading', e.target.value)}
+            placeholder="The Four Pillars"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Pillars Subheading</Label>
+          <Input
+            value={content?.pillars_subheading || ''}
+            onChange={(e) => onChange('pillars_subheading', e.target.value)}
+            placeholder="A holistic approach to living well..."
+            className="mt-1"
+          />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {pillars.map((pillar: any, index: number) => (
+            <Card key={index}>
+              <CardContent className="pt-4 space-y-2">
+                <Input
+                  placeholder="Pillar title"
+                  value={pillar.title || ''}
+                  onChange={(e) => updatePillar(index, 'title', e.target.value)}
+                />
+                <Textarea
+                  placeholder="Pillar description"
+                  value={pillar.description || ''}
+                  onChange={(e) => updatePillar(index, 'description', e.target.value)}
+                  rows={2}
+                />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Philosophy / Content Section */}
+      <div className="space-y-4">
+        <h3 className="font-semibold">Philosophy Section</h3>
+        <div>
+          <Label>Section Badge</Label>
+          <Input
+            value={content?.section_badge || ''}
+            onChange={(e) => onChange('section_badge', e.target.value)}
+            placeholder="Wellness Philosophy"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Section Title</Label>
+          <Input
+            value={content?.section_title || ''}
+            onChange={(e) => onChange('section_title', e.target.value)}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Section Content (separate paragraphs with empty lines)</Label>
+          <Textarea
+            value={content?.section_content || ''}
+            onChange={(e) => onChange('section_content', e.target.value)}
+            className="mt-1"
+            rows={6}
+          />
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="space-y-4">
+        <h3 className="font-semibold">CTA Section</h3>
+        <div>
+          <Label>CTA Title</Label>
+          <Input
+            value={content?.cta_title || ''}
+            onChange={(e) => onChange('cta_title', e.target.value)}
+            placeholder="Start Your Wellness Journey"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>CTA Description</Label>
+          <Textarea
+            value={content?.cta_description || ''}
+            onChange={(e) => onChange('cta_description', e.target.value)}
+            className="mt-1"
+            rows={3}
+          />
+        </div>
+        <div>
+          <Label>Primary Button Text</Label>
+          <Input
+            value={content?.cta_button_text || ''}
+            onChange={(e) => onChange('cta_button_text', e.target.value)}
+            placeholder="Explore Articles"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Primary Button Link</Label>
+          <Input
+            value={content?.cta_button_link || ''}
+            onChange={(e) => onChange('cta_button_link', e.target.value)}
+            placeholder="/articles"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Secondary Button Text</Label>
+          <Input
+            value={content?.cta_secondary_text || ''}
+            onChange={(e) => onChange('cta_secondary_text', e.target.value)}
+            placeholder="Join Newsletter"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Secondary Button Link</Label>
+          <Input
+            value={content?.cta_secondary_link || ''}
+            onChange={(e) => onChange('cta_secondary_link', e.target.value)}
+            placeholder="/newsletter"
+            className="mt-1"
+          />
+        </div>
+      </div>
     </div>
-    <div>
-      <Label>Section Content</Label>
-      <Textarea
-        value={content?.section_content || ''}
-        onChange={(e) => onChange('section_content', e.target.value)}
-        className="mt-1"
-        rows={6}
-      />
-    </div>
-  </div>
-);
+  );
+};
 
 // Travel page editor
 const TravelEditor = ({ content, onChange }: { content: any; onChange: (key: string, value: any) => void }) => (
