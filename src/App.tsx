@@ -42,6 +42,7 @@ import NavbarEditor from "./pages/admin/NavbarEditor";
 import ProductsManager from "./pages/admin/ProductsManager";
 import ProductDetail from "./pages/ProductDetail";
 import ReadBook from "./pages/ReadBook";
+import Newsletter from "./pages/Newsletter";
 const queryClient = new QueryClient();
 
 const App = () => (
