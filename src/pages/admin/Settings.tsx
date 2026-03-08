@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LogOut, User, Shield, KeyRound, Eye, EyeOff, Check, Loader2, Mail, Lock, ExternalLink } from 'lucide-react';
+import { getPublicOrigin } from '@/lib/redirectUrl';
 import { toast } from 'sonner';
 
 export default function Settings() {
@@ -91,7 +92,7 @@ export default function Settings() {
     setSendingReset(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${getPublicOrigin()}/reset-password`,
       });
       if (error) throw error;
       setResetSent(true);

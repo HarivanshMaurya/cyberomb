@@ -1,6 +1,7 @@
- import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
- import { User, Session } from '@supabase/supabase-js';
- import { supabase } from '@/integrations/supabase/client';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+import { getPublicOrigin } from '@/lib/redirectUrl';
  
  interface AuthContextType {
    user: User | null;
@@ -82,7 +83,7 @@
        email,
        password,
        options: {
-         emailRedirectTo: window.location.origin,
+         emailRedirectTo: getPublicOrigin(),
          data: {
            full_name: fullName,
          },
