@@ -43,6 +43,7 @@ import ProductsManager from "./pages/admin/ProductsManager";
 import ProductDetail from "./pages/ProductDetail";
 import ReadBook from "./pages/ReadBook";
 import Newsletter from "./pages/Newsletter";
+import SubscribersManager from "./pages/admin/SubscribersManager";
 const queryClient = new QueryClient();
 
 const App = () => (
