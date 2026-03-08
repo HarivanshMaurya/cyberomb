@@ -18,7 +18,8 @@ import { SortableBlock } from './SortableBlock';
 import { PageBlock, BlockType, BLOCK_LABELS, BLOCK_ICONS, createDefaultBlock } from './types';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { PlusCircle, Clipboard, ClipboardPaste } from 'lucide-react';
+import { PlusCircle, ClipboardPaste, LayoutTemplate } from 'lucide-react';
+import { PAGE_TEMPLATES } from './templates';
 import { toast } from 'sonner';
 
 interface PageBuilderProps {
