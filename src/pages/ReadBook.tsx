@@ -78,6 +78,7 @@ const ReadBook = () => {
       <EbookReader
         chapters={product.chapters}
         bookTitle={product.title}
+        bookSlug={product.slug || slug || "default"}
         onClose={() => window.history.back()}
       />
     </>
