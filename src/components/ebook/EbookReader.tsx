@@ -496,6 +496,12 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
           body: { chapters: [chapters[i]], targetLang: langCode, langName: langName || langCode },
         });
         
+        // Detect credits exhausted
+        const errMsg = error?.message || data?.error || "";
+        if (errMsg.includes("402") || errMsg.toLowerCase().includes("credits exhausted") || errMsg.toLowerCase().includes("add credits")) {
+          throw new Error("AI credits khatam ho gaye hain. Admin se contact karein.");
+        }
+        
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
         
