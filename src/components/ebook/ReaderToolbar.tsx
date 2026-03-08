@@ -135,6 +135,18 @@ export function ReaderToolbar({
           </Button>
         </div>
 
+        {/* Fullscreen */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggleFullscreen}
+          className="h-8 w-8"
+          title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+          style={{ color: darkMode ? "hsl(36 44% 80%)" : undefined }}
+        >
+          {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+        </Button>
+
         {/* Dark mode */}
         <div className="flex items-center gap-1.5">
           {darkMode ? (
