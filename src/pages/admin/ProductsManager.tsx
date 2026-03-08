@@ -429,8 +429,33 @@ const ProductsManager = () => {
                   <p className="text-sm text-muted-foreground">
                     ₹{p.price.toLocaleString('en-IN')} • {p.author || "No author"} • /{p.slug || "no-slug"}
                   </p>
+                  {/* Pre-translate progress */}
+                  {preTranslating === p.id && (
+                    <div className="mt-2 space-y-1">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <span>Translating {preTranslateProgress.langName} ({preTranslateProgress.langIdx}/{preTranslateProgress.totalLangs}) — batch {preTranslateProgress.batchIdx}/{preTranslateProgress.totalBatches}</span>
+                      </div>
+                      <Progress value={preTranslateProgress.totalBatches > 0 ? (preTranslateProgress.batchIdx / preTranslateProgress.totalBatches) * 100 : 0} className="h-1.5" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePreTranslate(p)}
+                    disabled={!!preTranslating || !p.chapters?.length}
+                    title="Pre-translate all languages for instant user experience"
+                    className="gap-1.5"
+                  >
+                    {preTranslating === p.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Languages className="h-4 w-4" />
+                    )}
+                    <span className="hidden sm:inline">Pre-Translate</span>
+                  </Button>
                   <Button variant="outline" size="icon" onClick={() => openEdit(p)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
