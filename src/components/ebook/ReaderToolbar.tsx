@@ -26,6 +26,8 @@ interface ReaderToolbarProps {
   isBookmarked: boolean;
   onToggleBookmark: () => void;
   onOpenToc: () => void;
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
 }
 
 const FONT_SIZES = [14, 16, 18, 20, 22];
