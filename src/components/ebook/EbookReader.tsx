@@ -56,7 +56,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     try { return JSON.parse(localStorage.getItem(getStorageKey(bookSlug, "bookmarks")) || "[]"); } catch { return []; }
   });
 
-  const pages = useBookPagination(chapters, fontSize);
+  const pages = useBookPagination(activeChapters, fontSize);
   const pagesPerSpread = isMobile ? 1 : 2;
   const totalSpreads = Math.ceil(pages.length / pagesPerSpread);
 
