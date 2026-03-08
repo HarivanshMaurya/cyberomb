@@ -15,6 +15,26 @@ const Index = () => {
   const { data: dbArticles } = useArticles('published');
   const { data: newsletterSection } = useSiteSection('newsletter');
   const { data: footerSection } = useSiteSection('footer');
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [footerEmail, setFooterEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [isFooterSubscribing, setIsFooterSubscribing] = useState(false);
+
+  const handleSubscribe = async (email: string, setEmail: (v: string) => void, setLoading: (v: boolean) => void) => {
+    if (!email.trim()) { toast.error('Please enter your email'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast.error('Please enter a valid email'); return; }
+    setLoading(true);
+    try {
+      const { error } = await supabase.from('newsletter_subscribers').upsert({ email: email.trim(), categories: [] }, { onConflict: 'email' });
+      if (error) throw error;
+      toast.success('Subscribed successfully! 🎉');
+      setEmail('');
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const featuredArticles = dbArticles?.length
     ? dbArticles.slice(0, 6).map((article) => ({
