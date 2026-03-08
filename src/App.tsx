@@ -52,6 +52,7 @@ import SiteSettingsHub from "./pages/admin/SiteSettingsHub";
 import WellnessArticlesList from "./pages/admin/WellnessArticlesList";
 import WellnessArticleEditor from "./pages/admin/WellnessArticleEditor";
 import Settings from "./pages/admin/Settings";
+import LanguagesManager from "./pages/admin/LanguagesManager";
 
 const queryClient = new QueryClient();
 
