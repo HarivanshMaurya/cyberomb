@@ -118,8 +118,10 @@ const App = () => (
               <Route path="database" element={<DatabaseBrowser />} />
                <Route path="users" element={<UserManagement />} />
                <Route path="analytics" element={<AnalyticsDashboard />} />
-               <Route path="site-settings" element={<SiteSettingsHub />} />
-               <Route path="settings" element={<Settings />} />
+                <Route path="site-settings" element={<SiteSettingsHub />} />
+                <Route path="wellness-articles" element={<WellnessArticlesList />} />
+                <Route path="wellness-articles/:id" element={<WellnessArticleEditor />} />
+                <Route path="settings" element={<Settings />} />
             </Route>
  
              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
