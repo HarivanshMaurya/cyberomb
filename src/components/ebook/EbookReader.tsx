@@ -656,10 +656,10 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
             </div>
             <div>
               <p className="text-lg font-serif font-bold" style={{ color: darkMode ? "hsl(36 44% 92%)" : "hsl(var(--foreground))" }}>
-                हिंदी में अनुवाद हो रहा है...
+                {selectedLang === "hi" ? "हिंदी में अनुवाद हो रहा है..." : selectedLang === "mr" ? "मराठी मध्ये अनुवाद होत आहे..." : selectedLang === "ta" ? "தமிழில் மொழிபெயர்க்கப்படுகிறது..." : selectedLang === "bn" ? "বাংলায় অনুবাদ হচ্ছে..." : "Translating..."}
               </p>
               <p className="text-sm mt-1" style={{ color: darkMode ? "hsl(0 0% 55%)" : "hsl(var(--muted-foreground))" }}>
-                Translating to Hindi
+                Translating to {selectedLang === "hi" ? "Hindi" : selectedLang === "mr" ? "Marathi" : selectedLang === "ta" ? "Tamil" : selectedLang === "bn" ? "Bengali" : selectedLang}
               </p>
             </div>
             <div className="space-y-2">
