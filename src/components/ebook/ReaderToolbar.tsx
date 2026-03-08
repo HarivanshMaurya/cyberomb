@@ -14,6 +14,8 @@ import {
   Type,
   Maximize,
   Minimize,
+  Languages,
+  Loader2,
 } from "lucide-react";
 
 interface ReaderToolbarProps {
@@ -37,6 +39,9 @@ interface ReaderToolbarProps {
   onTtsResume: () => void;
   onTtsStop: () => void;
   onTtsCycleSpeed: () => void;
+  isTranslated: boolean;
+  isTranslating: boolean;
+  onToggleTranslate: () => void;
 }
 
 const FONT_SIZES = [14, 16, 18, 20, 22];
@@ -90,6 +95,9 @@ export function ReaderToolbar({
   onTtsResume,
   onTtsStop,
   onTtsCycleSpeed,
+  isTranslated,
+  isTranslating,
+  onToggleTranslate,
 }: ReaderToolbarProps) {
   const currentIdx = FONT_SIZES.indexOf(fontSize);
   const canDecrease = currentIdx > 0;
@@ -158,6 +166,14 @@ export function ReaderToolbar({
           </ToolbarButton>
           <ToolbarButton onClick={onToggleBookmark} title={isBookmarked ? "Remove bookmark" : "Bookmark"} darkMode={darkMode} active={isBookmarked}>
             {isBookmarked ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={onToggleTranslate}
+            title={isTranslated ? "Show Original" : "Translate to Hindi"}
+            darkMode={darkMode}
+            active={isTranslated}
+          >
+            {isTranslating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
           </ToolbarButton>
         </div>
 

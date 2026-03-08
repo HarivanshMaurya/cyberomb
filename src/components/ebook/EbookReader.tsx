@@ -10,6 +10,8 @@ import { useReadingAnalytics } from "@/hooks/useReadingAnalytics";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, BookOpen, Bookmark } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface Chapter {
   title: string;
@@ -38,6 +40,10 @@ function easeInOutCubic(t: number): number {
 export function EbookReader({ chapters, bookTitle, bookSlug = "default", productId, coverImage, userEmail, onClose }: EbookReaderProps) {
   const isMobile = useIsMobile();
   const [showCover, setShowCover] = useState(true);
+  const [isTranslated, setIsTranslated] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translatedChapters, setTranslatedChapters] = useState<Chapter[] | null>(null);
+  const activeChapters = isTranslated && translatedChapters ? translatedChapters : chapters;
 
   // Persisted preferences
   const [darkMode, setDarkMode] = useState(() => {
@@ -50,7 +56,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     try { return JSON.parse(localStorage.getItem(getStorageKey(bookSlug, "bookmarks")) || "[]"); } catch { return []; }
   });
 
-  const pages = useBookPagination(chapters, fontSize);
+  const pages = useBookPagination(activeChapters, fontSize);
   const pagesPerSpread = isMobile ? 1 : 2;
   const totalSpreads = Math.ceil(pages.length / pagesPerSpread);
 
@@ -451,6 +457,34 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     tts.stop();
   }, [tts]);
 
+  // Translation handler
+  const handleToggleTranslate = useCallback(async () => {
+    if (isTranslated) {
+      setIsTranslated(false);
+      return;
+    }
+    if (translatedChapters) {
+      setIsTranslated(true);
+      return;
+    }
+    setIsTranslating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-ebook', {
+        body: { chapters, targetLang: 'hi' },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setTranslatedChapters(data.chapters);
+      setIsTranslated(true);
+      toast({ title: 'अनुवाद पूरा हुआ', description: 'पुस्तक हिंदी में अनुवादित हो गई है' });
+    } catch (err: any) {
+      console.error('Translation error:', err);
+      toast({ title: 'Translation Failed', description: err.message || 'Could not translate', variant: 'destructive' });
+    } finally {
+      setIsTranslating(false);
+    }
+  }, [isTranslated, translatedChapters, chapters]);
+
   // Cleanup animation frame on unmount
   useEffect(() => {
     return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
@@ -527,6 +561,9 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         onTtsResume={tts.resume}
         onTtsStop={handleTtsStop}
         onTtsCycleSpeed={tts.cycleSpeed}
+        isTranslated={isTranslated}
+        isTranslating={isTranslating}
+        onToggleTranslate={handleToggleTranslate}
       />
 
       {/* Reading progress bar */}
