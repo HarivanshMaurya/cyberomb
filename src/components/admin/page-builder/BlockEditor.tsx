@@ -1,4 +1,4 @@
-import { PageBlock, HeroBlock, RichTextBlock, TextImageBlock, FeatureCardsBlock, ImageGalleryBlock, TestimonialsBlock, FAQBlock, CTABlock, BlockStyleSettings, BlockAnimation, DEFAULT_STYLE } from './types';
+import { PageBlock, HeroBlock, RichTextBlock, TextImageBlock, FeatureCardsBlock, ImageGalleryBlock, TestimonialsBlock, FAQBlock, CTABlock, BlockStyleSettings, BlockAnimation, BlockWidth, BlockBorderStyle, BlockShadow, DEFAULT_STYLE } from './types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
