@@ -264,31 +264,7 @@ All colors MUST be HSL.
   }
 
   /* eBook Reader 3D page flip animations */
-  .ebook-flip-next-3d {
-    animation: ebookFlip3dNext 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-
-  .ebook-flip-prev-3d {
-    animation: ebookFlip3dPrev 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-
-  @keyframes ebookFlip3dNext {
-    0% { transform: rotateY(0deg) scale(1); opacity: 1; }
-    15% { transform: rotateY(-3deg) scale(0.99); opacity: 0.95; }
-    40% { transform: rotateY(-12deg) scale(0.97) translateX(-2%); opacity: 0.6; }
-    60% { transform: rotateY(-8deg) scale(0.98) translateX(-1%); opacity: 0.75; }
-    80% { transform: rotateY(3deg) scale(0.995); opacity: 0.9; }
-    100% { transform: rotateY(0deg) scale(1); opacity: 1; }
-  }
-
-  @keyframes ebookFlip3dPrev {
-    0% { transform: rotateY(0deg) scale(1); opacity: 1; }
-    15% { transform: rotateY(3deg) scale(0.99); opacity: 0.95; }
-    40% { transform: rotateY(12deg) scale(0.97) translateX(2%); opacity: 0.6; }
-    60% { transform: rotateY(8deg) scale(0.98) translateX(1%); opacity: 0.75; }
-    80% { transform: rotateY(-3deg) scale(0.995); opacity: 0.9; }
-    100% { transform: rotateY(0deg) scale(1); opacity: 1; }
-  }
+  /* Page flip styles — animation is JS-driven via transform */
 
   /* Slide-in for side panels */
   @keyframes slideInRight {
