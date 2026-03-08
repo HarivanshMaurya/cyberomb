@@ -48,6 +48,7 @@ import DatabaseBrowser from "./pages/admin/DatabaseBrowser";
 import UserManagement from "./pages/admin/UserManagement";
 import AnalyticsDashboard from "./pages/admin/AnalyticsDashboard";
 import SiteSettingsHub from "./pages/admin/SiteSettingsHub";
+import ResetPassword from "./pages/ResetPassword";
 const queryClient = new QueryClient();
 
 const App = () => (
