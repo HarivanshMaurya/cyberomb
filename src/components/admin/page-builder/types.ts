@@ -82,6 +82,7 @@ export interface ImageGalleryBlock {
   heading: string;
   columns: 2 | 3 | 4;
   images: GalleryImage[];
+  style?: BlockStyleSettings;
 }
 
 export interface Testimonial {
