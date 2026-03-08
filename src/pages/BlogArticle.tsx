@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import ArticleCard from "@/components/ArticleCard";
 import ArticleHeader from "@/components/blog/ArticleHeader";
 import CategorySidebar from "@/components/blog/CategorySidebar";
-import MobileShareButtons from "@/components/blog/MobileShareButtons";
+import ShareButtons from "@/components/blog/ShareButtons";
 import LanguageToggle from "@/components/blog/LanguageToggle";
 import SEOHead, { buildArticleJsonLd, buildBreadcrumbJsonLd } from "@/components/SEOHead";
 import { ArrowLeft, Loader2 } from "lucide-react";
