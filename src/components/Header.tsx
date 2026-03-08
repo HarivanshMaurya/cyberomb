@@ -9,6 +9,7 @@ import cyberomLogo from "@/assets/cyberom-logo.png";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,6 +29,10 @@ const Header = () => {
     const shouldBeDark = savedTheme === "dark" || (!savedTheme && prefersDark);
     setIsDark(shouldBeDark);
     if (shouldBeDark) document.documentElement.classList.add("dark");
+
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleTheme = () => {
@@ -50,7 +55,7 @@ const Header = () => {
   const isAdminPage = location.pathname.startsWith('/admin');
 
   return (
-    <header className="sticky top-0 z-50 py-2 sm:py-4">
+    <header className={`sticky top-0 z-50 py-2 sm:py-4 transition-colors duration-300 ${scrolled ? 'bg-background/80 backdrop-blur-md shadow-sm' : ''}`}>
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16 pill-nav px-4 sm:px-6">
           <div className="flex items-center min-w-0">
