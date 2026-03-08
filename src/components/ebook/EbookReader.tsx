@@ -460,7 +460,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     tts.stop();
   }, [tts]);
 
-  // Translation handler - langName passed from toolbar
+  // Translation handler - batch translate 3 chapters at a time with real progress
   const handleTranslate = useCallback(async (langCode: string, langName?: string) => {
     if (isTranslating) return;
     
@@ -478,26 +478,40 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     
     setIsTranslating(true);
     setSelectedLang(langCode);
-    setTranslationProgress({ current: 0, total: 1 });
+    
+    const BATCH_SIZE = 3;
+    const totalBatches = Math.ceil(chapters.length / BATCH_SIZE);
+    setTranslationProgress({ current: 0, total: chapters.length });
     
     try {
-      const { data, error } = await supabase.functions.invoke('translate-ebook', {
-        body: { chapters, targetLang: langCode, langName: langName || langCode },
-      });
+      const allTranslated: { title: string; content: string }[] = [];
       
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      for (let batchIdx = 0; batchIdx < totalBatches; batchIdx++) {
+        const start = batchIdx * BATCH_SIZE;
+        const batchChapters = chapters.slice(start, start + BATCH_SIZE);
+        
+        const { data, error } = await supabase.functions.invoke('translate-ebook', {
+          body: { chapters: batchChapters, targetLang: langCode, langName: langName || langCode },
+        });
+        
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        
+        const translated = data?.chapters || batchChapters;
+        allTranslated.push(...translated);
+        
+        // Update real progress
+        setTranslationProgress({ current: allTranslated.length, total: chapters.length });
+      }
       
-      const translated = data?.chapters || chapters;
-      setTranslationProgress({ current: 1, total: 1 });
-      setTranslationCache(prev => ({ ...prev, [langCode]: translated }));
+      setTranslationCache(prev => ({ ...prev, [langCode]: allTranslated }));
       setIsTranslated(true);
       const langLabel = langName || langCode;
       toast({ title: 'अनुवाद पूरा हुआ ✅', description: `${chapters.length} अध्याय ${langLabel} में अनुवादित हो गए` });
       
-      // Save translation to DB for instant access next time (fire and forget)
+      // Save translation to DB for instant access next time
       if (productId) {
-        const updatedTranslations = { ...translationCache, [langCode]: translated };
+        const updatedTranslations = { ...translationCache, [langCode]: allTranslated };
         supabase
           .from("products" as any)
           .update({ translations: updatedTranslations } as any)
@@ -611,23 +625,32 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
             </div>
             <div>
               <p className="text-lg font-serif font-bold" style={{ color: darkMode ? "hsl(36 44% 92%)" : "hsl(var(--foreground))" }}>
-                {selectedLang === "hi" ? "हिंदी में अनुवाद हो रहा है..." : selectedLang === "mr" ? "मराठी मध्ये अनुवाद होत आहे..." : selectedLang === "ta" ? "தமிழில் மொழிபெயர்க்கப்படுகிறது..." : selectedLang === "bn" ? "বাংলায় অনুবাদ হচ্ছে..." : "Translating..."}
+                Translating...
               </p>
-              <p className="text-sm mt-1" style={{ color: darkMode ? "hsl(0 0% 55%)" : "hsl(var(--muted-foreground))" }}>
-                {chapters.length} chapters • Please wait a moment
+              <p className="text-sm mt-1 font-medium" style={{ color: darkMode ? "hsl(0 0% 65%)" : "hsl(var(--muted-foreground))" }}>
+                {translationProgress.total > 0
+                  ? `${translationProgress.current} / ${translationProgress.total} chapters done`
+                  : "Preparing..."}
               </p>
             </div>
-            <div className="h-2 rounded-full overflow-hidden" style={{ background: darkMode ? "hsl(0 0% 18%)" : "hsl(var(--muted))" }}>
+            <div className="h-2.5 rounded-full overflow-hidden" style={{ background: darkMode ? "hsl(0 0% 18%)" : "hsl(var(--muted))" }}>
               <div
-                className="h-full rounded-full animate-pulse"
+                className="h-full rounded-full transition-all duration-700 ease-out"
                 style={{
-                  width: "70%",
+                  width: translationProgress.total > 0 
+                    ? `${Math.max(5, (translationProgress.current / translationProgress.total) * 100)}%`
+                    : "5%",
                   background: darkMode
                     ? "linear-gradient(90deg, hsl(36 44% 55%), hsl(36 60% 65%))"
                     : "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))",
                 }}
               />
             </div>
+            <p className="text-xs" style={{ color: darkMode ? "hsl(0 0% 45%)" : "hsl(var(--muted-foreground) / 0.7)" }}>
+              {translationProgress.total > 0 
+                ? `${Math.round((translationProgress.current / translationProgress.total) * 100)}% complete`
+                : "Starting translation..."}
+            </p>
           </div>
         </div>
       )}
