@@ -45,6 +45,7 @@ const PageSectionsEditor = () => {
       case 'wellness': return <Heart className="h-4 w-4" />;
       case 'travel': return <Plane className="h-4 w-4" />;
       case 'about': return <Info className="h-4 w-4" />;
+      case 'contact': return <MessageSquare className="h-4 w-4" />;
       default: return <FileText className="h-4 w-4" />;
     }
   };
