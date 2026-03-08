@@ -404,80 +404,252 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         onTouchEnd={handleTouchEnd}
       >
         <div
-          className="w-full max-w-5xl h-full max-h-[85vh] flex relative"
-          style={{ perspective: "2500px", borderRadius: "4px" }}
+          className="w-full max-w-5xl h-full max-h-[85vh] flex relative overflow-hidden"
+          style={{ perspective: "2000px", borderRadius: "4px" }}
         >
           {/* Book spine */}
           {!isMobile && (
             <div
-              className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-6 z-10 pointer-events-none"
+              className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-6 z-30 pointer-events-none"
               style={{
                 background: `linear-gradient(to right, ${spineShadow}, ${darkMode ? "hsl(0 0% 0% / 0.35)" : "hsl(var(--shadow-soft) / 0.2)"}, ${spineShadow})`,
               }}
             />
           )}
 
-          {/* Page flip wrapper */}
-          <div
-            className={`flex w-full h-full ${
-              isFlipping && flipDirection === "next"
-                ? "ebook-flip-next-3d"
-                : isFlipping && flipDirection === "prev"
-                  ? "ebook-flip-prev-3d"
-                  : ""
-            }`}
-            style={{ transformStyle: "preserve-3d" }}
-          >
+          {/* === STATIC BASE PAGES (always visible underneath) === */}
+          <div className="flex w-full h-full absolute inset-0">
+            {/* Left page */}
             <div className="flex-1 flex cursor-default" onClick={(e) => handlePageClick(e, "left")}>
               <BookPageView
-                page={leftPage}
+                page={isFlipping && flipDirection === "next" ? flipFromPages[0] : isFlipping && flipDirection === "prev" ? flipToPages[0] : leftPage}
                 totalPages={pages.length}
                 side={isMobile ? "single" : "left"}
                 darkMode={darkMode}
                 fontSize={fontSize}
                 watermark={userEmail || undefined}
-                highlightSentenceIndex={tts.highlightIndex}
-                sentences={tts.sentences}
+                highlightSentenceIndex={!isFlipping ? tts.highlightIndex : -1}
+                sentences={!isFlipping ? tts.sentences : []}
               />
             </div>
+            {/* Right page */}
             {!isMobile && (
               <div className="flex-1 flex cursor-default" onClick={(e) => handlePageClick(e, "right")}>
                 <BookPageView
-                  page={rightPage}
+                  page={isFlipping && flipDirection === "next" ? flipToPages[1] : isFlipping && flipDirection === "prev" ? flipFromPages[1] : rightPage}
                   totalPages={pages.length}
                   side="right"
                   darkMode={darkMode}
                   fontSize={fontSize}
                   watermark={userEmail || undefined}
-                  highlightSentenceIndex={tts.highlightIndex}
-                  sentences={tts.sentences}
+                  highlightSentenceIndex={!isFlipping ? tts.highlightIndex : -1}
+                  sentences={!isFlipping ? tts.sentences : []}
                 />
               </div>
             )}
           </div>
 
+          {/* === FLIPPING PAGE (3D animated) === */}
+          {isFlipping && flipDirection === "next" && !isMobile && (
+            <>
+              {/* The right page lifting and flipping to become new left page */}
+              <div
+                className="absolute top-0 bottom-0 right-0 z-20 overflow-hidden"
+                style={{
+                  width: "50%",
+                  transformOrigin: "left center",
+                  transform: `rotateY(${-180 * flipProgress}deg)`,
+                  transformStyle: "preserve-3d",
+                  transition: "none",
+                }}
+              >
+                {/* Front face: current right page */}
+                <div
+                  className="absolute inset-0"
+                  style={{ backfaceVisibility: "hidden" }}
+                >
+                  <BookPageView
+                    page={flipFromPages[1]}
+                    totalPages={pages.length}
+                    side="right"
+                    darkMode={darkMode}
+                    fontSize={fontSize}
+                    watermark={userEmail || undefined}
+                  />
+                </div>
+                {/* Back face: next left page */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backfaceVisibility: "hidden",
+                    transform: "rotateY(180deg)",
+                  }}
+                >
+                  <BookPageView
+                    page={flipToPages[0]}
+                    totalPages={pages.length}
+                    side="left"
+                    darkMode={darkMode}
+                    fontSize={fontSize}
+                    watermark={userEmail || undefined}
+                  />
+                </div>
+              </div>
+              {/* Shadow on the page underneath */}
+              <div
+                className="absolute top-0 bottom-0 z-15 pointer-events-none"
+                style={{
+                  left: "50%",
+                  width: "50%",
+                  background: `linear-gradient(to right, hsl(0 0% 0% / ${0.3 * Math.sin(flipProgress * Math.PI)}), transparent 60%)`,
+                  opacity: flipProgress < 0.5 ? 1 : 1 - (flipProgress - 0.5) * 2,
+                }}
+              />
+              {/* Shadow from the flipping page onto left side */}
+              <div
+                className="absolute top-0 bottom-0 z-15 pointer-events-none"
+                style={{
+                  right: "50%",
+                  width: "50%",
+                  background: `linear-gradient(to left, hsl(0 0% 0% / ${0.15 * Math.sin(flipProgress * Math.PI)}), transparent 40%)`,
+                }}
+              />
+            </>
+          )}
+
+          {isFlipping && flipDirection === "prev" && !isMobile && (
+            <>
+              {/* The left page flipping back from left to right */}
+              <div
+                className="absolute top-0 bottom-0 left-0 z-20 overflow-hidden"
+                style={{
+                  width: "50%",
+                  transformOrigin: "right center",
+                  transform: `rotateY(${180 * flipProgress}deg)`,
+                  transformStyle: "preserve-3d",
+                  transition: "none",
+                }}
+              >
+                {/* Front face: current left page */}
+                <div
+                  className="absolute inset-0"
+                  style={{ backfaceVisibility: "hidden" }}
+                >
+                  <BookPageView
+                    page={flipFromPages[0]}
+                    totalPages={pages.length}
+                    side="left"
+                    darkMode={darkMode}
+                    fontSize={fontSize}
+                    watermark={userEmail || undefined}
+                  />
+                </div>
+                {/* Back face: prev right page */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backfaceVisibility: "hidden",
+                    transform: "rotateY(180deg)",
+                  }}
+                >
+                  <BookPageView
+                    page={flipToPages[1]}
+                    totalPages={pages.length}
+                    side="right"
+                    darkMode={darkMode}
+                    fontSize={fontSize}
+                    watermark={userEmail || undefined}
+                  />
+                </div>
+              </div>
+              {/* Shadow */}
+              <div
+                className="absolute top-0 bottom-0 z-15 pointer-events-none"
+                style={{
+                  right: "50%",
+                  width: "50%",
+                  background: `linear-gradient(to left, hsl(0 0% 0% / ${0.3 * Math.sin(flipProgress * Math.PI)}), transparent 60%)`,
+                  opacity: flipProgress < 0.5 ? 1 : 1 - (flipProgress - 0.5) * 2,
+                }}
+              />
+            </>
+          )}
+
+          {/* Mobile: single page flip */}
+          {isFlipping && isMobile && (
+            <>
+              <div
+                className="absolute inset-0 z-20"
+                style={{
+                  transformOrigin: flipDirection === "next" ? "left center" : "right center",
+                  transform: `rotateY(${flipDirection === "next" ? -180 * flipProgress : 180 * flipProgress}deg)`,
+                  transformStyle: "preserve-3d",
+                  transition: "none",
+                }}
+              >
+                <div className="absolute inset-0" style={{ backfaceVisibility: "hidden" }}>
+                  <BookPageView
+                    page={flipFromPages[0]}
+                    totalPages={pages.length}
+                    side="single"
+                    darkMode={darkMode}
+                    fontSize={fontSize}
+                    watermark={userEmail || undefined}
+                  />
+                </div>
+                <div className="absolute inset-0" style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
+                  <BookPageView
+                    page={flipToPages[0]}
+                    totalPages={pages.length}
+                    side="single"
+                    darkMode={darkMode}
+                    fontSize={fontSize}
+                    watermark={userEmail || undefined}
+                  />
+                </div>
+              </div>
+              {/* Shadow */}
+              <div
+                className="absolute inset-0 z-15 pointer-events-none"
+                style={{
+                  background: `hsl(0 0% 0% / ${0.15 * Math.sin(flipProgress * Math.PI)})`,
+                }}
+              />
+            </>
+          )}
+
           {/* Corner fold indicators */}
           {!isMobile && !isFlipping && currentSpread < totalSpreads - 1 && (
             <div
-              className="absolute bottom-0 right-0 w-8 h-8 z-20 cursor-pointer opacity-40 hover:opacity-80 transition-opacity"
+              className="absolute bottom-0 right-0 w-10 h-10 z-20 cursor-pointer group"
               onClick={goNext}
               title="Turn page"
-              style={{
-                background: `linear-gradient(135deg, transparent 50%, ${darkMode ? "hsl(36 30% 30%)" : "hsl(36 30% 80%)"} 50%)`,
-                borderRadius: "0 0 4px 0",
-              }}
-            />
+            >
+              <div
+                className="w-full h-full transition-all duration-200 group-hover:w-14 group-hover:h-14 absolute bottom-0 right-0"
+                style={{
+                  background: `linear-gradient(135deg, transparent 40%, ${darkMode ? "hsl(36 25% 25%)" : "hsl(36 30% 82%)"} 40%, ${darkMode ? "hsl(36 20% 30%)" : "hsl(36 25% 88%)"})`,
+                  borderRadius: "0 0 4px 0",
+                  boxShadow: `-2px -2px 4px hsl(0 0% 0% / 0.1)`,
+                }}
+              />
+            </div>
           )}
           {!isMobile && !isFlipping && currentSpread > 0 && (
             <div
-              className="absolute bottom-0 left-0 w-8 h-8 z-20 cursor-pointer opacity-40 hover:opacity-80 transition-opacity"
+              className="absolute bottom-0 left-0 w-10 h-10 z-20 cursor-pointer group"
               onClick={goPrev}
               title="Previous page"
-              style={{
-                background: `linear-gradient(-135deg, transparent 50%, ${darkMode ? "hsl(36 30% 30%)" : "hsl(36 30% 80%)"} 50%)`,
-                borderRadius: "0 0 0 4px",
-              }}
-            />
+            >
+              <div
+                className="w-full h-full transition-all duration-200 group-hover:w-14 group-hover:h-14 absolute bottom-0 left-0"
+                style={{
+                  background: `linear-gradient(-135deg, transparent 40%, ${darkMode ? "hsl(36 25% 25%)" : "hsl(36 30% 82%)"} 40%, ${darkMode ? "hsl(36 20% 30%)" : "hsl(36 25% 88%)"})`,
+                  borderRadius: "0 0 0 4px",
+                  boxShadow: `2px -2px 4px hsl(0 0% 0% / 0.1)`,
+                }}
+              />
+            </div>
           )}
         </div>
       </div>
