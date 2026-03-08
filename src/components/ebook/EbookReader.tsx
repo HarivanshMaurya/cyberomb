@@ -407,7 +407,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         ttsPlaying={tts.isPlaying}
         ttsPaused={tts.isPaused}
         ttsSpeed={tts.speed}
-        ttsLangLabel={tts.currentLangLabel}
+        ttsLangLabel={contentLang === "hi" ? "हिंदी" : "EN"}
         onTtsPlay={handleTtsPlay}
         onTtsPause={tts.pause}
         onTtsResume={tts.resume}
