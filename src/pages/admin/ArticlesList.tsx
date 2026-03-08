@@ -97,24 +97,25 @@ import { format } from 'date-fns';
                  <TableRow>
                    <TableHead>Title</TableHead>
                    <TableHead>Category</TableHead>
-                   <TableHead>Status</TableHead>
-                   <TableHead>Date</TableHead>
-                   <TableHead className="text-right">Actions</TableHead>
-                 </TableRow>
-               </TableHeader>
-               <TableBody>
-                 {filteredArticles?.map((article) => (
-                   <TableRow key={article.id}>
-                     <TableCell>
-                       <Link
-                         to={`/admin/articles/${article.id}`}
-                         className="font-medium hover:text-primary transition-colors"
-                       >
-                         {article.title}
-                       </Link>
-                     </TableCell>
-                     <TableCell className="capitalize">{article.category}</TableCell>
-                     <TableCell>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Scheduled</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredArticles?.map((article) => (
+                    <TableRow key={article.id}>
+                      <TableCell>
+                        <Link
+                          to={`/admin/articles/${article.id}`}
+                          className="font-medium hover:text-primary transition-colors"
+                        >
+                          {article.title}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="capitalize">{article.category}</TableCell>
+                      <TableCell>
                         <span
                           className={`text-xs px-2 py-1 rounded-full ${
                             article.status === 'published'
@@ -128,9 +129,19 @@ import { format } from 'date-fns';
                         >
                           {article.status === 'scheduled' ? `📅 ${article.status}` : article.status}
                         </span>
-                     </TableCell>
-                     <TableCell>
-                       {new Date(article.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(article.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {article.status === 'scheduled' && article.published_at ? (
+                          <div className="flex items-center gap-1 text-xs text-blue-600">
+                            <CalendarIcon className="h-3 w-3" />
+                            {format(new Date(article.published_at), 'MMM dd, yyyy HH:mm')}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
                      </TableCell>
                      <TableCell className="text-right">
                        <div className="flex items-center justify-end gap-2">
