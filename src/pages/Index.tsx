@@ -27,7 +27,7 @@ const Index = () => {
     : staticArticles.slice(0, 6);
 
   const newsletterContent = newsletterSection?.content as { heading?: string; description?: string; button_text?: string } | null;
-  const footerContent = footerSection?.content as { copyright?: string } | null;
+  const footerContent = footerSection?.content as { copyright?: string; brand_description?: string; newsletter_placeholder?: string } | null;
 
   return (
     <div className="min-h-screen bg-background animate-fade-in">
@@ -87,13 +87,13 @@ const Index = () => {
                 Cyberom
               </a>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-                Exploring ideas, finding inspiration. A space for wellness, creativity, travel, and personal growth.
+                {footerContent?.brand_description || 'Exploring ideas, finding inspiration. A space for wellness, creativity, travel, and personal growth.'}
               </p>
               {/* Newsletter mini */}
               <div className="flex gap-2 max-w-xs">
                 <input
                   type="email"
-                  placeholder="Your email"
+                  placeholder={footerContent?.newsletter_placeholder || "Your email"}
                   className="flex-1 px-4 py-2.5 rounded-full border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
                 />
                 <button className="px-4 py-2.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all">
