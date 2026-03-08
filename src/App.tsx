@@ -116,6 +116,7 @@ const App = () => (
               <Route path="seo" element={<SEOSettings />} />
               <Route path="products" element={<ProductsManager />} />
                <Route path="subscribers" element={<SubscribersManager />} />
+               <Route path="contact-messages" element={<ContactMessages />} />
               <Route path="database" element={<DatabaseBrowser />} />
                <Route path="users" element={<UserManagement />} />
                <Route path="analytics" element={<AnalyticsDashboard />} />

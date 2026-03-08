@@ -518,4 +518,173 @@ const AboutEditor = ({
   );
 };
 
+// Contact page editor
+const ContactEditor = ({ content, onChange }: { content: any; onChange: (key: string, value: any) => void }) => {
+  const faqs = content?.faqs || [
+    { q: "", a: "" },
+  ];
+
+  const updateFaq = (index: number, field: string, value: string) => {
+    const updated = [...faqs];
+    updated[index] = { ...updated[index], [field]: value };
+    onChange('faqs', updated);
+  };
+
+  const addFaq = () => {
+    onChange('faqs', [...faqs, { q: "", a: "" }]);
+  };
+
+  const removeFaq = (index: number) => {
+    onChange('faqs', faqs.filter((_: any, i: number) => i !== index));
+  };
+
+  return (
+    <div className="space-y-6 border-t pt-4">
+      {/* Hero Section */}
+      <div className="space-y-4">
+        <h3 className="font-semibold">Hero Section</h3>
+        <div>
+          <Label>Hero Badge Text</Label>
+          <Input
+            value={content?.hero_badge || ''}
+            onChange={(e) => onChange('hero_badge', e.target.value)}
+            placeholder="Contact"
+            className="mt-1"
+          />
+        </div>
+      </div>
+
+      {/* Contact Info */}
+      <div className="space-y-4">
+        <h3 className="font-semibold">Contact Information</h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <Label>Email Address</Label>
+            <Input
+              value={content?.email || ''}
+              onChange={(e) => onChange('email', e.target.value)}
+              placeholder="hello@cyberom.blog"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label>Email Subtitle</Label>
+            <Input
+              value={content?.email_sub || ''}
+              onChange={(e) => onChange('email_sub', e.target.value)}
+              placeholder="We'll respond within 24 hours"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label>Location</Label>
+            <Input
+              value={content?.location || ''}
+              onChange={(e) => onChange('location', e.target.value)}
+              placeholder="India"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label>Location Subtitle</Label>
+            <Input
+              value={content?.location_sub || ''}
+              onChange={(e) => onChange('location_sub', e.target.value)}
+              placeholder="Remote-first team"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label>Phone Number</Label>
+            <Input
+              value={content?.phone || ''}
+              onChange={(e) => onChange('phone', e.target.value)}
+              placeholder="+91 98765 43210"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label>Phone Subtitle</Label>
+            <Input
+              value={content?.phone_sub || ''}
+              onChange={(e) => onChange('phone_sub', e.target.value)}
+              placeholder="Mon-Fri, 9am-6pm IST"
+              className="mt-1"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Form Section */}
+      <div className="space-y-4">
+        <h3 className="font-semibold">Form Section</h3>
+        <div>
+          <Label>Form Title</Label>
+          <Input
+            value={content?.form_title || ''}
+            onChange={(e) => onChange('form_title', e.target.value)}
+            placeholder="Send a Message"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Button Text</Label>
+          <Input
+            value={content?.button_text || ''}
+            onChange={(e) => onChange('button_text', e.target.value)}
+            placeholder="Send Message"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>FAQ Section Title</Label>
+          <Input
+            value={content?.faq_title || ''}
+            onChange={(e) => onChange('faq_title', e.target.value)}
+            placeholder="FAQ"
+            className="mt-1"
+          />
+        </div>
+      </div>
+
+      {/* FAQs */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold">FAQs</h3>
+          <Button type="button" variant="outline" size="sm" onClick={addFaq}>
+            <Plus className="h-3 w-3 mr-1" /> Add FAQ
+          </Button>
+        </div>
+        <div className="space-y-3">
+          {faqs.map((faq: any, index: number) => (
+            <Card key={index}>
+              <CardContent className="pt-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>FAQ #{index + 1}</Label>
+                  {faqs.length > 1 && (
+                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeFaq(index)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+                <Input
+                  placeholder="Question"
+                  value={faq.q || ''}
+                  onChange={(e) => updateFaq(index, 'q', e.target.value)}
+                />
+                <Textarea
+                  placeholder="Answer"
+                  value={faq.a || ''}
+                  onChange={(e) => updateFaq(index, 'a', e.target.value)}
+                  rows={2}
+                />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default PageSectionsEditor;
