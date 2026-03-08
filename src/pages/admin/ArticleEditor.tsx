@@ -67,21 +67,27 @@ export default function ArticleEditor() {
  
    useEffect(() => {
      if (article && !isNew) {
-       setFormData({
-         title: article.title,
-         slug: article.slug,
-         excerpt: article.excerpt || '',
-         content: article.content || '',
-         featured_image: article.featured_image || '',
-         category: article.category,
-         author_name: article.author_name || '',
-         status: article.status as 'draft' | 'published' | 'archived',
-         read_time: article.read_time || '5 min read',
-         meta_title: article.meta_title || '',
-         meta_description: article.meta_description || '',
-         og_image: article.og_image || '',
-       });
-     }
+        setFormData({
+          title: article.title,
+          slug: article.slug,
+          excerpt: article.excerpt || '',
+          content: article.content || '',
+          featured_image: article.featured_image || '',
+          category: article.category,
+          author_name: article.author_name || '',
+          status: article.status as 'draft' | 'published' | 'archived' | 'scheduled',
+          read_time: article.read_time || '5 min read',
+          meta_title: article.meta_title || '',
+          meta_description: article.meta_description || '',
+          og_image: article.og_image || '',
+        });
+        // Load scheduled date if status is scheduled
+        if (article.status === 'scheduled' && article.published_at) {
+          const d = new Date(article.published_at);
+          setScheduledDate(d);
+          setScheduledTime(format(d, 'HH:mm'));
+        }
+      }
    }, [article, isNew]);
  
    const generateSlug = (title: string) => {
