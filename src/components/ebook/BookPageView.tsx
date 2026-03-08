@@ -1,4 +1,5 @@
 import { BookPage } from "./useBookPagination";
+import React from "react";
 
 interface BookPageViewProps {
   page: BookPage | null;
@@ -6,9 +7,15 @@ interface BookPageViewProps {
   side?: "left" | "right" | "single";
   darkMode?: boolean;
   fontSize?: number;
+  watermark?: string;
+  highlightSentenceIndex?: number;
+  sentences?: string[];
 }
 
-export function BookPageView({ page, totalPages, side = "single", darkMode = false, fontSize = 16 }: BookPageViewProps) {
+export function BookPageView({
+  page, totalPages, side = "single", darkMode = false, fontSize = 16,
+  watermark, highlightSentenceIndex = -1, sentences = [],
+}: BookPageViewProps) {
   const bg = darkMode ? "hsl(0 0% 14%)" : "hsl(var(--surface-elevated))";
   const fg = darkMode ? "hsl(36 44% 88%)" : "hsl(var(--foreground))";
   const mutedFg = darkMode ? "hsl(0 0% 45%)" : "hsl(var(--muted-foreground))";
@@ -34,9 +41,18 @@ export function BookPageView({ page, totalPages, side = "single", darkMode = fal
     );
   }
 
+  // Build highlighted content if TTS is active
+  let displayContent = page.content;
+  if (highlightSentenceIndex >= 0 && sentences.length > 0 && highlightSentenceIndex < sentences.length) {
+    const currentSentence = sentences[highlightSentenceIndex];
+    // Try to find and highlight in the clean text
+    const escapedSentence = currentSentence.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // We'll add a highlight class via CSS instead of modifying HTML directly
+  }
+
   return (
     <div
-      className={`flex-1 flex flex-col overflow-hidden relative
+      className={`flex-1 flex flex-col overflow-hidden relative ebook-protected
         ${side === "left" ? "rounded-l-sm" : side === "right" ? "rounded-r-sm" : "rounded-sm"}`}
       style={{
         background: bg,
@@ -51,6 +67,7 @@ export function BookPageView({ page, totalPages, side = "single", darkMode = fal
               ? `inset 4px 0 8px -4px ${shadowSoft}`
               : "none",
       }}
+      onContextMenu={(e) => e.preventDefault()}
     >
       {/* Chapter title at start */}
       {page.isChapterStart && page.chapterTitle && (
@@ -74,7 +91,6 @@ export function BookPageView({ page, totalPages, side = "single", darkMode = fal
             fontFamily: "'Georgia', 'Times New Roman', serif",
             fontSize: `${fontSize * 0.059}rem`,
             color: fg,
-            // Override prose defaults for dark mode
             ...(darkMode ? {
               '--tw-prose-headings': fg,
               '--tw-prose-body': fg,
@@ -83,9 +99,27 @@ export function BookPageView({ page, totalPages, side = "single", darkMode = fal
               '--tw-prose-quote-borders': primaryC,
             } as React.CSSProperties : {}),
           }}
-          dangerouslySetInnerHTML={{ __html: page.content }}
+          dangerouslySetInnerHTML={{ __html: displayContent }}
         />
       </div>
+
+      {/* Watermark */}
+      {watermark && (
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
+          style={{
+            transform: "rotate(-30deg)",
+            opacity: 0.04,
+            fontSize: "3rem",
+            fontFamily: "monospace",
+            color: fg,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+          }}
+        >
+          {watermark}
+        </div>
+      )}
 
       {/* Page number */}
       <div className="absolute bottom-0 inset-x-0 py-3 text-center">
