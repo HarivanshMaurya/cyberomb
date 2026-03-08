@@ -38,6 +38,7 @@ export default function PageEditor() {
   const [sections, setSections] = useState<PageBlock[]>([]);
   const [editorMode, setEditorMode] = useState<'builder' | 'classic'>('builder');
   const [showPreview, setShowPreview] = useState(false);
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
   useEffect(() => {
     if (page && !isNew) {
