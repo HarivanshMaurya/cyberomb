@@ -51,12 +51,7 @@ interface ReaderToolbarProps {
 
 const FONT_SIZES = [14, 16, 18, 20, 22];
 
-const LANGUAGES = [
-  { code: "hi", label: "हिंदी", sublabel: "Hindi" },
-  { code: "mr", label: "मराठी", sublabel: "Marathi" },
-  { code: "ta", label: "தமிழ்", sublabel: "Tamil" },
-  { code: "bn", label: "বাংলা", sublabel: "Bengali" },
-];
+// Languages are now fetched from database
 
 const ToolbarButton = ({ 
   onClick, title, darkMode, active, children, className = "" 
