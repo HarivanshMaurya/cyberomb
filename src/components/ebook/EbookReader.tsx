@@ -40,6 +40,10 @@ function easeInOutCubic(t: number): number {
 export function EbookReader({ chapters, bookTitle, bookSlug = "default", productId, coverImage, userEmail, onClose }: EbookReaderProps) {
   const isMobile = useIsMobile();
   const [showCover, setShowCover] = useState(true);
+  const [isTranslated, setIsTranslated] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translatedChapters, setTranslatedChapters] = useState<Chapter[] | null>(null);
+  const activeChapters = isTranslated && translatedChapters ? translatedChapters : chapters;
 
   // Persisted preferences
   const [darkMode, setDarkMode] = useState(() => {
