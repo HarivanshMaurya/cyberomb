@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, Product } from "@/hooks/useProducts";
+import { useActiveTranslationLanguages } from "@/hooks/useTranslationLanguages";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,9 +11,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Plus, Pencil, Trash2, BookOpen, X } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen, X, Languages, Loader2, Check } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 
 const emptyForm = {
   title: "",
@@ -32,7 +36,8 @@ const emptyForm = {
 };
 
 const ProductsManager = () => {
-  const { data: products, isLoading } = useProducts();
+  const { data: products, isLoading, refetch } = useProducts();
+  const { data: activeLangs = [] } = useActiveTranslationLanguages();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
@@ -43,6 +48,77 @@ const ProductsManager = () => {
   const [newGalleryUrl, setNewGalleryUrl] = useState("");
   const [newTocTitle, setNewTocTitle] = useState("");
   const [newTocPage, setNewTocPage] = useState("");
+  const [preTranslating, setPreTranslating] = useState<string | null>(null);
+  const [preTranslateProgress, setPreTranslateProgress] = useState({ langIdx: 0, batchIdx: 0, totalBatches: 0, langName: "", totalLangs: 0 });
+
+  // Pre-translate all chapters for all active languages
+  const handlePreTranslate = async (product: Product) => {
+    if (preTranslating || !product.chapters?.length || !activeLangs.length) return;
+    setPreTranslating(product.id);
+    
+    const BATCH_SIZE = 3;
+    const allTranslations: Record<string, { title: string; content: string }[]> = {};
+    
+    // Load existing translations from DB
+    try {
+      const { data: existing } = await supabase
+        .from("products" as any)
+        .select("translations")
+        .eq("id", product.id)
+        .single();
+      if (existing && (existing as any).translations) {
+        Object.assign(allTranslations, (existing as any).translations);
+      }
+    } catch {}
+    
+    let failed = false;
+    
+    for (let langIdx = 0; langIdx < activeLangs.length; langIdx++) {
+      const lang = activeLangs[langIdx];
+      
+      // Skip if already translated
+      if (allTranslations[lang.code]?.length === product.chapters.length) continue;
+      
+      const totalBatches = Math.ceil(product.chapters.length / BATCH_SIZE);
+      setPreTranslateProgress({ langIdx: langIdx + 1, batchIdx: 0, totalBatches, langName: lang.sublabel, totalLangs: activeLangs.length });
+      
+      const translated: { title: string; content: string }[] = [];
+      
+      for (let b = 0; b < totalBatches; b++) {
+        setPreTranslateProgress(prev => ({ ...prev, batchIdx: b + 1 }));
+        const batch = product.chapters.slice(b * BATCH_SIZE, (b + 1) * BATCH_SIZE);
+        
+        try {
+          const { data, error } = await supabase.functions.invoke('translate-ebook', {
+            body: { chapters: batch, targetLang: lang.code, langName: `${lang.label} (${lang.sublabel})` },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          translated.push(...(data?.chapters || batch));
+        } catch (err: any) {
+          console.error(`Pre-translate failed for ${lang.code} batch ${b}:`, err);
+          toast.error(`Failed translating ${lang.sublabel}: ${err.message}`);
+          failed = true;
+          break;
+        }
+      }
+      
+      if (failed) break;
+      allTranslations[lang.code] = translated;
+      
+      // Save after each language completes
+      await supabase
+        .from("products" as any)
+        .update({ translations: allTranslations } as any)
+        .eq("id", product.id);
+    }
+    
+    setPreTranslating(null);
+    if (!failed) {
+      toast.success(`All ${activeLangs.length} languages pre-translated & saved! Users will get instant translation now.`);
+      refetch();
+    }
+  };
 
   const openCreate = () => {
     setEditingId(null);
@@ -353,8 +429,33 @@ const ProductsManager = () => {
                   <p className="text-sm text-muted-foreground">
                     ₹{p.price.toLocaleString('en-IN')} • {p.author || "No author"} • /{p.slug || "no-slug"}
                   </p>
+                  {/* Pre-translate progress */}
+                  {preTranslating === p.id && (
+                    <div className="mt-2 space-y-1">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <span>Translating {preTranslateProgress.langName} ({preTranslateProgress.langIdx}/{preTranslateProgress.totalLangs}) — batch {preTranslateProgress.batchIdx}/{preTranslateProgress.totalBatches}</span>
+                      </div>
+                      <Progress value={preTranslateProgress.totalBatches > 0 ? (preTranslateProgress.batchIdx / preTranslateProgress.totalBatches) * 100 : 0} className="h-1.5" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePreTranslate(p)}
+                    disabled={!!preTranslating || !p.chapters?.length}
+                    title="Pre-translate all languages for instant user experience"
+                    className="gap-1.5"
+                  >
+                    {preTranslating === p.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Languages className="h-4 w-4" />
+                    )}
+                    <span className="hidden sm:inline">Pre-Translate</span>
+                  </Button>
                   <Button variant="outline" size="icon" onClick={() => openEdit(p)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
