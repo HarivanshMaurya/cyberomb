@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import SEOHead from '@/components/SEOHead';
+import { BlockRenderer } from '@/components/page-blocks/BlockRenderer';
+import { PageBlock } from '@/components/admin/page-builder/types';
 import { Loader2 } from 'lucide-react';
 
 export default function DynamicPage() {
@@ -49,6 +51,10 @@ export default function DynamicPage() {
     );
   }
 
+  const raw = page as any;
+  const sections: PageBlock[] = Array.isArray(raw.sections) && raw.sections.length > 0 ? raw.sections : [];
+  const hasBuilder = sections.length > 0;
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
@@ -58,17 +64,24 @@ export default function DynamicPage() {
         ogImage={page.og_image || undefined}
       />
       <Header />
-      <main className="max-w-4xl mx-auto px-4 py-12">
-        <article>
-          <h1 className="text-4xl md:text-5xl font-bold mb-8">{page.title}</h1>
-          {page.content && (
-            <div
-              className="prose prose-lg max-w-none"
-              dangerouslySetInnerHTML={{ __html: page.content }}
-            />
-          )}
-        </article>
-      </main>
+
+      {hasBuilder ? (
+        <main>
+          <BlockRenderer blocks={sections} />
+        </main>
+      ) : (
+        <main className="max-w-4xl mx-auto px-4 py-12">
+          <article>
+            <h1 className="text-4xl md:text-5xl font-bold mb-8">{page.title}</h1>
+            {page.content && (
+              <div
+                className="prose prose-lg max-w-none"
+                dangerouslySetInnerHTML={{ __html: page.content }}
+              />
+            )}
+          </article>
+        </main>
+      )}
     </div>
   );
 }
