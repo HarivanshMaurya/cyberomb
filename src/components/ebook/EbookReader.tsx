@@ -482,7 +482,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     
     try {
       const { data, error } = await supabase.functions.invoke('translate-ebook', {
-        body: { chapters, targetLang: langCode },
+        body: { chapters, targetLang: langCode, langName: langName || langCode },
       });
       
       if (error) throw error;
