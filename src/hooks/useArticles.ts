@@ -12,7 +12,7 @@
    category: string;
    author_id: string | null;
    author_name: string | null;
-   status: 'draft' | 'published' | 'archived';
+   status: 'draft' | 'published' | 'archived' | 'scheduled';
    read_time: string | null;
    meta_title: string | null;
    meta_description: string | null;
