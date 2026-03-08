@@ -319,6 +319,22 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
         <ToolbarButton active={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} title="Numbered List">
           <ListOrdered className="h-4 w-4" />
         </ToolbarButton>
+        <ToolbarButton
+          active={false}
+          disabled={!editor.can().sinkListItem('listItem')}
+          onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
+          title="Increase Indent (Tab)"
+        >
+          <Indent className="h-4 w-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          active={false}
+          disabled={!editor.can().liftListItem('listItem')}
+          onClick={() => editor.chain().focus().liftListItem('listItem').run()}
+          title="Decrease Indent (Shift+Tab)"
+        >
+          <Outdent className="h-4 w-4" />
+        </ToolbarButton>
         <ToolbarButton active={editor.isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()} title="Blockquote">
           <Quote className="h-4 w-4" />
         </ToolbarButton>
