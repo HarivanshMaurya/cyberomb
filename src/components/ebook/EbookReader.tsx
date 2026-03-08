@@ -561,6 +561,9 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         onTtsResume={tts.resume}
         onTtsStop={handleTtsStop}
         onTtsCycleSpeed={tts.cycleSpeed}
+        isTranslated={isTranslated}
+        isTranslating={isTranslating}
+        onToggleTranslate={handleToggleTranslate}
       />
 
       {/* Reading progress bar */}
