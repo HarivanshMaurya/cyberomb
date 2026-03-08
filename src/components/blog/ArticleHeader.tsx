@@ -1,25 +1,27 @@
  import { Facebook, Twitter, Linkedin, Link2 } from "lucide-react";
  import { toast } from "sonner";
  
- interface ArticleHeaderProps {
-   title: string;
-   excerpt: string | null;
-   category: string;
-   authorName: string | null;
-   formattedDate: string;
-   readTime: string | null;
-   getCategoryClass: (cat: string) => string;
- }
+interface ArticleHeaderProps {
+  title: string;
+  excerpt: string | null;
+  category: string;
+  authorName: string | null;
+  authorImage: string | null;
+  formattedDate: string;
+  readTime: string | null;
+  getCategoryClass: (cat: string) => string;
+}
  
- const ArticleHeader = ({
-   title,
-   excerpt,
-   category,
-   authorName,
-   formattedDate,
-   readTime,
-   getCategoryClass,
- }: ArticleHeaderProps) => {
+const ArticleHeader = ({
+  title,
+  excerpt,
+  category,
+  authorName,
+  authorImage,
+  formattedDate,
+  readTime,
+  getCategoryClass,
+}: ArticleHeaderProps) => {
    const handleCopyLink = () => {
      navigator.clipboard.writeText(window.location.href);
      toast.success("Link copied to clipboard!");
@@ -53,11 +55,15 @@
        {/* Author Info */}
        <div className="flex items-center justify-between border-t border-b border-border py-6">
          <div className="flex items-center gap-4">
-           <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
-             <span className="text-xl font-bold text-muted-foreground">
-               {authorName?.charAt(0) || 'A'}
-             </span>
-           </div>
+            <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+              {authorImage ? (
+                <img src={authorImage} alt={authorName || 'Author'} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xl font-bold text-muted-foreground">
+                  {authorName?.charAt(0) || 'A'}
+                </span>
+              )}
+            </div>
            <div>
              <p className="font-semibold">{authorName || 'Anonymous'}</p>
              <p className="text-sm text-muted-foreground">Author</p>
