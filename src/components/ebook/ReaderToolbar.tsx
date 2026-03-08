@@ -98,6 +98,7 @@ function LanguageDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { data: languages = [] } = useActiveTranslationLanguages();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -106,8 +107,6 @@ function LanguageDropdown({
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
-
-  const activeLang = LANGUAGES.find((l) => l.code === selectedLang);
 
   return (
     <div ref={ref} className="relative">
