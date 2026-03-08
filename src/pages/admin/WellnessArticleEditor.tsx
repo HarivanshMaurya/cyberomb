@@ -39,6 +39,8 @@ export default function WellnessArticleEditor() {
     meta_description: '',
     og_image: '',
   });
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>(undefined);
+  const [scheduledTime, setScheduledTime] = useState('09:00');
 
   useEffect(() => {
     if (article && !isNew) {
