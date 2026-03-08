@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import ArticleCard from "@/components/ArticleCard";
 import ArticleHeader from "@/components/blog/ArticleHeader";
 import CategorySidebar from "@/components/blog/CategorySidebar";
-import MobileShareButtons from "@/components/blog/MobileShareButtons";
+import ShareButtons from "@/components/blog/ShareButtons";
 import LanguageToggle from "@/components/blog/LanguageToggle";
 import SEOHead, { buildArticleJsonLd, buildBreadcrumbJsonLd } from "@/components/SEOHead";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -206,7 +206,7 @@ const BlogArticle = () => {
                 />
               ) : null}
 
-              <MobileShareButtons title={article.title} />
+              <ShareButtons title={article.title} variant="floating" />
 
               <aside className="mb-16 rounded-2xl bg-card p-8 md:p-12 text-center">
                 <h3 className="text-2xl md:text-3xl font-bold mb-4">Enjoyed this article?</h3>

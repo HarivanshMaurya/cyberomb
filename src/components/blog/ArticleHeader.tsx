@@ -1,5 +1,5 @@
- import { Facebook, Twitter, Linkedin, Link2 } from "lucide-react";
- import { toast } from "sonner";
+import { toast } from "sonner";
+import ShareButtons from "./ShareButtons";
  
 interface ArticleHeaderProps {
   title: string;
@@ -70,43 +70,7 @@ const ArticleHeader = ({
            </div>
          </div>
  
-         {/* Share Buttons */}
-         <div className="hidden md:flex items-center gap-2">
-           <button
-             onClick={handleCopyLink}
-             className="w-10 h-10 rounded-full border border-border hover:border-primary hover:bg-muted transition-all flex items-center justify-center"
-             aria-label="Copy link"
-           >
-             <Link2 className="w-4 h-4" />
-           </button>
-           <a
-             href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(window.location.href)}`}
-             target="_blank"
-             rel="noopener noreferrer"
-             className="w-10 h-10 rounded-full border border-border hover:border-primary hover:bg-muted transition-all flex items-center justify-center"
-             aria-label="Share on Twitter"
-           >
-             <Twitter className="w-4 h-4" />
-           </a>
-           <a
-             href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
-             target="_blank"
-             rel="noopener noreferrer"
-             className="w-10 h-10 rounded-full border border-border hover:border-primary hover:bg-muted transition-all flex items-center justify-center"
-             aria-label="Share on Facebook"
-           >
-             <Facebook className="w-4 h-4" />
-           </a>
-           <a
-             href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
-             target="_blank"
-             rel="noopener noreferrer"
-             className="w-10 h-10 rounded-full border border-border hover:border-primary hover:bg-muted transition-all flex items-center justify-center"
-             aria-label="Share on LinkedIn"
-           >
-             <Linkedin className="w-4 h-4" />
-           </a>
-         </div>
+          <ShareButtons title={title} variant="inline" />
        </div>
      </div>
    );
