@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Instagram, Facebook, Linkedin, ArrowRight, Play, ChevronDown } from "lucide-react";
+import { Instagram, Facebook, Linkedin, Twitter, ArrowRight, Play, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeroContent } from "@/hooks/useHeroContent";
 import { Skeleton } from "@/components/ui/skeleton";
