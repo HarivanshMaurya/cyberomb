@@ -1,8 +1,34 @@
-import { useState, useEffect, useRef } from "react";
-import { Instagram, Facebook, Linkedin, Twitter, ArrowRight, Sparkles, MousePointer2 } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Instagram, Facebook, Linkedin, Twitter, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeroContent } from "@/hooks/useHeroContent";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const useAnimatedCounter = (target: number, duration = 2000, startDelay = 1000) => {
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const delayTimer = setTimeout(() => setStarted(true), startDelay);
+    return () => clearTimeout(delayTimer);
+  }, [startDelay]);
+
+  useEffect(() => {
+    if (!started) return;
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * target));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [started, target, duration]);
+
+  return count;
+};
 
 const AnimatedWord = ({ word, index, isVisible }: { word: string; index: number; isVisible: boolean }) => (
   <span
@@ -48,6 +74,7 @@ const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
+  const readerCount = useAnimatedCounter(5000, 2500, 1300);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 200);
@@ -305,7 +332,7 @@ const HeroSection = () => {
                         ))}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-foreground">5K+ Readers</p>
+                        <p className="text-sm font-bold text-foreground tabular-nums">{readerCount.toLocaleString()}+ Readers</p>
                         <p className="text-[11px] text-muted-foreground">Join our community</p>
                       </div>
                     </div>
@@ -355,7 +382,7 @@ const HeroSection = () => {
                       ))}
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-foreground">5K+ Readers</p>
+                      <p className="text-xs font-bold text-foreground tabular-nums">{readerCount.toLocaleString()}+ Readers</p>
                       <p className="text-[10px] text-muted-foreground">Join our community</p>
                     </div>
                   </div>
