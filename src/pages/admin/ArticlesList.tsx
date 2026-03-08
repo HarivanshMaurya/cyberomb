@@ -114,17 +114,19 @@
                      </TableCell>
                      <TableCell className="capitalize">{article.category}</TableCell>
                      <TableCell>
-                       <span
-                         className={`text-xs px-2 py-1 rounded-full ${
-                           article.status === 'published'
-                             ? 'bg-green-100 text-green-700'
-                             : article.status === 'draft'
-                             ? 'bg-yellow-100 text-yellow-700'
-                             : 'bg-gray-100 text-gray-700'
-                         }`}
-                       >
-                         {article.status}
-                       </span>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            article.status === 'published'
+                              ? 'bg-green-100 text-green-700'
+                              : article.status === 'scheduled'
+                              ? 'bg-blue-100 text-blue-700'
+                              : article.status === 'draft'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {article.status === 'scheduled' ? `📅 ${article.status}` : article.status}
+                        </span>
                      </TableCell>
                      <TableCell>
                        {new Date(article.created_at).toLocaleDateString()}
