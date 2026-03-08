@@ -47,7 +47,27 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", onClose
   const [flipDirection, setFlipDirection] = useState<"next" | "prev" | null>(null);
   const [showToc, setShowToc] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const touchStartX = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Fullscreen toggle
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen?.().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen?.().catch(() => {});
+      setIsFullscreen(false);
+    }
+  }, []);
+
+  // Sync fullscreen state on external exit (Esc key)
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
 
   // Persist preferences
   useEffect(() => {
