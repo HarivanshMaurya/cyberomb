@@ -85,8 +85,16 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
   const saveTimerRef = useRef<ReturnType<typeof setInterval>>();
   const animFrameRef = useRef<number>(0);
 
-  // TTS
+  // TTS - sync language with translation state
   const tts = useTextToSpeech();
+  
+  useEffect(() => {
+    if (isTranslated && selectedLang) {
+      tts.setLang(selectedLang);
+    } else {
+      tts.setLang("en");
+    }
+  }, [isTranslated, selectedLang]);
 
   // Resume reading position
   useEffect(() => {
