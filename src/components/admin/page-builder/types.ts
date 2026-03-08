@@ -111,6 +111,7 @@ export interface FAQBlock {
   heading: string;
   subtitle: string;
   items: FAQItem[];
+  style?: BlockStyleSettings;
 }
 
 export interface CTABlock {
