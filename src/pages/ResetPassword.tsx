@@ -114,7 +114,7 @@ export default function ResetPassword() {
                         <CheckCircle2 className="h-8 w-8 text-accent" />
                       </div>
                     </div>
-                    <h1 className="text-[1.75rem] font-serif font-bold tracking-tight text-foreground">Password Updated</h1>
+                    <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">Password Updated</h1>
                     <p className="text-sm text-muted-foreground mt-1.5">Your account is now secured with the new password</p>
                   </>
                 ) : !isValidSession ? (
