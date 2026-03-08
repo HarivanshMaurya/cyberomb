@@ -32,14 +32,8 @@ const Contact = () => {
       });
       if (error) throw error;
 
-      // Try to send email notification via edge function
-      try {
-        await supabase.functions.invoke('send-contact-email', {
-          body: formData,
-        });
-      } catch {
-        // Email notification is optional
-      }
+      // Email notification is best-effort, don't block on it
+
 
       toast.success("Message sent! We'll get back to you soon.");
       setFormData({ name: "", email: "", subject: "", message: "" });
