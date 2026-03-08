@@ -1,13 +1,16 @@
-import { PageBlock, HeroBlock, RichTextBlock, TextImageBlock, FeatureCardsBlock, ImageGalleryBlock, TestimonialsBlock, FAQBlock, CTABlock } from './types';
+import { PageBlock, HeroBlock, RichTextBlock, TextImageBlock, FeatureCardsBlock, ImageGalleryBlock, TestimonialsBlock, FAQBlock, CTABlock, BlockStyleSettings, BlockAnimation, DEFAULT_STYLE } from './types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { MediaPicker } from './MediaPicker';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Settings2 } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useState } from 'react';
 
 interface BlockEditorProps {
   block: PageBlock;
