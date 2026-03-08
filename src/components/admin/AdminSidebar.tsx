@@ -24,6 +24,7 @@ import {
   Shield,
   Settings2,
   Heart,
+  MessageSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
