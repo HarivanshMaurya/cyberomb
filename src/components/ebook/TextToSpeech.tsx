@@ -4,18 +4,45 @@ import { Volume2, Pause, Square, Play } from "lucide-react";
 
 const SPEEDS = [0.75, 1, 1.25, 1.5];
 
+// Map language codes to BCP-47 speech synthesis language tags
+const LANG_MAP: Record<string, string> = {
+  en: "en-US",
+  hi: "hi-IN",
+  mr: "mr-IN",
+  ta: "ta-IN",
+  bn: "bn-IN",
+  ja: "ja-JP",
+  zh: "zh-CN",
+  es: "es-ES",
+  fr: "fr-FR",
+  de: "de-DE",
+  ko: "ko-KR",
+  ar: "ar-SA",
+  pt: "pt-BR",
+  ru: "ru-RU",
+  it: "it-IT",
+};
+
 export function useTextToSpeech() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [highlightIndex, setHighlightIndex] = useState(-1);
+  const [currentLang, setCurrentLang] = useState("en");
   const sentencesRef = useRef<string[]>([]);
   const currentIdxRef = useRef(0);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const autoNextRef = useRef<(() => void) | null>(null);
+  const langRef = useRef("en");
+
+  const setLang = useCallback((lang: string) => {
+    langRef.current = lang;
+    setCurrentLang(lang);
+  }, []);
 
   const splitSentences = (text: string): string[] => {
     const clean = text.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    // Split on Hindi purna viram (।) as well as English punctuation
     return clean.split(/(?<=[।.!?])\s+/).filter((s) => s.trim().length > 0);
   };
 
@@ -30,7 +57,7 @@ export function useTextToSpeech() {
 
     const utt = new SpeechSynthesisUtterance(sentencesRef.current[idx]);
     utt.rate = speed;
-    utt.lang = "en-US";
+    utt.lang = LANG_MAP[langRef.current] || langRef.current;
     utt.onend = () => {
       currentIdxRef.current = idx + 1;
       speakSentence(idx + 1);
