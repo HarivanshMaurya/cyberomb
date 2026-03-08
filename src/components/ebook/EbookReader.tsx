@@ -35,12 +35,6 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
   const isMobile = useIsMobile();
   const [showCover, setShowCover] = useState(true);
 
-  // Language state — controls both content translation and TTS
-  const [contentLang, setContentLang] = useState<"en" | "hi">("hi");
-  const [translatedChapters, setTranslatedChapters] = useState<Chapter[] | null>(null);
-  const [isTranslating, setIsTranslating] = useState(false);
-  const translationCacheRef = useRef<Record<string, Chapter[]>>({});
-
   // Persisted preferences
   const [darkMode, setDarkMode] = useState(() => {
     try { return localStorage.getItem(getStorageKey(bookSlug, "dark")) === "true"; } catch { return false; }
@@ -52,55 +46,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     try { return JSON.parse(localStorage.getItem(getStorageKey(bookSlug, "bookmarks")) || "[]"); } catch { return []; }
   });
 
-  // Translate chapters when Hindi is selected
-  useEffect(() => {
-    if (contentLang === "en") {
-      setTranslatedChapters(null);
-      return;
-    }
-    // Check cache
-    if (translationCacheRef.current[contentLang]) {
-      setTranslatedChapters(translationCacheRef.current[contentLang]);
-      return;
-    }
-    // Translate all chapters in parallel
-    let cancelled = false;
-    (async () => {
-      setIsTranslating(true);
-      try {
-        const translationPromises = chapters.map(async (chapter) => {
-          const { data, error } = await supabase.functions.invoke("translate-article", {
-            body: {
-              title: chapter.title,
-              content: chapter.content,
-              excerpt: "",
-              targetLang: contentLang,
-            },
-          });
-          if (error) throw error;
-          return {
-            title: data.title || chapter.title,
-            content: data.content || chapter.content,
-          } as Chapter;
-        });
-        const translated = await Promise.all(translationPromises);
-        if (!cancelled) {
-          translationCacheRef.current[contentLang] = translated;
-          setTranslatedChapters(translated);
-        }
-      } catch (err) {
-        console.error("Translation error:", err);
-        if (!cancelled) setTranslatedChapters(null);
-      } finally {
-        if (!cancelled) setIsTranslating(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [contentLang, chapters]);
-
-  // Active chapters based on language
-  const activeChapters = contentLang === "en" ? chapters : (translatedChapters || chapters);
-  const pages = useBookPagination(activeChapters, fontSize);
+  const pages = useBookPagination(chapters, fontSize);
   const pagesPerSpread = isMobile ? 1 : 2;
   const totalSpreads = Math.ceil(pages.length / pagesPerSpread);
 
