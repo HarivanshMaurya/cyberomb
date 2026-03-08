@@ -14,7 +14,6 @@ import { PageBlock } from '@/components/admin/page-builder/types';
 import { Loader2, Save, ArrowLeft, Eye, EyeOff, LayoutGrid, FileText, Monitor, Tablet, Smartphone } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { PAGE_TEMPLATES } from '@/components/admin/page-builder/templates';
-import { supabase } from '@/integrations/supabase/client';
 
 export default function PageEditor() {
   const { id } = useParams();
