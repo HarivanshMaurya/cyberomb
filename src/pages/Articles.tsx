@@ -29,78 +29,47 @@ const Articles = () => {
       />
       <Header />
       
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-16">
-        {/* Header */}
-        <header className="mb-12 space-y-3 animate-slide-down">
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Hero */}
+        <header className="mb-16 text-center space-y-6">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight animate-slide-down">
             All Articles
           </h1>
-          <p className="text-base text-muted-foreground max-w-xl leading-relaxed">
-            Explore our collection of articles covering wellness, travel, creativity, personal growth, and more.
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-slide-up stagger-1">
+            Explore our collection of articles covering wellness, travel, creativity, personal growth, and more. 
+            Find inspiration and insights to enrich your life.
           </p>
         </header>
 
         {/* Category Filter */}
-        <nav className="mb-10 flex flex-wrap gap-1.5 animate-slide-up stagger-1" aria-label="Category filter">
-          <button
-            className={cn(
-              "text-[13px] font-medium px-3 py-1.5 rounded-lg transition-colors",
-              selectedCategory === null
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted"
-            )}
-            onClick={() => setSelectedCategory(null)}
-          >
-            All
-          </button>
+        <nav className="mb-8 flex flex-wrap gap-2 justify-center animate-slide-up stagger-2" aria-label="Category filter">
+          <Button variant="outline" size="sm" className={cn("rounded-full transition-all", selectedCategory === null && "bg-primary text-primary-foreground hover:bg-primary/90")} onClick={() => setSelectedCategory(null)}>All</Button>
           {categoriesLoading ? (
-            <>{[1,2,3,4].map(i => <Skeleton key={i} className="h-8 w-16 rounded-lg" />)}</>
+            <>{[1,2,3,4].map(i => <Skeleton key={i} className="h-8 w-20 rounded-full" />)}</>
           ) : (
             categories?.map(category => (
-              <button
-                key={category.id}
-                className={cn(
-                  "text-[13px] font-medium px-3 py-1.5 rounded-lg transition-colors",
-                  selectedCategory?.toLowerCase() === category.slug.toLowerCase()
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
-                onClick={() => setSelectedCategory(category.slug)}
-              >
+              <Button key={category.id} variant="outline" size="sm" className={cn("rounded-full transition-all", selectedCategory?.toLowerCase() === category.slug.toLowerCase() && "bg-primary text-primary-foreground hover:bg-primary/90")} onClick={() => setSelectedCategory(category.slug)}>
                 {category.name}
-              </button>
+              </Button>
             ))
           )}
         </nav>
 
         {/* Grid */}
         {isLoading ? (
-          <div className="flex items-center justify-center h-[40vh]">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          <div className="flex items-center justify-center h-[40vh]"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
         ) : filteredArticles && filteredArticles.length > 0 ? (
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10" aria-label="Articles list">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" aria-label="Articles list">
             {filteredArticles.map((article, index) => (
               <div key={article.id} className={`animate-slide-up stagger-${Math.min(index + 1, 6)}`}>
-                <ArticleCard
-                  id={article.slug}
-                  title={article.title}
-                  category={article.category}
-                  date={new Date(article.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  image={article.featured_image || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&q=80'}
-                  size="small"
-                />
+                <ArticleCard id={article.slug} title={article.title} category={article.category} date={new Date(article.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} image={article.featured_image || 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&q=80'} size="small" />
               </div>
             ))}
           </section>
         ) : (
-          <div className="text-center py-20">
-            <p className="text-muted-foreground">No articles found{selectedCategory ? ` in "${selectedCategory}"` : ''}.</p>
-            {selectedCategory && (
-              <button className="mt-3 text-sm font-medium text-foreground underline underline-offset-4" onClick={() => setSelectedCategory(null)}>
-                View all articles
-              </button>
-            )}
+          <div className="text-center py-16">
+            <p className="text-xl text-muted-foreground">No articles found{selectedCategory ? ` in ${selectedCategory}` : ''}.</p>
+            {selectedCategory && <Button className="mt-4" onClick={() => setSelectedCategory(null)}>View all articles</Button>}
           </div>
         )}
       </main>
