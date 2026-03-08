@@ -114,6 +114,14 @@ const ProductsManager = () => {
               },
             });
             
+            // Check for credits exhausted (402) - stop immediately, no retry
+            const errMsg = error?.message || data?.error || "";
+            if (errMsg.includes("402") || errMsg.toLowerCase().includes("credits exhausted") || errMsg.toLowerCase().includes("add credits")) {
+              toast.error("⚠️ AI credits khatam ho gaye hain. Pehle credits add karo phir dobara try karo.");
+              failed = true;
+              break;
+            }
+            
             if (error) throw error;
             if (data?.error) throw new Error(data.error);
             
@@ -125,7 +133,14 @@ const ProductsManager = () => {
               throw new Error("Empty translation returned");
             }
           } catch (err: any) {
-            console.error(`Chapter ${chIdx + 1} attempt ${attempt + 1} failed:`, err.message);
+            const msg = err?.message || "";
+            // Also catch 402 in generic catch
+            if (msg.includes("402") || msg.toLowerCase().includes("credits")) {
+              toast.error("⚠️ AI credits khatam ho gaye hain. Credits add karo phir try karo.");
+              failed = true;
+              break;
+            }
+            console.error(`Chapter ${chIdx + 1} attempt ${attempt + 1} failed:`, msg);
             if (attempt === 2) {
               toast.error(`Failed: Chapter ${chIdx + 1} "${chapter.title}" in ${lang.sublabel}`);
             }
