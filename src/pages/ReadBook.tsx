@@ -15,6 +15,7 @@ interface ReaderProduct {
   slug: string | null;
   image: string | null;
   chapters: { title: string; content: string }[];
+  translations: Record<string, { title: string; content: string }[]>;
 }
 
 const ReadBook = () => {
@@ -26,7 +27,7 @@ const ReadBook = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products" as any)
-        .select("id, title, slug, chapters, image")
+        .select("id, title, slug, chapters, image, translations")
         .eq("slug", slug)
         .eq("is_active", true)
         .single();
@@ -38,6 +39,7 @@ const ReadBook = () => {
         slug: raw.slug,
         image: raw.image,
         chapters: Array.isArray(raw.chapters) ? raw.chapters : [],
+        translations: raw.translations && typeof raw.translations === 'object' ? raw.translations : {},
       } as ReaderProduct;
     },
     enabled: !!slug,
