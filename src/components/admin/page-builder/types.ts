@@ -8,6 +8,23 @@ export type BlockType =
   | 'faq'
   | 'cta';
 
+export type BlockAnimation = 'none' | 'fade-in' | 'slide-up' | 'slide-left' | 'slide-right' | 'scale-in' | 'zoom-in';
+
+export interface BlockSpacing {
+  paddingTop: number;
+  paddingBottom: number;
+  marginTop: number;
+  marginBottom: number;
+}
+
+export interface BlockStyleSettings {
+  spacing: BlockSpacing;
+  animation: BlockAnimation;
+}
+
+export const DEFAULT_SPACING: BlockSpacing = { paddingTop: 0, paddingBottom: 0, marginTop: 0, marginBottom: 0 };
+export const DEFAULT_STYLE: BlockStyleSettings = { spacing: DEFAULT_SPACING, animation: 'none' };
+
 export interface HeroBlock {
   type: 'hero';
   id: string;
