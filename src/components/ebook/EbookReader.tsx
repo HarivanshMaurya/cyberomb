@@ -641,9 +641,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
                 Translating...
               </p>
               <p className="text-sm mt-1 font-medium" style={{ color: darkMode ? "hsl(0 0% 65%)" : "hsl(var(--muted-foreground))" }}>
-                {translationProgress.total > 0
-                  ? `${translationProgress.current} / ${translationProgress.total} chapters done`
-                  : "Preparing..."}
+                पूरी किताब अनुवादित हो रही है...
               </p>
             </div>
             <div className="h-2.5 rounded-full overflow-hidden" style={{ background: darkMode ? "hsl(0 0% 18%)" : "hsl(var(--muted))" }}>
