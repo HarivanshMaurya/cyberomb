@@ -486,47 +486,41 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     
     setIsTranslating(true);
     setSelectedLang(langCode);
-    setTranslationProgress({ current: 0, total: chapters.length });
+    setTranslationProgress({ current: 0, total: 1 });
     
     try {
-      const allTranslated: { title: string; content: string }[] = [];
+      // Send ALL chapters in one call - translate entire book at once
+      const { data, error } = await supabase.functions.invoke('translate-ebook', {
+        body: { chapters, targetLang: langCode, langName: langName || langCode },
+      });
       
-      for (let i = 0; i < chapters.length; i++) {
-        const { data, error } = await supabase.functions.invoke('translate-ebook', {
-          body: { chapters: [chapters[i]], targetLang: langCode, langName: langName || langCode },
-        });
-        
-        // Handle edge function errors - read the response body for details
-        if (error) {
-          let errorBody: any = null;
-          try {
-            // FunctionsHttpError has a context property with the Response
-            if ('context' in error && error.context instanceof Response) {
-              errorBody = await error.context.json();
-            }
-          } catch (_) { /* ignore parse errors */ }
-          
-          const errMsg = errorBody?.error || error.message || "";
-          if (errMsg.includes("402") || errMsg.toLowerCase().includes("credits exhausted") || errMsg.toLowerCase().includes("add credits")) {
-            throw new Error("AI credits khatam ho gaye hain. Kripya baad mein try karein.");
+      // Handle edge function errors
+      if (error) {
+        let errorBody: any = null;
+        try {
+          if ('context' in error && error.context instanceof Response) {
+            errorBody = await error.context.json();
           }
-          throw new Error(errMsg || "Translation failed");
-        }
-        if (data?.error) throw new Error(data.error);
+        } catch (_) {}
         
-        if (data?.chapters?.[0]) {
-          allTranslated.push(data.chapters[0]);
-        } else {
-          throw new Error(`Chapter ${i + 1} translation returned empty`);
+        const errMsg = errorBody?.error || error.message || "";
+        if (errMsg.includes("402") || errMsg.toLowerCase().includes("credits exhausted") || errMsg.toLowerCase().includes("add credits")) {
+          throw new Error("AI credits khatam ho gaye hain. Kripya baad mein try karein.");
         }
-        
-        setTranslationProgress({ current: allTranslated.length, total: chapters.length });
+        throw new Error(errMsg || "Translation failed");
+      }
+      if (data?.error) throw new Error(data.error);
+      
+      const allTranslated = data?.chapters;
+      if (!allTranslated || !Array.isArray(allTranslated) || allTranslated.length === 0) {
+        throw new Error("Translation returned empty result");
       }
       
+      setTranslationProgress({ current: 1, total: 1 });
       setTranslationCache(prev => ({ ...prev, [langCode]: allTranslated }));
       setIsTranslated(true);
       const langLabel = langName || langCode;
-      toast({ title: 'अनुवाद पूरा हुआ ✅', description: `${chapters.length} अध्याय ${langLabel} में अनुवादित हो गए` });
+      toast({ title: 'अनुवाद पूरा हुआ ✅', description: `पूरी किताब ${langLabel} में अनुवादित हो गई` });
       
       // Save translation to DB for instant access next time
       if (productId) {
