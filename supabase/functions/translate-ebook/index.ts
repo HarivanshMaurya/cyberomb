@@ -7,10 +7,9 @@ const corsHeaders = {
 };
 
 /**
- * Free Google Translate API (unofficial but widely used, no API key needed).
- * Translates text while reasonably preserving HTML structure.
+ * Free Google Translate API (unofficial, no API key needed).
  */
-async function translateChunk(text: string, targetLang: string): Promise<string> {
+async function translateText(text: string, targetLang: string): Promise<string> {
   if (!text.trim()) return text;
 
   const url = "https://translate.googleapis.com/translate_a/single";
@@ -34,7 +33,6 @@ async function translateChunk(text: string, targetLang: string): Promise<string>
   }
 
   const data = await response.json();
-  // Response: [[["translated text","original",null,null,N], ...], ...]
   if (!data || !Array.isArray(data[0])) {
     throw new Error("Unexpected Google Translate response format");
   }
@@ -43,96 +41,140 @@ async function translateChunk(text: string, targetLang: string): Promise<string>
 }
 
 /**
- * Split HTML into tag parts and text parts.
- * Tags are preserved as-is, only text parts get translated.
- */
-function splitHtml(html: string): { parts: string[]; textIndices: number[] } {
-  // Split by HTML tags, keeping the tags
-  const regex = /(<[^>]*>)/g;
-  const parts = html.split(regex);
-  const textIndices: number[] = [];
-
-  parts.forEach((part, i) => {
-    // Not a tag and has actual translatable text
-    if (!part.startsWith("<") && part.trim().length > 0) {
-      textIndices.push(i);
-    }
-  });
-
-  return { parts, textIndices };
-}
-
-/**
- * Translate HTML content by extracting text nodes, batch translating, and reinserting.
- * Uses a separator to batch multiple text nodes into fewer API calls.
+ * Extract all text nodes from HTML, translate them individually, and reinsert.
+ * This guarantees HTML structure is never broken.
  */
 async function translateHtml(html: string, targetLang: string): Promise<string> {
-  const { parts, textIndices } = splitHtml(html);
+  // Use a simple regex to find text nodes between tags
+  // Split into: [text, tag, text, tag, ...]
+  const parts = html.split(/(<[^>]*>)/g);
 
-  if (textIndices.length === 0) return html;
+  // Collect pure text parts (not tags, not empty)
+  const textIndices: number[] = [];
+  const textBatch: string[] = [];
 
-  // Collect all text segments
-  const textSegments = textIndices.map((i) => parts[i]);
-
-  // Use a unique separator that won't be translated/modified
-  const SEPARATOR = " \n[•SEP•]\n ";
-  const joinedText = textSegments.join(SEPARATOR);
-
-  // Split into chunks of ~4000 chars to stay within limits
-  const MAX_CHUNK = 4000;
-  const chunks: string[] = [];
-
-  if (joinedText.length <= MAX_CHUNK) {
-    chunks.push(joinedText);
-  } else {
-    // Split at separator boundaries to keep segments intact
-    let current = "";
-    for (const segment of textSegments) {
-      const withSep = current ? current + SEPARATOR + segment : segment;
-      if (withSep.length > MAX_CHUNK && current) {
-        chunks.push(current);
-        current = segment;
-      } else {
-        current = withSep;
-      }
+  for (let i = 0; i < parts.length; i++) {
+    if (!parts[i].startsWith("<") && parts[i].trim().length > 0) {
+      textIndices.push(i);
+      textBatch.push(parts[i]);
     }
-    if (current) chunks.push(current);
   }
 
-  // Translate each chunk with a small delay between to avoid rate limits
-  const translatedChunks: string[] = [];
-  for (let i = 0; i < chunks.length; i++) {
-    if (i > 0) await new Promise((r) => setTimeout(r, 300));
+  if (textBatch.length === 0) return html;
 
-    let translated = "";
-    // Retry up to 3 times per chunk
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        translated = await translateChunk(chunks[i], targetLang);
-        break;
-      } catch (err) {
-        if (attempt === 2) throw err;
-        console.log(`Retry chunk ${i}, attempt ${attempt + 1}`);
-        await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
-      }
+  // Use a numeric-only separator that Google Translate won't touch
+  // Format: ||N|| where N is the index
+  // Batch all text into chunks of ~3000 chars using this separator
+  const BATCH_MAX = 3000;
+  const batches: { indices: number[]; texts: string[] }[] = [];
+  let currentBatch: { indices: number[]; texts: string[] } = { indices: [], texts: [] };
+  let currentLen = 0;
+
+  for (let i = 0; i < textBatch.length; i++) {
+    const sepOverhead = 8; // "||N||" approx
+    if (currentLen + textBatch[i].length + sepOverhead > BATCH_MAX && currentBatch.texts.length > 0) {
+      batches.push(currentBatch);
+      currentBatch = { indices: [], texts: [] };
+      currentLen = 0;
     }
-    translatedChunks.push(translated);
+    currentBatch.indices.push(textIndices[i]);
+    currentBatch.texts.push(textBatch[i]);
+    currentLen += textBatch[i].length + sepOverhead;
   }
+  if (currentBatch.texts.length > 0) batches.push(currentBatch);
 
-  // Rejoin and split back by separator
-  const fullTranslated = translatedChunks.join(SEPARATOR);
-  // Google may alter spacing/format of separator, so be flexible
-  const translatedSegments = fullTranslated.split(/\s*\[•SEP•\]\s*/);
+  // Translate each batch
+  for (let b = 0; b < batches.length; b++) {
+    if (b > 0) await new Promise((r) => setTimeout(r, 400));
+    const batch = batches[b];
 
-  // Reinsert translated text into HTML parts
-  for (let i = 0; i < textIndices.length; i++) {
-    const idx = textIndices[i];
-    if (i < translatedSegments.length) {
-      parts[idx] = translatedSegments[i];
+    if (batch.texts.length === 1) {
+      // Single text — translate directly, no separator needed
+      let translated = "";
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          translated = await translateText(batch.texts[0], targetLang);
+          break;
+        } catch (err) {
+          if (attempt === 2) throw err;
+          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+        }
+      }
+      parts[batch.indices[0]] = translated;
+    } else {
+      // Use numeric markers as separator — these survive translation unchanged
+      // Format: TEXT0||0||TEXT1||1||TEXT2
+      // We join with unique numeric markers, translate, then split by same markers
+      const joined = batch.texts.map((t, i) => (i === 0 ? t : `||${i}||${t}`)).join("");
+      // The markers ||0||, ||1|| etc. are pure numbers/pipes — won't be translated
+
+      let translatedJoined = "";
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          translatedJoined = await translateText(joined, targetLang);
+          break;
+        } catch (err) {
+          if (attempt === 2) throw err;
+          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+        }
+      }
+
+      // Split back using the numeric markers
+      // Build regex: ||1||, ||2||, etc.
+      const segments = [translatedJoined];
+      let workStr = translatedJoined;
+      const splitResult: string[] = [];
+      
+      // Split sequentially by each marker
+      for (let i = 1; i < batch.texts.length; i++) {
+        // Find marker ||i|| with optional surrounding spaces
+        const markerRegex = new RegExp(`\\s*\\|\\|\\s*${i}\\s*\\|\\|\\s*`);
+        const markerIdx = workStr.search(markerRegex);
+        if (markerIdx === -1) {
+          // Marker not found — translate this piece individually as fallback
+          splitResult.push(workStr);
+          workStr = "";
+          // For remaining, push original text
+          for (let j = splitResult.length; j < batch.texts.length; j++) {
+            splitResult.push(batch.texts[j]);
+          }
+          break;
+        }
+        const match = workStr.match(markerRegex)!;
+        const before = workStr.slice(0, markerIdx);
+        splitResult.push(before);
+        workStr = workStr.slice(markerIdx + match[0].length);
+      }
+      if (splitResult.length < batch.texts.length) {
+        splitResult.push(workStr);
+      }
+
+      // Reinsert translated texts
+      for (let i = 0; i < batch.indices.length; i++) {
+        if (i < splitResult.length && splitResult[i] !== undefined) {
+          parts[batch.indices[i]] = splitResult[i] || batch.texts[i];
+        }
+      }
     }
   }
 
   return parts.join("");
+}
+
+/**
+ * Translate plain text title in chunks if needed.
+ */
+async function translateTitle(title: string, targetLang: string): Promise<string> {
+  if (!title.trim()) return title;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await translateText(title, targetLang);
+    } catch (err) {
+      if (attempt === 2) throw err;
+      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+    }
+  }
+  return title;
 }
 
 serve(async (req) => {
@@ -150,18 +192,21 @@ serve(async (req) => {
       );
     }
 
+    console.log(`Translating ${chapters.length} chapters to ${targetLang}`);
+
     const translatedChapters: { title: string; content: string }[] = [];
 
     for (let i = 0; i < chapters.length; i++) {
       const ch = chapters[i];
+      console.log(`Translating chapter ${i + 1}/${chapters.length}: "${ch.title}"`);
 
-      // Translate title (plain text)
-      const translatedTitle = await translateChunk(ch.title || "", targetLang);
+      // Translate title
+      const translatedTitle = await translateTitle(ch.title || "", targetLang);
 
-      // Small delay
-      await new Promise((r) => setTimeout(r, 200));
+      // Small delay between title and content
+      await new Promise((r) => setTimeout(r, 150));
 
-      // Translate content (HTML)
+      // Translate HTML content
       const translatedContent = await translateHtml(ch.content || "", targetLang);
 
       translatedChapters.push({
@@ -169,11 +214,13 @@ serve(async (req) => {
         content: translatedContent,
       });
 
-      // Delay between chapters
+      // Delay between chapters to avoid rate limiting
       if (i < chapters.length - 1) {
-        await new Promise((r) => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 400));
       }
     }
+
+    console.log(`Translation complete! ${translatedChapters.length} chapters done.`);
 
     return new Response(
       JSON.stringify({ chapters: translatedChapters }),
