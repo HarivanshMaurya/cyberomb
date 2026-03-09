@@ -468,7 +468,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     tts.stop();
   }, [tts]);
 
-  // Translation handler - 1 chapter at a time for reliability, with real progress
+  // Translation handler - 1 chapter at a time to avoid edge function timeouts
   const handleTranslate = useCallback(async (langCode: string, langName?: string) => {
     if (isTranslating) return;
     
@@ -481,47 +481,56 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
     if (translationCache[langCode]) {
       setSelectedLang(langCode);
       setIsTranslated(true);
+      setCurrentSpread(0); // Reset to first page on language switch
       return;
     }
     
     setIsTranslating(true);
     setSelectedLang(langCode);
-    setTranslationProgress({ current: 0, total: 1 });
+    const totalChapters = chapters.length;
+    setTranslationProgress({ current: 0, total: totalChapters });
     
     try {
-      // Send ALL chapters in one call - translate entire book at once
-      const { data, error } = await supabase.functions.invoke('translate-ebook', {
-        body: { chapters, targetLang: langCode, langName: langName || langCode },
-      });
+      const translatedChapters: Chapter[] = [];
       
-      // Handle edge function errors
-      if (error) {
-        let errorBody: any = null;
-        try {
-          if ('context' in error && error.context instanceof Response) {
-            errorBody = await error.context.json();
-          }
-        } catch (_) {}
+      for (let i = 0; i < totalChapters; i++) {
+        setTranslationProgress({ current: i, total: totalChapters });
         
-        const errMsg = errorBody?.error || error.message || "";
-        throw new Error(errMsg || "Translation failed");
+        // Send ONE chapter at a time to avoid timeouts
+        const { data, error } = await supabase.functions.invoke('translate-ebook', {
+          body: { chapters: [chapters[i]], targetLang: langCode },
+        });
+        
+        if (error) {
+          let errorBody: any = null;
+          try {
+            if ('context' in error && error.context instanceof Response) {
+              errorBody = await error.context.json();
+            }
+          } catch (_) {}
+          const errMsg = errorBody?.error || error.message || "";
+          throw new Error(errMsg || `Chapter ${i + 1} translation failed`);
+        }
+        if (data?.error) throw new Error(data.error);
+        
+        const chResult = data?.chapters;
+        if (!chResult || !Array.isArray(chResult) || chResult.length === 0) {
+          throw new Error(`Chapter ${i + 1} returned empty`);
+        }
+        
+        translatedChapters.push(chResult[0]);
       }
-      if (data?.error) throw new Error(data.error);
       
-      const allTranslated = data?.chapters;
-      if (!allTranslated || !Array.isArray(allTranslated) || allTranslated.length === 0) {
-        throw new Error("Translation returned empty result");
-      }
-      
-      setTranslationProgress({ current: 1, total: 1 });
-      setTranslationCache(prev => ({ ...prev, [langCode]: allTranslated }));
+      setTranslationProgress({ current: totalChapters, total: totalChapters });
+      setTranslationCache(prev => ({ ...prev, [langCode]: translatedChapters }));
       setIsTranslated(true);
+      setCurrentSpread(0); // Reset to first page after translation
       const langLabel = langName || langCode;
       toast({ title: 'अनुवाद पूरा हुआ ✅', description: `पूरी किताब ${langLabel} में अनुवादित हो गई` });
       
       // Save translation to DB for instant access next time
       if (productId) {
-        const updatedTranslations = { ...translationCache, [langCode]: allTranslated };
+        const updatedTranslations = { ...translationCache, [langCode]: translatedChapters };
         supabase
           .from("products" as any)
           .update({ translations: updatedTranslations } as any)
@@ -541,6 +550,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
 
   const handleShowOriginal = useCallback(() => {
     setIsTranslated(false);
+    setCurrentSpread(0); // Reset to first page when switching back
   }, []);
 
   // Cleanup animation frame on unmount
