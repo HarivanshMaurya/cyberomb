@@ -1,0 +1,1 @@
+UPDATE products SET translations = '{}' WHERE translations IS NOT NULL AND translations::text != '{}';
