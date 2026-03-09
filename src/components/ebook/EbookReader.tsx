@@ -504,9 +504,6 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
         } catch (_) {}
         
         const errMsg = errorBody?.error || error.message || "";
-        if (errMsg.includes("402") || errMsg.toLowerCase().includes("credits exhausted") || errMsg.toLowerCase().includes("add credits")) {
-          throw new Error("AI credits khatam ho gaye hain. Kripya baad mein try karein.");
-        }
         throw new Error(errMsg || "Translation failed");
       }
       if (data?.error) throw new Error(data.error);
