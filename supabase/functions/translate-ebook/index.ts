@@ -26,134 +26,119 @@ serve(async (req) => {
 
     const langName = providedLangName || targetLang;
 
-    // Translate each chapter individually for maximum reliability
-    const translatedChapters: { title: string; content: string }[] = [];
+    // Build a single combined prompt with all chapters marked by delimiters
+    const chaptersPayload = chapters.map((ch: any, i: number) => 
+      `===CHAPTER_${i + 1}_START===\nTITLE: ${ch.title}\nCONTENT:\n${ch.content}\n===CHAPTER_${i + 1}_END===`
+    ).join("\n\n");
 
-    for (let i = 0; i < chapters.length; i++) {
-      const ch = chapters[i];
-      
-      const prompt = `Translate this chapter to ${langName}.
+    const prompt = `Translate the following ${chapters.length} chapter(s) to ${langName}.
 Keep ALL HTML tags exactly as they are. Only translate the visible text inside tags.
 Do NOT translate content inside <pre> or <code> tags.
-Do NOT skip any content. Translate EVERYTHING.
+Do NOT skip any content. Translate EVERYTHING completely.
+Each chapter is marked with ===CHAPTER_N_START=== and ===CHAPTER_N_END===.
 
-TITLE: ${ch.title}
+${chaptersPayload}`;
 
-CONTENT:
-${ch.content}`;
+    let lastError = "";
 
-      let lastError = "";
-      let translated = false;
-      
-      // Retry up to 3 times per chapter
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (attempt > 0) {
-          // Wait before retry: 2s, 4s
-          await new Promise(r => setTimeout(r, attempt * 2000));
-        }
-
-        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
-            messages: [
-              {
-                role: "system",
-                content: `You are an expert translator. Translate the chapter to ${langName}. Preserve ALL HTML tags exactly. Do not skip any content. Return the complete translated chapter using the provided tool.`,
-              },
-              { role: "user", content: prompt },
-            ],
-            temperature: 0.2,
-            tools: [
-              {
-                type: "function",
-                function: {
-                  name: "return_translation",
-                  description: "Return the translated chapter",
-                  parameters: {
-                    type: "object",
-                    properties: {
-                      title: { type: "string", description: "Translated chapter title" },
-                      content: { type: "string", description: "Translated chapter content with ALL HTML preserved" },
-                    },
-                    required: ["title", "content"],
-                    additionalProperties: false,
-                  },
-                },
-              },
-            ],
-            tool_choice: { type: "function", function: { name: "return_translation" } },
-          }),
-        });
-
-        if (response.status === 429) {
-          lastError = "Rate limited";
-          console.log(`Rate limited on chapter ${i}, attempt ${attempt + 1}, retrying...`);
-          await new Promise(r => setTimeout(r, 3000));
-          continue;
-        }
-
-        if (response.status === 402) {
-          return new Response(
-            JSON.stringify({ error: "AI credits exhausted. Please add credits.", translatedSoFar: translatedChapters }),
-            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-
-        if (!response.ok) {
-          lastError = `API error: ${response.status}`;
-          const errText = await response.text();
-          console.error(`AI error chapter ${i}:`, errText);
-          continue;
-        }
-
-        const data = await response.json();
-        
-        try {
-          const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-          if (toolCall?.function?.arguments) {
-            const parsed = JSON.parse(toolCall.function.arguments);
-            if (parsed.title && parsed.content) {
-              translatedChapters.push({
-                title: parsed.title,
-                content: parsed.content,
-              });
-              translated = true;
-              break;
-            }
-          }
-          lastError = "Invalid AI response structure";
-        } catch (parseErr) {
-          lastError = `Parse error: ${(parseErr as Error).message}`;
-          console.error(`Parse error chapter ${i}:`, lastError);
-        }
+    // Retry up to 3 times
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) {
+        await new Promise(r => setTimeout(r, attempt * 2000));
       }
 
-      if (!translated) {
-        console.error(`Failed to translate chapter ${i} after 3 attempts: ${lastError}`);
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert translator. Translate ALL chapters to ${langName}. Preserve ALL HTML tags exactly. Do not skip any content. Return the complete translated chapters using the provided tool. You MUST return exactly ${chapters.length} chapter(s) in the chapters array.`,
+            },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0.2,
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "return_translations",
+                description: "Return all translated chapters",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    chapters: {
+                      type: "array",
+                      description: "Array of translated chapters",
+                      items: {
+                        type: "object",
+                        properties: {
+                          title: { type: "string", description: "Translated chapter title" },
+                          content: { type: "string", description: "Translated chapter content with ALL HTML preserved" },
+                        },
+                        required: ["title", "content"],
+                      },
+                    },
+                  },
+                  required: ["chapters"],
+                  additionalProperties: false,
+                },
+              },
+            },
+          ],
+          tool_choice: { type: "function", function: { name: "return_translations" } },
+        }),
+      });
+
+      if (response.status === 429) {
+        lastError = "Rate limited";
+        console.log(`Rate limited, attempt ${attempt + 1}, retrying...`);
+        await new Promise(r => setTimeout(r, 3000));
+        continue;
+      }
+
+      if (response.status === 402) {
         return new Response(
-          JSON.stringify({ 
-            error: `Failed to translate chapter ${i + 1} ("${ch.title}") after 3 attempts: ${lastError}`,
-            translatedSoFar: translatedChapters,
-            failedAtChapter: i,
-          }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "AI credits exhausted. Please add credits." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      // Small delay between chapters to avoid rate limiting
-      if (i < chapters.length - 1) {
-        await new Promise(r => setTimeout(r, 500));
+      if (!response.ok) {
+        lastError = `API error: ${response.status}`;
+        const errText = await response.text();
+        console.error(`AI error:`, errText);
+        continue;
+      }
+
+      const data = await response.json();
+
+      try {
+        const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+        if (toolCall?.function?.arguments) {
+          const parsed = JSON.parse(toolCall.function.arguments);
+          if (parsed.chapters && Array.isArray(parsed.chapters) && parsed.chapters.length > 0) {
+            return new Response(
+              JSON.stringify({ chapters: parsed.chapters }),
+              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        }
+        lastError = "Invalid AI response structure";
+      } catch (parseErr) {
+        lastError = `Parse error: ${(parseErr as Error).message}`;
+        console.error(`Parse error:`, lastError);
       }
     }
 
     return new Response(
-      JSON.stringify({ chapters: translatedChapters }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ error: `Failed to translate after 3 attempts: ${lastError}` }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Translate ebook error:", error);
