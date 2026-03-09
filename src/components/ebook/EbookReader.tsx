@@ -550,6 +550,7 @@ export function EbookReader({ chapters, bookTitle, bookSlug = "default", product
 
   const handleShowOriginal = useCallback(() => {
     setIsTranslated(false);
+    setCurrentSpread(0); // Reset to first page when switching back
   }, []);
 
   // Cleanup animation frame on unmount
