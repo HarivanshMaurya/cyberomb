@@ -60,7 +60,7 @@ const LanguageToggle = ({ articleId, title, content, excerpt, onTranslated, onRe
         .eq('id', articleId)
         .maybeSingle();
 
-      const cached = articleData?.translations as Record<string, TranslatedData> | null;
+      const cached = articleData?.translations as unknown as Record<string, TranslatedData> | null;
       if (cached && cached[langCode]) {
         setActiveLang(langCode);
         onTranslated(cached[langCode]);
