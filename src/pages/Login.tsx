@@ -146,7 +146,7 @@ export default function Login() {
     );
   }
 
-  // Shared input wrapper - using plain div to avoid re-mount on state change
+  
 
   // Social buttons
   const SocialButtons = () => (
