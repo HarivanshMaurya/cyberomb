@@ -309,7 +309,7 @@ export default function Login() {
                       <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 ml-1">
                         Email
                       </Label>
-                      <InputWrapper focused={focusedField === 'email'}>
+                      <div className={`relative group rounded-2xl border-2 transition-all duration-300 bg-muted/20 hover:bg-muted/30 ${focusedField === 'email' ? 'border-primary/60 bg-muted/30 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.15)]' : 'border-transparent'}`}>
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors" />
                         <Input
                           id="email"
@@ -322,7 +322,7 @@ export default function Login() {
                           required
                           className="pl-11 h-[52px] border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm rounded-2xl"
                         />
-                      </InputWrapper>
+                      </div>
                     </div>
 
                     <div className="space-y-1.5">
@@ -338,7 +338,7 @@ export default function Login() {
                           Forgot?
                         </button>
                       </div>
-                      <InputWrapper focused={focusedField === 'password'}>
+                      <div className={`relative group rounded-2xl border-2 transition-all duration-300 bg-muted/20 hover:bg-muted/30 ${focusedField === 'password' ? 'border-primary/60 bg-muted/30 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.15)]' : 'border-transparent'}`}>
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors" />
                         <Input
                           id="password"
@@ -359,7 +359,7 @@ export default function Login() {
                         >
                           {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
                         </button>
-                      </InputWrapper>
+                      </div>
                     </div>
 
                     <Button
@@ -393,7 +393,7 @@ export default function Login() {
                       <Label htmlFor="fullName" className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 ml-1">
                         Full Name
                       </Label>
-                      <InputWrapper focused={focusedField === 'name'}>
+                      <div className={`relative group rounded-2xl border-2 transition-all duration-300 bg-muted/20 hover:bg-muted/30 ${focusedField === 'name' ? 'border-primary/60 bg-muted/30 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.15)]' : 'border-transparent'}`}>
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-muted-foreground/40" />
                         <Input
                           id="fullName"
@@ -405,14 +405,14 @@ export default function Login() {
                           onBlur={() => setFocusedField(null)}
                           className="pl-11 h-[52px] border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm rounded-2xl"
                         />
-                      </InputWrapper>
+                      </div>
                     </div>
 
                     <div className="space-y-1.5">
                       <Label htmlFor="signupEmail" className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 ml-1">
                         Email
                       </Label>
-                      <InputWrapper focused={focusedField === 'signupEmail'}>
+                      <div className={`relative group rounded-2xl border-2 transition-all duration-300 bg-muted/20 hover:bg-muted/30 ${focusedField === 'signupEmail' ? 'border-primary/60 bg-muted/30 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.15)]' : 'border-transparent'}`}>
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-muted-foreground/40" />
                         <Input
                           id="signupEmail"
@@ -425,14 +425,14 @@ export default function Login() {
                           required
                           className="pl-11 h-[52px] border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm rounded-2xl"
                         />
-                      </InputWrapper>
+                      </div>
                     </div>
 
                     <div className="space-y-1.5">
                       <Label htmlFor="signupPassword" className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 ml-1">
                         Password
                       </Label>
-                      <InputWrapper focused={focusedField === 'signupPassword'}>
+                      <div className={`relative group rounded-2xl border-2 transition-all duration-300 bg-muted/20 hover:bg-muted/30 ${focusedField === 'signupPassword' ? 'border-primary/60 bg-muted/30 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.15)]' : 'border-transparent'}`}>
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-muted-foreground/40" />
                         <Input
                           id="signupPassword"
@@ -453,7 +453,7 @@ export default function Login() {
                         >
                           {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
                         </button>
-                      </InputWrapper>
+                      </div>
                       {password.length > 0 && (
                         <div className="space-y-1.5 pt-1 px-1">
                           <div className="flex gap-1.5">
@@ -500,7 +500,7 @@ export default function Login() {
                     <Label htmlFor="resetEmail" className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 ml-1">
                       Registered Email
                     </Label>
-                    <InputWrapper focused={focusedField === 'resetEmail'}>
+                    <div className={`relative group rounded-2xl border-2 transition-all duration-300 bg-muted/20 hover:bg-muted/30 ${focusedField === 'resetEmail' ? 'border-primary/60 bg-muted/30 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.15)]' : 'border-transparent'}`}>
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-muted-foreground/40" />
                       <Input
                         id="resetEmail"
@@ -513,7 +513,7 @@ export default function Login() {
                         required
                         className="pl-11 h-[52px] border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm rounded-2xl"
                       />
-                    </InputWrapper>
+                    </div>
                     <p className="text-[11px] text-muted-foreground/60 leading-relaxed ml-1">
                       A secure password reset link will be sent to this address.
                     </p>
