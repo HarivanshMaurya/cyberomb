@@ -92,7 +92,7 @@ const LanguageToggle = ({ articleId, title, content, excerpt, onTranslated, onRe
           .eq('id', articleId)
           .maybeSingle();
         
-        const existing = (current?.translations as Record<string, TranslatedData>) || {};
+        const existing = (current?.translations as unknown as Record<string, TranslatedData>) || {};
         existing[langCode] = result;
         
         await supabase

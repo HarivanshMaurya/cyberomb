@@ -164,6 +164,7 @@ const BlogArticle = () => {
               {/* Language Toggle */}
               <div className="mb-6 flex justify-end">
                 <LanguageToggle
+                  articleId={article.id}
                   title={article.title}
                   content={article.content || ""}
                   excerpt={article.excerpt}
