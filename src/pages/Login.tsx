@@ -146,16 +146,7 @@ export default function Login() {
     );
   }
 
-  // Shared input wrapper
-  const InputWrapper = ({ focused, children }: { focused: boolean; children: React.ReactNode }) => (
-    <div className={`relative group rounded-2xl border-2 transition-all duration-300 bg-muted/20 hover:bg-muted/30 ${
-      focused 
-        ? 'border-primary/60 bg-muted/30 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.15)]' 
-        : 'border-transparent'
-    }`}>
-      {children}
-    </div>
-  );
+  // Shared input wrapper - using plain div to avoid re-mount on state change
 
   // Social buttons
   const SocialButtons = () => (
