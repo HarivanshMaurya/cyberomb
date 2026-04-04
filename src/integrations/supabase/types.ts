@@ -32,6 +32,7 @@ export type Database = {
           slug: string
           status: string
           title: string
+          translations: Json | null
           updated_at: string
         }
         Insert: {
@@ -51,6 +52,7 @@ export type Database = {
           slug: string
           status?: string
           title: string
+          translations?: Json | null
           updated_at?: string
         }
         Update: {
@@ -70,6 +72,7 @@ export type Database = {
           slug?: string
           status?: string
           title?: string
+          translations?: Json | null
           updated_at?: string
         }
         Relationships: []
@@ -657,6 +660,7 @@ export type Database = {
           slug: string
           status: string
           title: string
+          translations: Json | null
           updated_at: string
         }
         Insert: {
@@ -674,6 +678,7 @@ export type Database = {
           slug: string
           status?: string
           title: string
+          translations?: Json | null
           updated_at?: string
         }
         Update: {
@@ -691,6 +696,7 @@ export type Database = {
           slug?: string
           status?: string
           title?: string
+          translations?: Json | null
           updated_at?: string
         }
         Relationships: []
