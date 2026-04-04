@@ -1,57 +1,142 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function sanitizeJsonString(raw: string): string {
-  // Strip markdown code fences
-  raw = raw.replace(/^```json?\s*/i, "").replace(/\s*```$/i, "").trim();
-  
-  // Remove control characters that break JSON.parse
-  // Replace literal control chars inside string values (tabs, newlines, etc.)
-  // but preserve the JSON structure
-  raw = raw.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, "");
-  
-  // Fix unescaped newlines inside JSON string values
-  // Strategy: replace actual newlines that are inside strings with \\n
-  let result = "";
-  let inString = false;
-  let escaped = false;
-  for (let i = 0; i < raw.length; i++) {
-    const ch = raw[i];
-    if (escaped) {
-      result += ch;
-      escaped = false;
-      continue;
-    }
-    if (ch === "\\") {
-      result += ch;
-      escaped = true;
-      continue;
-    }
-    if (ch === '"') {
-      inString = !inString;
-      result += ch;
-      continue;
-    }
-    if (inString && ch === "\n") {
-      result += "\\n";
-      continue;
-    }
-    if (inString && ch === "\r") {
-      result += "\\r";
-      continue;
-    }
-    if (inString && ch === "\t") {
-      result += "\\t";
-      continue;
-    }
-    result += ch;
+/**
+ * Free Google Translate API (same as ebook translator).
+ */
+async function translateText(text: string, targetLang: string): Promise<string> {
+  if (!text.trim()) return text;
+
+  const url = "https://translate.googleapis.com/translate_a/single";
+  const params = new URLSearchParams({
+    client: "gtx",
+    sl: "auto",
+    tl: targetLang,
+    dt: "t",
+    q: text,
+  });
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Google Translate error ${response.status}: ${errText}`);
   }
-  return result;
+
+  const data = await response.json();
+  if (!data || !Array.isArray(data[0])) {
+    throw new Error("Unexpected Google Translate response format");
+  }
+
+  return data[0].map((seg: any) => seg[0] || "").join("");
+}
+
+/**
+ * Translate HTML content preserving tags.
+ */
+async function translateHtml(html: string, targetLang: string): Promise<string> {
+  const parts = html.split(/(<[^>]*>)/g);
+
+  const textIndices: number[] = [];
+  const textBatch: string[] = [];
+
+  for (let i = 0; i < parts.length; i++) {
+    if (!parts[i].startsWith("<") && parts[i].trim().length > 0) {
+      textIndices.push(i);
+      textBatch.push(parts[i]);
+    }
+  }
+
+  if (textBatch.length === 0) return html;
+
+  const BATCH_MAX = 3000;
+  const batches: { indices: number[]; texts: string[] }[] = [];
+  let currentBatch: { indices: number[]; texts: string[] } = { indices: [], texts: [] };
+  let currentLen = 0;
+
+  for (let i = 0; i < textBatch.length; i++) {
+    const sepOverhead = 8;
+    if (currentLen + textBatch[i].length + sepOverhead > BATCH_MAX && currentBatch.texts.length > 0) {
+      batches.push(currentBatch);
+      currentBatch = { indices: [], texts: [] };
+      currentLen = 0;
+    }
+    currentBatch.indices.push(textIndices[i]);
+    currentBatch.texts.push(textBatch[i]);
+    currentLen += textBatch[i].length + sepOverhead;
+  }
+  if (currentBatch.texts.length > 0) batches.push(currentBatch);
+
+  for (let b = 0; b < batches.length; b++) {
+    if (b > 0) await new Promise((r) => setTimeout(r, 400));
+    const batch = batches[b];
+
+    if (batch.texts.length === 1) {
+      let translated = "";
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          translated = await translateText(batch.texts[0], targetLang);
+          break;
+        } catch (err) {
+          if (attempt === 2) throw err;
+          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+        }
+      }
+      parts[batch.indices[0]] = translated;
+    } else {
+      const joined = batch.texts.map((t, i) => (i === 0 ? t : `||${i}||${t}`)).join("");
+
+      let translatedJoined = "";
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          translatedJoined = await translateText(joined, targetLang);
+          break;
+        } catch (err) {
+          if (attempt === 2) throw err;
+          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+        }
+      }
+
+      let workStr = translatedJoined;
+      const splitResult: string[] = [];
+
+      for (let i = 1; i < batch.texts.length; i++) {
+        const markerRegex = new RegExp(`\\s*\\|\\|\\s*${i}\\s*\\|\\|\\s*`);
+        const markerIdx = workStr.search(markerRegex);
+        if (markerIdx === -1) {
+          splitResult.push(workStr);
+          workStr = "";
+          for (let j = splitResult.length; j < batch.texts.length; j++) {
+            splitResult.push(batch.texts[j]);
+          }
+          break;
+        }
+        const match = workStr.match(markerRegex)!;
+        splitResult.push(workStr.slice(0, markerIdx));
+        workStr = workStr.slice(markerIdx + match[0].length);
+      }
+      if (splitResult.length < batch.texts.length) {
+        splitResult.push(workStr);
+      }
+
+      for (let i = 0; i < batch.indices.length; i++) {
+        if (i < splitResult.length && splitResult[i] !== undefined) {
+          parts[batch.indices[i]] = splitResult[i] || batch.texts[i];
+        }
+      }
+    }
+  }
+
+  return parts.join("");
 }
 
 serve(async (req) => {
@@ -69,73 +154,53 @@ serve(async (req) => {
       });
     }
 
-    const langName = targetLang === "hi" ? "Hindi" : "English";
+    console.log(`Translating article to ${targetLang}, content length: ${content.length}`);
 
-    const prompt = `Translate this content to ${langName}. Keep ALL HTML tags exactly as they are. Only translate the visible text content inside tags. Do NOT translate content inside <pre> or <code> tags - keep those exactly as-is.
-
-Return a valid JSON object with these keys: "title", "content", "excerpt"
-Make sure all strings are properly escaped for JSON (no raw newlines inside strings, use \\n instead).
-
-Title: ${title || ""}
-Excerpt: ${excerpt || ""}
-Content: ${content}`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          {
-            role: "system",
-            content: "You are a translation assistant. Always respond with valid JSON only, no markdown code blocks. Ensure all string values have properly escaped special characters (newlines as \\n, tabs as \\t). Never put raw newlines inside JSON string values.",
-          },
-          { role: "user", content: prompt },
-        ],
-        temperature: 0.3,
-      }),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("AI Gateway error:", errText);
-      throw new Error("Translation service error");
-    }
-
-    const data = await response.json();
-    let raw = data.choices?.[0]?.message?.content || "";
-
-    // Sanitize and parse
-    const sanitized = sanitizeJsonString(raw);
-    
-    let translated;
-    try {
-      translated = JSON.parse(sanitized);
-    } catch (parseErr) {
-      console.error("JSON parse failed after sanitization, raw length:", raw.length);
-      console.error("Parse error:", (parseErr as Error).message);
-      // Last resort: try to extract fields with regex
-      const titleMatch = sanitized.match(/"title"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-      const contentMatch = sanitized.match(/"content"\s*:\s*"((?:[^"\\]|\\.)*)"/s);
-      const excerptMatch = sanitized.match(/"excerpt"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-      
-      if (contentMatch) {
-        translated = {
-          title: titleMatch ? titleMatch[1] : title,
-          content: contentMatch[1],
-          excerpt: excerptMatch ? excerptMatch[1] : excerpt,
-        };
-      } else {
-        throw parseErr;
+    // Translate title
+    let translatedTitle = title || "";
+    if (title?.trim()) {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          translatedTitle = await translateText(title, targetLang);
+          break;
+        } catch (err) {
+          if (attempt === 2) throw err;
+          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+        }
       }
     }
 
-    return new Response(JSON.stringify(translated), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    await new Promise((r) => setTimeout(r, 200));
+
+    // Translate excerpt
+    let translatedExcerpt = excerpt || "";
+    if (excerpt?.trim()) {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          translatedExcerpt = await translateText(excerpt, targetLang);
+          break;
+        } catch (err) {
+          if (attempt === 2) throw err;
+          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+        }
+      }
+    }
+
+    await new Promise((r) => setTimeout(r, 200));
+
+    // Translate HTML content
+    const translatedContent = await translateHtml(content, targetLang);
+
+    console.log("Article translation complete!");
+
+    return new Response(
+      JSON.stringify({
+        title: translatedTitle,
+        content: translatedContent,
+        excerpt: translatedExcerpt,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (error) {
     console.error("Translation error:", error);
     return new Response(JSON.stringify({ error: (error as Error).message }), {
