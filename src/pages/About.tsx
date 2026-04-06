@@ -69,6 +69,7 @@ const About = () => {
         description="A space for exploring ideas, finding inspiration, and discovering new ways of seeing the world."
         canonical="/about"
       />
+      <PageBackground />
       <Header />
 
       <main>

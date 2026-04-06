@@ -58,6 +58,7 @@ const Wellness = () => {
         description="Discover practices, insights, and strategies to nurture your physical, mental, and emotional wellbeing."
         canonical="/wellness"
       />
+      <PageBackground />
       <Header />
 
       {/* Hero Section */}
