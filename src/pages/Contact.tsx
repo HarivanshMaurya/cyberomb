@@ -63,7 +63,8 @@ const Contact = () => {
   const faqs = content?.faqs?.length ? content.faqs : defaultFaqs;
 
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
+    <div className="min-h-screen bg-background animate-fade-in relative">
+      <PageBackground />
       <SEOHead
         title="Contact Us"
         description="Have a question, suggestion, or just want to say hello? Get in touch with the Cyberom team."
