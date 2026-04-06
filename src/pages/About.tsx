@@ -63,8 +63,8 @@ const About = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
-      <SEOHead
+    <div className="min-h-screen bg-background animate-fade-in relative">
+      <PageBackground />
         title="About Cyberom"
         description="A space for exploring ideas, finding inspiration, and discovering new ways of seeing the world."
         canonical="/about"

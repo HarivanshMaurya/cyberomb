@@ -52,8 +52,8 @@ const Wellness = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
-      <SEOHead
+    <div className="min-h-screen bg-background animate-fade-in relative">
+      <PageBackground />
         title="Wellness & Self-Care"
         description="Discover practices, insights, and strategies to nurture your physical, mental, and emotional wellbeing."
         canonical="/wellness"

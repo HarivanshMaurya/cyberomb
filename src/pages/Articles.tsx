@@ -30,7 +30,8 @@ const Articles = () => {
   const isLoading = articlesLoading || categoriesLoading;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      <PageBackground />
       <SEOHead
         title="All Articles"
         description="Explore our collection of articles covering wellness, travel, creativity, personal growth, and more."
