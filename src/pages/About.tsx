@@ -80,6 +80,14 @@ const About = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
           <div className="absolute top-20 right-20 w-72 h-72 bg-accent/10 rounded-full blur-3xl" />
           <div className="absolute bottom-10 left-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
+          <FloatingIcons icons={[
+            { icon: Lightbulb, top: '10%', left: '7%', size: 30, delay: '0s', duration: '15s', rotate: -12 },
+            { icon: Compass, top: '15%', left: '89%', size: 28, delay: '2s', duration: '18s', rotate: 10 },
+            { icon: Target, top: '60%', left: '6%', size: 24, delay: '1s', duration: '16s', rotate: -8 },
+            { icon: Feather, top: '55%', left: '91%', size: 26, delay: '3s', duration: '20s', rotate: 15 },
+            { icon: Users, top: '28%', left: '93%', size: 22, delay: '4s', duration: '14s', rotate: -18 },
+            { icon: Heart, top: '72%', left: '10%', size: 20, delay: '5s', duration: '17s', rotate: 6 },
+          ]} />
           
           <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border/60 mb-8 animate-slide-down">

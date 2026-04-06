@@ -45,6 +45,14 @@ const Articles = () => {
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-accent/10 to-secondary/20 py-20 md:py-28">
         <div className="absolute top-10 right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-10 left-10 w-56 h-56 bg-accent/10 rounded-full blur-3xl" />
+        <FloatingIcons icons={[
+          { icon: BookOpen, top: '10%', left: '5%', size: 32, delay: '0s', duration: '14s', rotate: -15 },
+          { icon: FileText, top: '15%', left: '88%', size: 28, delay: '2s', duration: '18s', rotate: 12 },
+          { icon: PenTool, top: '60%', left: '8%', size: 24, delay: '1s', duration: '16s', rotate: -8 },
+          { icon: MessageSquare, top: '55%', left: '90%', size: 26, delay: '3s', duration: '20s', rotate: 10 },
+          { icon: Bookmark, top: '25%', left: '92%', size: 22, delay: '4s', duration: '15s', rotate: -20 },
+          { icon: Rss, top: '70%', left: '15%', size: 20, delay: '5s', duration: '17s', rotate: 5 },
+        ]} />
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 animate-slide-down">

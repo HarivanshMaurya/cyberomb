@@ -6,7 +6,8 @@ import { usePageSection } from "@/hooks/usePageSections";
 import { useSectionCards } from "@/hooks/useSectionCards";
 import { useActiveProducts } from "@/hooks/useProducts";
 import { Link } from "react-router-dom";
-import { Store, Sparkles, ArrowRight } from "lucide-react";
+import { Store, Sparkles, ArrowRight, BookOpen, ShoppingBag, Package, BookMarked, Gift } from "lucide-react";
+import FloatingIcons from "@/components/FloatingIcons";
 
 const resolveCardLink = (raw?: string) => {
   const link = (raw ?? "").trim();
