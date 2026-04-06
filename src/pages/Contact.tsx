@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { usePageSection } from "@/hooks/usePageSections";
 import { supabase } from "@/integrations/supabase/client";
+import PageBackground from "@/components/PageBackground";
 
 const Contact = () => {
   const { data: pageSection } = usePageSection('contact');

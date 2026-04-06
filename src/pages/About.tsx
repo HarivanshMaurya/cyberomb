@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAuthors } from "@/hooks/useAuthors";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import PageBackground from "@/components/PageBackground";
 
 interface AboutContent {
   story_title?: string;

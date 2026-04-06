@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Newspaper, Search } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import PageBackground from "@/components/PageBackground";
 
 const Articles = () => {
   const { data: articles, isLoading: articlesLoading } = useArticles('published');
