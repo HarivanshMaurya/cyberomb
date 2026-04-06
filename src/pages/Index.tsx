@@ -10,6 +10,7 @@ import { articles as staticArticles } from "@/data/articles";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Mail, ArrowUpRight } from "lucide-react";
+import PageBackground from "@/components/PageBackground";
 
 const Index = () => {
   const { data: dbArticles } = useArticles('published');
@@ -53,7 +54,8 @@ const Index = () => {
   const footerContent = footerSection?.content as { copyright?: string; brand_description?: string; newsletter_placeholder?: string } | null;
 
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
+    <div className="min-h-screen bg-background animate-fade-in relative">
+      <PageBackground />
       <SEOHead canonical="/" jsonLd={buildWebsiteJsonLd()} />
       <Header />
       

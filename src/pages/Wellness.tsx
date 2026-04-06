@@ -6,6 +6,8 @@ import { usePublishedWellnessArticles } from "@/hooks/useWellnessArticles";
 import { Link } from "react-router-dom";
 import { Heart, Leaf, Sun, Sparkles, ArrowRight, Clock, User } from "lucide-react";
 
+import PageBackground from "@/components/PageBackground";
+
 const iconMap: Record<string, React.ElementType> = { Heart, Leaf, Sun, Sparkles };
 
 const defaultPillars = [
@@ -50,12 +52,13 @@ const Wellness = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
+    <div className="min-h-screen bg-background animate-fade-in relative">
       <SEOHead
         title="Wellness & Self-Care"
         description="Discover practices, insights, and strategies to nurture your physical, mental, and emotional wellbeing."
         canonical="/wellness"
       />
+      <PageBackground />
       <Header />
 
       {/* Hero Section */}

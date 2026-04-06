@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveAuthors } from "@/hooks/useAuthors";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import PageBackground from "@/components/PageBackground";
 
 interface AboutContent {
   story_title?: string;
@@ -62,12 +63,13 @@ const About = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
+    <div className="min-h-screen bg-background animate-fade-in relative">
       <SEOHead
         title="About Cyberom"
         description="A space for exploring ideas, finding inspiration, and discovering new ways of seeing the world."
         canonical="/about"
       />
+      <PageBackground />
       <Header />
 
       <main>

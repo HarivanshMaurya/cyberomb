@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Newspaper, Search } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import PageBackground from "@/components/PageBackground";
 
 const Articles = () => {
   const { data: articles, isLoading: articlesLoading } = useArticles('published');
@@ -29,7 +30,8 @@ const Articles = () => {
   const isLoading = articlesLoading || categoriesLoading;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      <PageBackground />
       <SEOHead
         title="All Articles"
         description="Explore our collection of articles covering wellness, travel, creativity, personal growth, and more."
