@@ -9,6 +9,8 @@ import { useActiveAuthors } from "@/hooks/useAuthors";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import PageBackground from "@/components/PageBackground";
+import FloatingIcons from "@/components/FloatingIcons";
+import { Lightbulb, Compass, Target, Feather } from "lucide-react";
 
 interface AboutContent {
   story_title?: string;

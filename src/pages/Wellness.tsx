@@ -7,6 +7,8 @@ import { Link } from "react-router-dom";
 import { Heart, Leaf, Sun, Sparkles, ArrowRight, Clock, User } from "lucide-react";
 
 import PageBackground from "@/components/PageBackground";
+import FloatingIcons from "@/components/FloatingIcons";
+import { Flower2, Droplets, Brain, Activity } from "lucide-react";
 
 const iconMap: Record<string, React.ElementType> = { Heart, Leaf, Sun, Sparkles };
 

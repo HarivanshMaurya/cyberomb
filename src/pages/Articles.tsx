@@ -9,6 +9,8 @@ import { Loader2, Newspaper, Search } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import PageBackground from "@/components/PageBackground";
+import FloatingIcons from "@/components/FloatingIcons";
+import { BookOpen, FileText, PenTool, MessageSquare, Bookmark, Rss } from "lucide-react";
 
 const Articles = () => {
   const { data: articles, isLoading: articlesLoading } = useArticles('published');
