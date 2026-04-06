@@ -6,7 +6,8 @@ import { usePageSection } from "@/hooks/usePageSections";
 import { useSectionCards } from "@/hooks/useSectionCards";
 import { useActiveProducts } from "@/hooks/useProducts";
 import { Link } from "react-router-dom";
-import { Store, Sparkles, ArrowRight } from "lucide-react";
+import { Store, Sparkles, ArrowRight, BookOpen, ShoppingBag, Package, BookMarked, Gift } from "lucide-react";
+import FloatingIcons from "@/components/FloatingIcons";
 
 const resolveCardLink = (raw?: string) => {
   const link = (raw ?? "").trim();
@@ -60,6 +61,13 @@ const Travel = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-secondary/5" />
           <div className="absolute top-20 left-20 w-80 h-80 bg-accent/8 rounded-full blur-3xl" />
           <div className="absolute bottom-10 right-10 w-64 h-64 bg-secondary/8 rounded-full blur-3xl" />
+          <FloatingIcons icons={[
+            { icon: BookOpen, top: '10%', left: '6%', size: 30, delay: '0s', duration: '16s', rotate: -10 },
+            { icon: ShoppingBag, top: '12%', left: '90%', size: 28, delay: '2s', duration: '19s', rotate: 12 },
+            { icon: Package, top: '62%', left: '5%', size: 24, delay: '1s', duration: '15s', rotate: -15 },
+            { icon: BookMarked, top: '58%', left: '92%', size: 26, delay: '3s', duration: '18s', rotate: 8 },
+            { icon: Gift, top: '30%', left: '94%', size: 22, delay: '4s', duration: '14s', rotate: -20 },
+          ]} />
 
           <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border/60 mb-8 animate-slide-down">

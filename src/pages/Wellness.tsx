@@ -7,6 +7,8 @@ import { Link } from "react-router-dom";
 import { Heart, Leaf, Sun, Sparkles, ArrowRight, Clock, User } from "lucide-react";
 
 import PageBackground from "@/components/PageBackground";
+import FloatingIcons from "@/components/FloatingIcons";
+import { Flower2, Droplets, Brain, Activity } from "lucide-react";
 
 const iconMap: Record<string, React.ElementType> = { Heart, Leaf, Sun, Sparkles };
 
@@ -66,6 +68,14 @@ const Wellness = () => {
         <div className="absolute top-10 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-secondary/5 rounded-full blur-3xl" />
+        <FloatingIcons icons={[
+          { icon: Heart, top: '8%', left: '6%', size: 30, delay: '0s', duration: '16s', rotate: -10 },
+          { icon: Leaf, top: '12%', left: '90%', size: 28, delay: '2s', duration: '19s', rotate: 15 },
+          { icon: Flower2, top: '65%', left: '5%', size: 26, delay: '1s', duration: '14s', rotate: -20 },
+          { icon: Droplets, top: '55%', left: '92%', size: 24, delay: '3s', duration: '18s', rotate: 8 },
+          { icon: Brain, top: '30%', left: '93%', size: 22, delay: '4s', duration: '15s', rotate: -5 },
+          { icon: Activity, top: '75%', left: '12%', size: 20, delay: '5s', duration: '21s', rotate: 12 },
+        ]} />
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 animate-slide-down">
