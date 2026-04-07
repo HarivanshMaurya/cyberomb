@@ -105,6 +105,17 @@ const HeroSection = () => {
     >
       {/* ─── Cinematic Background ─── */}
       <div className="absolute inset-0 -z-10">
+        {/* Background Video */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-[0.15] dark:opacity-[0.08] mix-blend-multiply dark:mix-blend-screen"
+        >
+          <source src="/videos/hero-bg.webm" type="video/webm" />
+        </video>
+
         {/* Gradient mesh */}
         <div
           className="absolute w-[800px] h-[800px] rounded-full opacity-[0.06] blur-[120px] transition-transform duration-[2s]"
