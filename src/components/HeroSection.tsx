@@ -323,18 +323,18 @@ const HeroSection = () => {
                   <div className="absolute inset-0 bg-muted animate-pulse" />
                 )}
 
-                <img
-                  src={backgroundImage}
-                  alt="Hero"
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
                   className={`w-full aspect-[3/4] lg:aspect-[4/5] object-cover transition-all duration-[2s] ease-out ${
                     imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
                   }`}
-                  onLoad={() => setImageLoaded(true)}
-                />
-
-                {/* Cinematic gradient overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/10 pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-transparent to-transparent pointer-events-none" />
+                  onLoadedData={() => setImageLoaded(true)}
+                >
+                  <source src="/videos/hero-bg.webm" type="video/webm" />
+                </video>
 
                 {/* Bottom glass card */}
                 <div
