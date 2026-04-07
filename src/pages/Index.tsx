@@ -14,11 +14,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Mail, ArrowUpRight, BookOpen } from "lucide-react";
 import PageBackground from "@/components/PageBackground";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const { data: dbArticles } = useArticles('published');
   const { data: newsletterSection } = useSiteSection('newsletter');
   const { data: footerSection } = useSiteSection('footer');
+  const { data: products, isLoading: productsLoading } = useActiveProducts();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [footerEmail, setFooterEmail] = useState('');
   const [isSubscribing, setIsSubscribing] = useState(false);
@@ -78,6 +80,38 @@ const Index = () => {
             {featuredArticles.map((article, index) => (
               <div key={article.id} className={`animate-slide-up stagger-${Math.min(index + 1, 6)}`}>
                 <ArticleCard {...article} size="small" />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* eBooks Section */}
+        <section className="py-12" aria-label="eBooks">
+          <div className="flex items-center justify-between mb-12 animate-slide-up">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <BookOpen className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">eBooks</h2>
+            </div>
+            <Link to="/travel" className="text-sm font-medium text-muted-foreground hover:text-accent transition-colors px-4 py-2 rounded-full hover:bg-muted/60">
+              View all →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+            {productsLoading ? (
+              [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
+            ) : products?.slice(0, 4).map((product, index) => (
+              <div key={product.id} className={`animate-slide-up stagger-${Math.min(index + 1, 6)}`}>
+                <ProductCard
+                  title={product.title}
+                  description={product.description}
+                  image={product.image}
+                  price={product.price}
+                  slug={product.slug}
+                  author={product.author}
+                />
               </div>
             ))}
           </div>
