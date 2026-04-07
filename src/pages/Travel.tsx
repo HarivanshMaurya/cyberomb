@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import SEOHead from "@/components/SEOHead";
 import ProductCard from "@/components/ProductCard";
-import { Skeleton } from "@/components/ui/skeleton";
+import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import { usePageSection } from "@/hooks/usePageSections";
 import { useSectionCards } from "@/hooks/useSectionCards";
 import { useActiveProducts } from "@/hooks/useProducts";
@@ -20,7 +20,7 @@ const resolveCardLink = (raw?: string) => {
 const Travel = () => {
   const { data: pageData, isLoading } = usePageSection("travel");
   const { data: sectionCards } = useSectionCards("travel_cards");
-  const { data: products } = useActiveProducts();
+  const { data: products, isLoading: productsLoading } = useActiveProducts();
 
   const featuredCards = sectionCards?.content?.cards || [];
   const content = pageData?.content as
@@ -33,12 +33,12 @@ const Travel = () => {
         <Header />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="mb-16 text-center space-y-6">
-            <Skeleton className="h-16 w-96 mx-auto" />
-            <Skeleton className="h-8 w-full max-w-2xl mx-auto" />
+            <div className="h-16 w-96 mx-auto rounded-xl bg-muted animate-pulse" />
+            <div className="h-8 w-full max-w-2xl mx-auto rounded-lg bg-muted animate-pulse" />
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="aspect-[3/4] rounded-3xl" />
+              <ProductCardSkeleton key={i} />
             ))}
           </div>
         </main>
@@ -151,34 +151,34 @@ const Travel = () => {
         )}
 
         {/* Products Grid */}
-        {products && products.length > 0 && (
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                <Store className="w-4.5 h-4.5 text-accent" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold font-serif">Our Collection</h2>
-                <p className="text-sm text-muted-foreground">{products.length} item{products.length !== 1 ? 's' : ''} available</p>
-              </div>
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+              <Store className="w-4.5 h-4.5 text-accent" />
             </div>
+            <div>
+              <h2 className="text-2xl font-bold font-serif">Our Collection</h2>
+              {products && <p className="text-sm text-muted-foreground">{products.length} item{products.length !== 1 ? 's' : ''} available</p>}
+            </div>
+          </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {products.map((product, index) => (
-                <div key={product.id} className={`animate-slide-up stagger-${Math.min(index + 1, 6)}`}>
-                  <ProductCard
-                    title={product.title}
-                    description={product.description}
-                    image={product.image}
-                    price={product.price}
-                    slug={product.slug}
-                    author={product.author}
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {productsLoading ? (
+              [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
+            ) : products?.map((product, index) => (
+              <div key={product.id} className={`animate-slide-up stagger-${Math.min(index + 1, 6)}`}>
+                <ProductCard
+                  title={product.title}
+                  description={product.description}
+                  image={product.image}
+                  price={product.price}
+                  slug={product.slug}
+                  author={product.author}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Philosophy Section */}
         {content?.section_content && (
