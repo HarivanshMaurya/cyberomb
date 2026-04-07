@@ -20,7 +20,7 @@ const resolveCardLink = (raw?: string) => {
 const Travel = () => {
   const { data: pageData, isLoading } = usePageSection("travel");
   const { data: sectionCards } = useSectionCards("travel_cards");
-  const { data: products } = useActiveProducts();
+  const { data: products, isLoading: productsLoading } = useActiveProducts();
 
   const featuredCards = sectionCards?.content?.cards || [];
   const content = pageData?.content as
