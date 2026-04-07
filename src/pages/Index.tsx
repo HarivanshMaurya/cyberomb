@@ -4,12 +4,15 @@ import ArticleCard from "@/components/ArticleCard";
 import HeroSection from "@/components/HeroSection";
 import IntroSection from "@/components/IntroSection";
 import SEOHead, { buildWebsiteJsonLd } from "@/components/SEOHead";
+import ProductCard from "@/components/ProductCard";
+import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import { useSiteSection } from "@/hooks/useSiteSections";
 import { useArticles } from "@/hooks/useArticles";
+import { useActiveProducts } from "@/hooks/useProducts";
 import { articles as staticArticles } from "@/data/articles";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Mail, ArrowUpRight } from "lucide-react";
+import { Mail, ArrowUpRight, BookOpen } from "lucide-react";
 import PageBackground from "@/components/PageBackground";
 
 const Index = () => {
