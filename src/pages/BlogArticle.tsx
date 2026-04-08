@@ -113,6 +113,8 @@ const BlogArticle = () => {
     publishedAt: article.published_at || article.created_at,
     updatedAt: article.updated_at,
     authorName: article.author_name || undefined,
+    category: article.category,
+    readTime: article.read_time || undefined,
   });
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([

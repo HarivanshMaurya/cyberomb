@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import ArticleCard from "@/components/ArticleCard";
-import SEOHead from "@/components/SEOHead";
+import SEOHead, { buildCollectionPageJsonLd, buildBreadcrumbJsonLd } from "@/components/SEOHead";
 import { useArticles } from "@/hooks/useArticles";
 import { useCategories } from "@/hooks/useCategories";
 import { Button } from "@/components/ui/button";
@@ -36,8 +36,16 @@ const Articles = () => {
       <PageBackground />
       <SEOHead
         title="All Articles"
-        description="Explore our collection of articles covering wellness, travel, creativity, personal growth, and more."
+        description="Explore our collection of articles covering wellness, travel, creativity, personal growth, and more. Find inspiration and insights."
         canonical="/articles"
+        keywords="articles, blog, wellness, travel, creativity, personal growth, inspiration"
+        jsonLd={[
+          buildCollectionPageJsonLd("All Articles", "Explore our collection of articles covering wellness, travel, creativity, personal growth, and more.", "/articles"),
+          buildBreadcrumbJsonLd([
+            { name: "Home", url: "/" },
+            { name: "Articles", url: "/articles" },
+          ]),
+        ]}
       />
       <Header />
 
