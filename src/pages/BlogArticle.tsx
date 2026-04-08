@@ -135,13 +135,14 @@ const BlogArticle = () => {
         canonical={`/blog/${article.slug}`}
         ogType="article"
         ogImage={article.og_image || article.featured_image || `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-image?slug=${article.slug}`}
+        keywords={`${article.category}, ${article.title.split(' ').slice(0, 5).join(', ')}`}
         article={{
           publishedTime: article.published_at || article.created_at,
           modifiedTime: article.updated_at,
           author: article.author_name || undefined,
           category: article.category,
         }}
-        jsonLd={[articleJsonLd, breadcrumbJsonLd] as unknown as Record<string, unknown>}
+        jsonLd={[articleJsonLd, breadcrumbJsonLd]}
       />
       <Header />
       
