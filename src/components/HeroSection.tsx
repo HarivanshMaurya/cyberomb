@@ -112,13 +112,13 @@ const HeroSection = () => {
           muted
           playsInline
           preload="auto"
-          className="absolute inset-0 w-full h-full object-cover opacity-[0.18] dark:opacity-[0.1] mix-blend-multiply dark:mix-blend-screen"
+          className="absolute inset-0 w-full h-full object-cover"
         >
           <source src="/videos/hero-bg.webm" type="video/webm" />
         </video>
 
-        {/* Dark mode overlay to prevent washed-out look */}
-        <div className="absolute inset-0 bg-background/40 dark:bg-background/60" />
+        {/* Overlay for text readability */}
+        <div className="absolute inset-0 bg-background/70 dark:bg-background/80" />
 
         {/* Gradient mesh */}
         <div
