@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import ArticleCard from "@/components/ArticleCard";
 import HeroSection from "@/components/HeroSection";
 import IntroSection from "@/components/IntroSection";
-import SEOHead, { buildWebsiteJsonLd } from "@/components/SEOHead";
+import SEOHead, { buildWebsiteJsonLd, buildOrganizationJsonLd, buildItemListJsonLd } from "@/components/SEOHead";
 import ProductCard from "@/components/ProductCard";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import { useSiteSection } from "@/hooks/useSiteSections";
@@ -61,7 +61,25 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background animate-fade-in relative">
       <PageBackground />
-      <SEOHead canonical="/" jsonLd={buildWebsiteJsonLd()} />
+      <SEOHead
+        canonical="/"
+        keywords="wellness, travel, creativity, personal growth, articles, ebooks, inspiration, lifestyle"
+        jsonLd={[
+          buildWebsiteJsonLd(),
+          buildOrganizationJsonLd(),
+          ...(featuredArticles.length > 0
+            ? [buildItemListJsonLd(
+                "Featured Articles",
+                featuredArticles.map((a, i) => ({
+                  name: a.title,
+                  url: `/blog/${a.id}`,
+                  image: a.image,
+                  position: i + 1,
+                }))
+              )]
+            : []),
+        ]}
+      />
       <Header />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -8,39 +8,41 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // Fetch published articles
-  const { data: articles } = await supabase
-    .from("articles")
-    .select("slug, updated_at")
-    .eq("status", "published")
-    .order("updated_at", { ascending: false });
+  // Fetch all dynamic content in parallel
+  const [articlesRes, pagesRes, categoriesRes, productsRes, wellnessRes, authorsRes] = await Promise.all([
+    supabase.from("articles").select("slug, updated_at").eq("status", "published").order("updated_at", { ascending: false }),
+    supabase.from("pages").select("slug, updated_at").eq("is_published", true),
+    supabase.from("categories").select("slug, created_at"),
+    supabase.from("products").select("slug, updated_at").eq("is_active", true),
+    supabase.from("wellness_articles").select("slug, updated_at").eq("status", "published"),
+    supabase.from("authors").select("id, updated_at").eq("is_active", true),
+  ]);
 
-  // Fetch published pages
-  const { data: pages } = await supabase
-    .from("pages")
-    .select("slug, updated_at")
-    .eq("is_published", true);
-
-  // Fetch categories
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("slug, created_at");
+  const articles = articlesRes.data || [];
+  const pages = pagesRes.data || [];
+  const categories = categoriesRes.data || [];
+  const products = productsRes.data || [];
+  const wellnessArticles = wellnessRes.data || [];
+  const authors = authorsRes.data || [];
 
   const staticPages = [
     { loc: "/", priority: "1.0", changefreq: "daily" },
     { loc: "/articles", priority: "0.9", changefreq: "daily" },
-    { loc: "/wellness", priority: "0.8", changefreq: "weekly" },
+    { loc: "/wellness", priority: "0.8", changefreq: "daily" },
     { loc: "/travel", priority: "0.8", changefreq: "weekly" },
     { loc: "/creativity", priority: "0.8", changefreq: "weekly" },
     { loc: "/growth", priority: "0.8", changefreq: "weekly" },
     { loc: "/about", priority: "0.6", changefreq: "monthly" },
+    { loc: "/authors", priority: "0.6", changefreq: "monthly" },
     { loc: "/contact", priority: "0.5", changefreq: "monthly" },
+    { loc: "/newsletter", priority: "0.5", changefreq: "monthly" },
     { loc: "/privacy", priority: "0.3", changefreq: "yearly" },
     { loc: "/terms", priority: "0.3", changefreq: "yearly" },
   ];
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 `;
 
   // Static pages
@@ -54,18 +56,41 @@ Deno.serve(async () => {
   }
 
   // Articles
-  for (const a of articles || []) {
+  for (const a of articles) {
     xml += `  <url>
     <loc>${SITE_URL}/blog/${a.slug}</loc>
     <lastmod>${new Date(a.updated_at).toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+`;
+  }
+
+  // Wellness articles
+  for (const w of wellnessArticles) {
+    xml += `  <url>
+    <loc>${SITE_URL}/wellness/${w.slug}</loc>
+    <lastmod>${new Date(w.updated_at).toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 `;
   }
 
+  // Products / eBooks
+  for (const p of products) {
+    if (!p.slug) continue;
+    xml += `  <url>
+    <loc>${SITE_URL}/product/${p.slug}</loc>
+    <lastmod>${new Date(p.updated_at).toISOString()}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+`;
+  }
+
   // Dynamic pages
-  for (const p of pages || []) {
+  for (const p of pages) {
     xml += `  <url>
     <loc>${SITE_URL}/page/${p.slug}</loc>
     <lastmod>${new Date(p.updated_at).toISOString()}</lastmod>
@@ -76,7 +101,7 @@ Deno.serve(async () => {
   }
 
   // Categories
-  for (const c of categories || []) {
+  for (const c of categories) {
     xml += `  <url>
     <loc>${SITE_URL}/category/${c.slug}</loc>
     <changefreq>weekly</changefreq>
@@ -89,8 +114,9 @@ Deno.serve(async () => {
 
   return new Response(xml, {
     headers: {
-      "Content-Type": "application/xml",
-      "Cache-Control": "public, max-age=3600",
+      "Content-Type": "application/xml; charset=utf-8",
+      "Cache-Control": "public, max-age=3600, s-maxage=3600",
+      "X-Robots-Tag": "noindex",
     },
   });
 });
