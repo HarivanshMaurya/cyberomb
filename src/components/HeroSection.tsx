@@ -111,10 +111,14 @@ const HeroSection = () => {
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-[0.15] dark:opacity-[0.08] mix-blend-multiply dark:mix-blend-screen"
+          preload="auto"
+          className="absolute inset-0 w-full h-full object-cover opacity-[0.18] dark:opacity-[0.1] mix-blend-multiply dark:mix-blend-screen"
         >
           <source src="/videos/hero-bg.webm" type="video/webm" />
         </video>
+
+        {/* Dark mode overlay to prevent washed-out look */}
+        <div className="absolute inset-0 bg-background/40 dark:bg-background/60" />
 
         {/* Gradient mesh */}
         <div
@@ -323,18 +327,15 @@ const HeroSection = () => {
                   <div className="absolute inset-0 bg-muted animate-pulse" />
                 )}
 
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
+                <img
+                  src={backgroundImage}
+                  alt={title}
+                  loading="eager"
                   className={`w-full aspect-[3/4] lg:aspect-[4/5] object-cover transition-all duration-[2s] ease-out ${
                     imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
                   }`}
-                  onLoadedData={() => setImageLoaded(true)}
-                >
-                  <source src="/videos/hero-bg.webm" type="video/webm" />
-                </video>
+                  onLoad={() => setImageLoaded(true)}
+                />
 
                 {/* Bottom glass card */}
                 <div
