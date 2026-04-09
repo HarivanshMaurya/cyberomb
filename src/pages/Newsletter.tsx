@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
-import SEOHead from '@/components/SEOHead';
+import SEOHead, { buildBreadcrumbJsonLd, SITE_NAME, SITE_URL } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -78,7 +78,28 @@ export default function Newsletter() {
     <>
       <SEOHead
         title="Newsletter — Stay Inspired"
-        description="Subscribe to our newsletter for curated articles on wellness, travel, creativity, and personal growth delivered to your inbox."
+        description="Subscribe to Cyberom's free newsletter for curated articles on wellness, travel, creativity, and personal growth delivered weekly to your inbox."
+        canonical="/newsletter"
+        keywords="newsletter, subscribe, cyberom newsletter, wellness newsletter, weekly inspiration, email updates"
+        jsonLd={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", url: "/" },
+            { name: "Newsletter", url: "/newsletter" },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: `Newsletter — Stay Inspired | ${SITE_NAME}`,
+            description: "Subscribe to curated articles on wellness, travel, creativity, and personal growth.",
+            url: `${SITE_URL}/newsletter`,
+            isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
+            potentialAction: {
+              "@type": "SubscribeAction",
+              target: `${SITE_URL}/newsletter`,
+              name: "Subscribe to Newsletter",
+            },
+          },
+        ]}
       />
       <Header />
 
