@@ -437,9 +437,34 @@ export default function ArticleEditor() {
                <CardHeader>
                  <CardTitle>SEO Settings</CardTitle>
                </CardHeader>
-               <CardContent className="space-y-4">
+               <CardContent className="space-y-6">
+                 {/* Google Preview */}
+                 <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-1">
+                   <p className="text-xs text-muted-foreground font-medium mb-2">Google Search Preview</p>
+                   <p className="text-[#1a0dab] text-lg leading-snug font-medium truncate">
+                     {formData.meta_title || formData.title || 'Article Title'} | Cyberom
+                   </p>
+                   <p className="text-[#006621] text-sm truncate">
+                     cyberomb.lovable.app/blog/{formData.slug || 'article-slug'}
+                   </p>
+                   <p className="text-sm text-[#545454] line-clamp-2">
+                     {formData.meta_description || formData.excerpt || 'Add a meta description to improve click-through rates from search results.'}
+                   </p>
+                 </div>
+
                  <div className="space-y-2">
-                   <Label htmlFor="meta_title">Meta Title</Label>
+                   <div className="flex items-center justify-between">
+                     <Label htmlFor="meta_title">Meta Title</Label>
+                     <Button
+                       type="button"
+                       variant="ghost"
+                       size="sm"
+                       className="text-xs h-7"
+                       onClick={() => setFormData({ ...formData, meta_title: formData.title.slice(0, 60) })}
+                     >
+                       Auto-fill from title
+                     </Button>
+                   </div>
                    <Input
                      id="meta_title"
                      value={formData.meta_title}
@@ -447,34 +472,67 @@ export default function ArticleEditor() {
                      placeholder="SEO title (defaults to article title)"
                      maxLength={60}
                    />
-                   <p className="text-xs text-muted-foreground">
-                     {formData.meta_title.length}/60 characters
+                   <p className={cn("text-xs", formData.meta_title.length > 55 ? "text-destructive" : "text-muted-foreground")}>
+                     {formData.meta_title.length}/60 characters {formData.meta_title.length === 0 && '— will use article title'}
                    </p>
                  </div>
  
                  <div className="space-y-2">
-                   <Label htmlFor="meta_description">Meta Description</Label>
+                   <div className="flex items-center justify-between">
+                     <Label htmlFor="meta_description">Meta Description</Label>
+                     <Button
+                       type="button"
+                       variant="ghost"
+                       size="sm"
+                       className="text-xs h-7"
+                       onClick={() => setFormData({ ...formData, meta_description: formData.excerpt.slice(0, 160) })}
+                     >
+                       Auto-fill from excerpt
+                     </Button>
+                   </div>
                    <Textarea
                      id="meta_description"
                      value={formData.meta_description}
                      onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
-                     placeholder="SEO description"
+                     placeholder="SEO description (recommended 120-160 chars)"
                      maxLength={160}
                      rows={3}
                    />
-                   <p className="text-xs text-muted-foreground">
+                   <p className={cn("text-xs", formData.meta_description.length > 155 ? "text-destructive" : formData.meta_description.length > 0 && formData.meta_description.length < 120 ? "text-yellow-600" : "text-muted-foreground")}>
                      {formData.meta_description.length}/160 characters
+                     {formData.meta_description.length > 0 && formData.meta_description.length < 120 && ' — consider adding more for better SEO'}
+                     {formData.meta_description.length === 0 && ' — will use article excerpt'}
                    </p>
                  </div>
  
                  <div className="space-y-2">
-                   <Label htmlFor="og_image">Open Graph Image URL</Label>
+                   <div className="flex items-center justify-between">
+                     <Label htmlFor="og_image">Open Graph Image URL</Label>
+                     <Button
+                       type="button"
+                       variant="ghost"
+                       size="sm"
+                       className="text-xs h-7"
+                       onClick={() => setFormData({ ...formData, og_image: formData.featured_image })}
+                       disabled={!formData.featured_image}
+                     >
+                       Use featured image
+                     </Button>
+                   </div>
                    <Input
                      id="og_image"
                      value={formData.og_image}
                      onChange={(e) => setFormData({ ...formData, og_image: e.target.value })}
-                     placeholder="https://example.com/og-image.jpg"
+                     placeholder="https://example.com/og-image.jpg (1200×630 recommended)"
                    />
+                   {formData.og_image && (
+                     <div className="rounded-lg overflow-hidden border border-border">
+                       <img src={formData.og_image} alt="OG Preview" className="w-full h-32 object-cover" />
+                     </div>
+                   )}
+                   <p className="text-xs text-muted-foreground">
+                     {formData.og_image ? 'Image set ✓' : 'Will use featured image or auto-generated OG image'}
+                   </p>
                  </div>
                </CardContent>
              </Card>
