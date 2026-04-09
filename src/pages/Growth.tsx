@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import SEOHead from "@/components/SEOHead";
+import SEOHead, { buildBreadcrumbJsonLd, buildCollectionPageJsonLd } from "@/components/SEOHead";
 import ArticleCard from "@/components/ArticleCard";
 import { articles } from "@/data/articles";
 
@@ -12,8 +12,16 @@ const Growth = () => {
     <div className="min-h-screen bg-background animate-fade-in">
       <SEOHead
         title="Personal Growth"
-        description="Embark on a journey of self-discovery and continuous improvement with insights and practices for your evolution."
+        description="Embark on a journey of self-discovery and continuous improvement with insights, practices, and perspectives for your evolution."
         canonical="/growth"
+        keywords="personal growth, self-improvement, self-discovery, mindset, habits, motivation, personal development"
+        jsonLd={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", url: "/" },
+            { name: "Personal Growth", url: "/growth" },
+          ]),
+          buildCollectionPageJsonLd("Personal Growth", "Insights, practices, and perspectives that support your evolution into your best self.", "/growth"),
+        ]}
       />
       <Header />
       

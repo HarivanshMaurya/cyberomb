@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import SEOHead from "@/components/SEOHead";
+import SEOHead, { buildBreadcrumbJsonLd, buildCollectionPageJsonLd, buildProductJsonLd } from "@/components/SEOHead";
 import ProductCard from "@/components/ProductCard";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import { usePageSection } from "@/hooks/usePageSections";
@@ -50,8 +50,24 @@ const Travel = () => {
     <div className="min-h-screen bg-background animate-fade-in">
       <SEOHead
         title="Shop — Books & More"
-        description="Browse our curated collection of books, guides, and resources."
+        description="Browse our curated collection of books, guides, and resources on wellness, travel, creativity, and personal growth."
         canonical="/travel"
+        keywords="books, ebooks, guides, wellness books, travel guides, personal growth, cyberom shop"
+        jsonLd={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", url: "/" },
+            { name: "Shop", url: "/travel" },
+          ]),
+          buildCollectionPageJsonLd("Shop — Books & More", "Browse our curated collection of books, guides, and resources.", "/travel"),
+          ...(products?.slice(0, 5).map(p => buildProductJsonLd({
+            title: p.title,
+            description: p.description || undefined,
+            image: p.image || undefined,
+            price: p.price,
+            slug: p.slug || '',
+            author: p.author || undefined,
+          })) || []),
+        ]}
       />
       <Header />
 

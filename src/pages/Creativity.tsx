@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import SEOHead from "@/components/SEOHead";
+import SEOHead, { buildBreadcrumbJsonLd, buildCollectionPageJsonLd } from "@/components/SEOHead";
 import ArticleCard from "@/components/ArticleCard";
 import { articles } from "@/data/articles";
 
@@ -12,8 +12,16 @@ const Creativity = () => {
     <div className="min-h-screen bg-background animate-fade-in">
       <SEOHead
         title="Creativity & Expression"
-        description="Unlock your creative potential and explore the art of authentic self-expression."
+        description="Unlock your creative potential and explore the art of authentic self-expression. Overcome blocks and build sustainable creative practices."
         canonical="/creativity"
+        keywords="creativity, creative expression, art, writing, creative process, creative habits, inspiration"
+        jsonLd={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", url: "/" },
+            { name: "Creativity & Expression", url: "/creativity" },
+          ]),
+          buildCollectionPageJsonLd("Creativity & Expression", "Unlock your creative potential and explore the art of authentic self-expression.", "/creativity"),
+        ]}
       />
       <Header />
       
