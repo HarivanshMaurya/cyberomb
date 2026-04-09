@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useWellnessArticleBySlug } from '@/hooks/useWellnessArticles';
 import Header from '@/components/Header';
-import SEOHead from '@/components/SEOHead';
+import SEOHead, { buildArticleJsonLd, buildBreadcrumbJsonLd } from '@/components/SEOHead';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Clock, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -43,8 +43,35 @@ export default function WellnessArticle() {
     <div className="min-h-screen bg-background animate-fade-in">
       <SEOHead
         title={article.meta_title || article.title}
-        description={article.meta_description || article.excerpt || ''}
+        description={article.meta_description || article.excerpt || `Read ${article.title} — wellness insights on Cyberom.`}
         canonical={`/wellness/${article.slug}`}
+        ogType="article"
+        ogImage={article.og_image || article.featured_image || undefined}
+        keywords={`wellness, self-care, ${article.title.split(' ').slice(0, 4).join(', ')}`}
+        article={{
+          publishedTime: article.published_at || article.created_at,
+          modifiedTime: article.updated_at,
+          author: article.author_name || undefined,
+          category: "Wellness",
+        }}
+        jsonLd={[
+          buildArticleJsonLd({
+            title: article.title,
+            description: article.meta_description || article.excerpt || undefined,
+            image: article.og_image || article.featured_image || undefined,
+            slug: article.slug,
+            publishedAt: article.published_at || article.created_at,
+            updatedAt: article.updated_at,
+            authorName: article.author_name || undefined,
+            category: "Wellness",
+            readTime: article.read_time || undefined,
+          }),
+          buildBreadcrumbJsonLd([
+            { name: "Home", url: "/" },
+            { name: "Wellness", url: "/wellness" },
+            { name: article.title, url: `/wellness/${article.slug}` },
+          ]),
+        ]}
       />
       <Header />
 
