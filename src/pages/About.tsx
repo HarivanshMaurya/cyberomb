@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Header from "@/components/Header";
-import SEOHead from "@/components/SEOHead";
+import SEOHead, { buildBreadcrumbJsonLd, buildOrganizationJsonLd, SITE_NAME, SITE_URL } from "@/components/SEOHead";
 import { Mail, ArrowRight, Sparkles, Heart, Eye, Users, BookOpen, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePageSection } from "@/hooks/usePageSections";
@@ -68,8 +68,24 @@ const About = () => {
     <div className="min-h-screen bg-background animate-fade-in relative">
       <SEOHead
         title="About Cyberom"
-        description="A space for exploring ideas, finding inspiration, and discovering new ways of seeing the world."
+        description="Learn about Cyberom — a space for exploring ideas, finding inspiration, and discovering new ways of seeing the world through lifestyle, wellness, travel, and personal growth."
         canonical="/about"
+        keywords="about cyberom, cyberom blog, lifestyle blog, wellness blog, inspiration"
+        jsonLd={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", url: "/" },
+            { name: "About", url: "/about" },
+          ]),
+          buildOrganizationJsonLd(),
+          {
+            "@context": "https://schema.org",
+            "@type": "AboutPage",
+            name: `About ${SITE_NAME}`,
+            description: "Learn about Cyberom — a space for exploring ideas, finding inspiration, and discovering new ways of seeing the world.",
+            url: `${SITE_URL}/about`,
+            isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
+          },
+        ]}
       />
       <PageBackground />
       <Header />

@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import SEOHead from "@/components/SEOHead";
+import SEOHead, { buildBreadcrumbJsonLd, buildCollectionPageJsonLd, buildItemListJsonLd, SITE_NAME } from "@/components/SEOHead";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageSection } from "@/hooks/usePageSections";
 import { usePublishedWellnessArticles } from "@/hooks/useWellnessArticles";
@@ -57,8 +57,25 @@ const Wellness = () => {
     <div className="min-h-screen bg-background animate-fade-in relative">
       <SEOHead
         title="Wellness & Self-Care"
-        description="Discover practices, insights, and strategies to nurture your physical, mental, and emotional wellbeing."
+        description="Discover practices, insights, and strategies to nurture your physical, mental, and emotional wellbeing. Mind, body, soul guides."
         canonical="/wellness"
+        keywords="wellness, self-care, mental health, mindfulness, wellbeing, healthy lifestyle, meditation"
+        jsonLd={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", url: "/" },
+            { name: "Wellness", url: "/wellness" },
+          ]),
+          buildCollectionPageJsonLd("Wellness & Self-Care", "Discover practices, insights, and strategies to nurture your physical, mental, and emotional wellbeing.", "/wellness"),
+          ...(wellnessArticles?.length ? [buildItemListJsonLd(
+            "Wellness Articles",
+            wellnessArticles.slice(0, 10).map((a, i) => ({
+              name: a.title,
+              url: `/wellness/${a.slug}`,
+              image: a.featured_image || undefined,
+              position: i + 1,
+            }))
+          )] : []),
+        ]}
       />
       <PageBackground />
       <Header />

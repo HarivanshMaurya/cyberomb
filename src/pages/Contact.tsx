@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import SEOHead from "@/components/SEOHead";
+import SEOHead, { buildBreadcrumbJsonLd, SITE_NAME, SITE_URL } from "@/components/SEOHead";
 import { Mail, MapPin, Phone, Send, MessageSquare, ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -67,8 +67,23 @@ const Contact = () => {
       <PageBackground />
       <SEOHead
         title="Contact Us"
-        description="Have a question, suggestion, or just want to say hello? Get in touch with the Cyberom team."
+        description="Have a question, suggestion, or just want to say hello? Get in touch with the Cyberom team. We respond within 24 hours."
         canonical="/contact"
+        keywords="contact cyberom, get in touch, cyberom support, cyberom email"
+        jsonLd={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", url: "/" },
+            { name: "Contact", url: "/contact" },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "ContactPage",
+            name: `Contact ${SITE_NAME}`,
+            description: "Have a question, suggestion, or just want to say hello? Get in touch with the Cyberom team.",
+            url: `${SITE_URL}/contact`,
+            isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
+          },
+        ]}
       />
       <Header />
 
