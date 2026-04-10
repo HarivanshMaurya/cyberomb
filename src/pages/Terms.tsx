@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import SEOHead from "@/components/SEOHead";
+import SEOHead, { buildBreadcrumbJsonLd, SITE_URL } from "@/components/SEOHead";
 import { Shield, FileText, Users, AlertTriangle, Lock, Globe, RefreshCw, Scale, Mail, ExternalLink } from "lucide-react";
 
 const sections = [
@@ -75,8 +75,25 @@ const Terms = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Terms of Service"
-        description="Read the terms and conditions for using the Cyberom website."
+        description="Read the terms and conditions for using the Cyberom website. Understand your rights and responsibilities."
         canonical="/terms"
+        noindex={false}
+        jsonLd={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", url: "/" },
+            { name: "Terms of Service", url: "/terms" },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: "Terms of Service",
+            description: "Read the terms and conditions for using the Cyberom website.",
+            url: `${SITE_URL}/terms`,
+            dateModified: "2025-03-20",
+            inLanguage: "en-US",
+            isPartOf: { "@type": "WebSite", name: "Cyberom", url: SITE_URL },
+          },
+        ]}
       />
       <Header />
 
