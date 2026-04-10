@@ -329,12 +329,14 @@ const HeroSection = () => {
                   <div className="absolute inset-0 bg-muted animate-pulse" />
                 )}
 
+                {/* eslint-disable-next-line react/no-unknown-property */}
                 <img
                   src={backgroundImage}
                   alt={title}
                   width={800}
                   height={1000}
-                  fetchPriority="high"
+                  // @ts-ignore
+                  fetchpriority="high"
                   className={`w-full aspect-[3/4] lg:aspect-[4/5] object-cover transition-all duration-[2s] ease-out ${
                     imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
                   }`}
