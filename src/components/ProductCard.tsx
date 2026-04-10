@@ -19,6 +19,8 @@ const ProductCard = ({ title, description, image, price, slug, author }: Product
           <img
             src={image}
             alt={title}
+            width={600}
+            height={800}
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
             loading="lazy"
           />

@@ -35,6 +35,9 @@ const ArticleCard = ({ id, title, category, date, image, size = "small" }: Artic
         <img
           src={image}
           alt={title}
+          loading="lazy"
+          width={800}
+          height={600}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         

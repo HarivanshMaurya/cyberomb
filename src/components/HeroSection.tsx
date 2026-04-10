@@ -111,8 +111,10 @@ const HeroSection = () => {
           loop
           muted
           playsInline
-          preload="auto"
+          preload="none"
+          poster="/og-default.png"
           className="absolute inset-0 w-full h-full object-cover"
+          aria-hidden="true"
         >
           <source src="/videos/hero-bg.webm" type="video/webm" />
         </video>
