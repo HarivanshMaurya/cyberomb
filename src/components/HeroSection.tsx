@@ -111,8 +111,10 @@ const HeroSection = () => {
           loop
           muted
           playsInline
-          preload="auto"
+          preload="none"
+          poster="/og-default.png"
           className="absolute inset-0 w-full h-full object-cover"
+          aria-hidden="true"
         >
           <source src="/videos/hero-bg.webm" type="video/webm" />
         </video>
@@ -330,7 +332,9 @@ const HeroSection = () => {
                 <img
                   src={backgroundImage}
                   alt={title}
-                  loading="eager"
+                  width={800}
+                  height={1000}
+                  fetchPriority="high"
                   className={`w-full aspect-[3/4] lg:aspect-[4/5] object-cover transition-all duration-[2s] ease-out ${
                     imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
                   }`}

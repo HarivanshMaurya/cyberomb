@@ -89,9 +89,9 @@ const Index = () => {
         <section id="articles" className="py-12" aria-label="Featured Articles">
           <div className="flex items-center justify-between mb-12 animate-slide-up">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Featured Articles</h2>
-            <a href="/articles" className="text-sm font-medium text-muted-foreground hover:text-accent transition-colors px-4 py-2 rounded-full hover:bg-muted/60">
+            <Link to="/articles" className="text-sm font-medium text-muted-foreground hover:text-accent transition-colors px-4 py-2 rounded-full hover:bg-muted/60">
               View all →
-            </a>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -144,7 +144,7 @@ const Index = () => {
               {newsletterContent?.description || 'Subscribe to receive our latest articles and insights directly in your inbox.'}
             </p>
             <form onSubmit={(e) => { e.preventDefault(); handleSubscribe(newsletterEmail, setNewsletterEmail, setIsSubscribing); }} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input type="email" placeholder="Your email" aria-label="Email address" value={newsletterEmail} onChange={e => setNewsletterEmail(e.target.value)} className="flex-1 px-6 py-4 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-all" />
+              <input type="email" placeholder="Your email" aria-label="Email address for newsletter" value={newsletterEmail} onChange={e => setNewsletterEmail(e.target.value)} className="flex-1 px-6 py-4 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-all" />
               <button type="submit" disabled={isSubscribing} className="px-10 py-4 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 hover:scale-105 transition-all disabled:opacity-50">
                 {isSubscribing ? 'Subscribing...' : (newsletterContent?.button_text || 'Subscribe')}
               </button>
@@ -163,24 +163,25 @@ const Index = () => {
           <div className="py-16 grid grid-cols-1 md:grid-cols-12 gap-12">
             {/* Brand column */}
             <div className="md:col-span-4 space-y-5">
-              <a href="/" className="inline-block text-2xl font-bold tracking-tight hover:text-primary transition-colors">
+              <Link to="/" className="inline-block text-2xl font-bold tracking-tight hover:text-primary transition-colors">
                 Cyberom
-              </a>
+              </Link>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
                 {footerContent?.brand_description || 'Exploring ideas, finding inspiration. A space for wellness, creativity, travel, and personal growth.'}
               </p>
               {/* Newsletter mini */}
               <form onSubmit={(e) => { e.preventDefault(); handleSubscribe(footerEmail, setFooterEmail, setIsFooterSubscribing); }} className="flex gap-2 max-w-xs">
-                <input
-                  type="email"
-                  placeholder={footerContent?.newsletter_placeholder || "Your email"}
-                  value={footerEmail}
-                  onChange={e => setFooterEmail(e.target.value)}
-                  className="flex-1 px-4 py-2.5 rounded-full border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-                />
-                <button type="submit" disabled={isFooterSubscribing} className="px-4 py-2.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50">
-                  <Mail className="w-4 h-4" />
-                </button>
+                 <input
+                   type="email"
+                   placeholder={footerContent?.newsletter_placeholder || "Your email"}
+                   aria-label="Email address for footer newsletter"
+                   value={footerEmail}
+                   onChange={e => setFooterEmail(e.target.value)}
+                   className="flex-1 px-4 py-2.5 rounded-full border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                 />
+                 <button type="submit" disabled={isFooterSubscribing} aria-label="Subscribe to newsletter" className="px-4 py-2.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50">
+                   <Mail className="w-4 h-4" />
+                 </button>
               </form>
             </div>
 
