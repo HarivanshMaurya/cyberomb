@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import SEOHead from "@/components/SEOHead";
+import SEOHead, { buildBreadcrumbJsonLd, SITE_URL } from "@/components/SEOHead";
 import { Shield, Eye, Database, Cookie, Lock, UserCheck, ExternalLink, Baby, RefreshCw, Mail } from "lucide-react";
 
 const sections = [
@@ -85,8 +85,25 @@ const Privacy = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Privacy Policy"
-        description="Learn how Cyberom collects, uses, and protects your personal information."
+        description="Learn how Cyberom collects, uses, and protects your personal information. We value transparency and your data rights."
         canonical="/privacy"
+        noindex={false}
+        jsonLd={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", url: "/" },
+            { name: "Privacy Policy", url: "/privacy" },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: "Privacy Policy",
+            description: "Learn how Cyberom collects, uses, and protects your personal information.",
+            url: `${SITE_URL}/privacy`,
+            dateModified: "2025-03-20",
+            inLanguage: "en-US",
+            isPartOf: { "@type": "WebSite", name: "Cyberom", url: SITE_URL },
+          },
+        ]}
       />
       <Header />
 
