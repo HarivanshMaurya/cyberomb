@@ -89,9 +89,9 @@ const Index = () => {
         <section id="articles" className="py-12" aria-label="Featured Articles">
           <div className="flex items-center justify-between mb-12 animate-slide-up">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Featured Articles</h2>
-            <a href="/articles" className="text-sm font-medium text-muted-foreground hover:text-accent transition-colors px-4 py-2 rounded-full hover:bg-muted/60">
+            <Link to="/articles" className="text-sm font-medium text-muted-foreground hover:text-accent transition-colors px-4 py-2 rounded-full hover:bg-muted/60">
               View all →
-            </a>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -163,9 +163,9 @@ const Index = () => {
           <div className="py-16 grid grid-cols-1 md:grid-cols-12 gap-12">
             {/* Brand column */}
             <div className="md:col-span-4 space-y-5">
-              <a href="/" className="inline-block text-2xl font-bold tracking-tight hover:text-primary transition-colors">
+              <Link to="/" className="inline-block text-2xl font-bold tracking-tight hover:text-primary transition-colors">
                 Cyberom
-              </a>
+              </Link>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
                 {footerContent?.brand_description || 'Exploring ideas, finding inspiration. A space for wellness, creativity, travel, and personal growth.'}
               </p>
