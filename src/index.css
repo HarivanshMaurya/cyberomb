@@ -134,8 +134,6 @@ All colors MUST be HSL.
   }
 }
 
-@layer base {
-
 @layer utilities {
   .text-gradient {
     background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)));
