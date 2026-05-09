@@ -1,5 +1,6 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 interface ArticleCardProps {
   id: string;
@@ -8,9 +9,18 @@ interface ArticleCardProps {
   date: string;
   image: string;
   size?: "small" | "large";
+  featured?: boolean;
 }
 
-const ArticleCard = ({ id, title, category, date, image, size = "small" }: ArticleCardProps) => {
+const ArticleCard = ({
+  id,
+  title,
+  category,
+  date,
+  image,
+  size = "small",
+  featured = false,
+}: ArticleCardProps) => {
   const getCategoryClass = (cat: string) => {
     const normalized = cat.toLowerCase();
     if (normalized.includes("financ")) return "tag-financing";
@@ -26,50 +36,64 @@ const ArticleCard = ({ id, title, category, date, image, size = "small" }: Artic
   return (
     <Link
       to={`/blog/${id}`}
-      className={`group relative block rounded-[2.5rem] overflow-hidden card-hover ${
-        size === "large" ? "col-span-1 md:col-span-2 row-span-2" : ""
-      }`}
+      aria-label={`Read article: ${title}`}
+      className={cn(
+        "group relative block rounded-[2rem] overflow-hidden bg-card border border-border/50",
+        "transition-all duration-500 ease-out",
+        "hover:-translate-y-1 hover:shadow-[0_24px_60px_-20px_hsl(var(--shadow-soft)/0.25)] hover:border-border",
+        size === "large" ? "col-span-1 md:col-span-2" : ""
+      )}
     >
-      {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted rounded-[2.5rem]">
+      {/* Enforced 4:3 image */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img
           src={image}
           alt={title}
           loading="lazy"
           width={800}
           height={600}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
-        
-        {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-        
-        {/* Content overlay */}
-        <div className="absolute inset-0 p-8 flex flex-col justify-between">
-          {/* Top section - Category and Date */}
-          <div className="flex items-start justify-between">
-            <span className={`px-4 py-1.5 rounded-full text-xs font-medium backdrop-blur-md ${getCategoryClass(category)} bg-opacity-80`}>
-              {category}
-            </span>
-            <span className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-medium text-white border border-white/30">
-              {date}
-            </span>
-          </div>
 
-          {/* Bottom section - Title and Arrow */}
-          <div className="flex items-end justify-between gap-4">
-            <div className="flex-1">
-              <span className="text-white/50 text-xs font-medium tracking-wider block mb-3">{category}</span>
-              <h3 className="text-white text-xl md:text-2xl lg:text-3xl font-bold leading-tight tracking-tight">
+        {/* Subtle bottom gradient for legibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+
+        {/* Top badges */}
+        <div className="absolute top-4 left-4 right-4 flex items-start justify-between gap-2">
+          <span
+            className={cn(
+              "px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider backdrop-blur-md ring-1 ring-white/20",
+              getCategoryClass(category)
+            )}
+          >
+            {category}
+          </span>
+          {featured && (
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-accent text-accent-foreground text-[11px] font-semibold uppercase tracking-wider shadow-[0_4px_14px_hsl(var(--accent)/0.45)]">
+              <Sparkles className="w-3 h-3" />
+              Featured
+            </span>
+          )}
+        </div>
+
+        {/* Bottom title + date */}
+        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+          <div className="flex items-end justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-white/70 text-[11px] font-medium tracking-wider mb-1.5">
+                {date}
+              </p>
+              <h3 className="text-white text-lg sm:text-xl md:text-2xl font-semibold leading-tight tracking-tight line-clamp-2">
                 {title}
               </h3>
             </div>
+            <div
+              aria-hidden="true"
+              className="flex-shrink-0 w-10 h-10 rounded-full bg-white/95 text-foreground flex items-center justify-center transition-transform duration-500 group-hover:rotate-45"
+            >
+              <ArrowUpRight className="w-4 h-4" />
+            </div>
           </div>
-        </div>
-
-        {/* Floating circular arrow button - positioned outside content overlay */}
-        <div className="absolute bottom-6 right-6 floating-button">
-          <ArrowUpRight className="w-5 h-5" />
         </div>
       </div>
     </Link>
