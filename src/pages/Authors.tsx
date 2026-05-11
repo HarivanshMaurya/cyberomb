@@ -134,16 +134,7 @@ const Authors = () => {
 
                   {/* Social links */}
                   <div className="flex items-center gap-2 pt-4 border-t border-border">
-                    {author.email && (
-                      <a
-                        href={`mailto:${author.email}`}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium bg-muted hover:bg-primary/10 hover:text-primary transition-all"
-                        aria-label="Email"
-                      >
-                        <Mail className="w-3.5 h-3.5" />
-                        Email
-                      </a>
-                    )}
+                    {/* Email intentionally hidden from public listing for privacy */}
                     {author.twitter && (
                       <a
                         href={`https://twitter.com/${author.twitter.replace('@', '')}`}
