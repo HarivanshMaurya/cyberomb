@@ -261,6 +261,11 @@ const Index = () => {
               </div>
             </>
           )}
+
+          {/* SR-only live region for pagination announcements */}
+          <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+            {loadMoreAnnouncement}
+          </div>
         </section>
 
         {/* eBooks Section */}
