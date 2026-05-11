@@ -19,7 +19,16 @@ const Index = () => {
   const { data: footerSection } = useSiteSection('footer');
   const { data: products, isLoading: productsLoading } = useActiveProducts();
 
-  const [sort, setSort] = useState<ArticleSort>('featured');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sortParam = searchParams.get('sort');
+  const sort: ArticleSort = sortParam === 'latest' ? 'latest' : 'featured';
+  const setSort = (next: ArticleSort) => {
+    const params = new URLSearchParams(searchParams);
+    if (next === 'featured') params.delete('sort');
+    else params.set('sort', next);
+    setSearchParams(params, { replace: false });
+  };
+
   const {
     data,
     isLoading: articlesLoading,
@@ -28,6 +37,7 @@ const Index = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch: refetchArticles,
   } = useArticlesPaginated(sort);
 
   const articles = useMemo(
