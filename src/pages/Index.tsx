@@ -224,10 +224,10 @@ const Index = () => {
                 ))}
               </div>
 
-              <div className="mt-12 flex flex-col items-center gap-3" aria-live="polite">
+              <div className="mt-12 flex flex-col items-center gap-3">
                 {hasNextPage ? (
                   <button
-                    onClick={() => fetchNextPage()}
+                    onClick={handleLoadMore}
                     disabled={isFetchingNextPage}
                     aria-label="Load more articles"
                     className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-border bg-background hover:bg-muted/60 hover:border-accent/60 text-sm font-semibold transition-all disabled:opacity-60"
