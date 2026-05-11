@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Header from "@/components/Header";
 import ArticleCard from "@/components/ArticleCard";
 import HeroSection from "@/components/HeroSection";
@@ -10,16 +10,25 @@ import NewsletterForm from "@/components/NewsletterForm";
 import { useSiteSection } from "@/hooks/useSiteSections";
 import { useArticlesPaginated, type ArticleSort } from "@/hooks/useArticlesPaginated";
 import { useActiveProducts } from "@/hooks/useProducts";
-import { ArrowUpRight, BookOpen, Loader2, Sparkles, Clock, Inbox } from "lucide-react";
+import { ArrowUpRight, BookOpen, Loader2, Sparkles, Clock, Inbox, RefreshCw } from "lucide-react";
 import PageBackground from "@/components/PageBackground";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 const Index = () => {
   const { data: newsletterSection } = useSiteSection('newsletter');
   const { data: footerSection } = useSiteSection('footer');
   const { data: products, isLoading: productsLoading } = useActiveProducts();
 
-  const [sort, setSort] = useState<ArticleSort>('featured');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sortParam = searchParams.get('sort');
+  const sort: ArticleSort = sortParam === 'latest' ? 'latest' : 'featured';
+  const setSort = (next: ArticleSort) => {
+    const params = new URLSearchParams(searchParams);
+    if (next === 'featured') params.delete('sort');
+    else params.set('sort', next);
+    setSearchParams(params, { replace: false });
+  };
+
   const {
     data,
     isLoading: articlesLoading,
@@ -28,6 +37,7 @@ const Index = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch: refetchArticles,
   } = useArticlesPaginated(sort);
 
   const articles = useMemo(
@@ -46,6 +56,28 @@ const Index = () => {
 
   const total = data?.pages[0]?.total ?? 0;
   const hasArticles = articles.length > 0;
+
+  // Announce loading + appended count for screen readers when paginating
+  const [loadMoreAnnouncement, setLoadMoreAnnouncement] = useState('');
+  const prevCountRef = useRef(articles.length);
+  const wasFetchingRef = useRef(false);
+  useEffect(() => {
+    if (isFetchingNextPage && !wasFetchingRef.current) {
+      setLoadMoreAnnouncement('Loading more articles…');
+    } else if (!isFetchingNextPage && wasFetchingRef.current) {
+      const added = articles.length - prevCountRef.current;
+      if (added > 0) {
+        setLoadMoreAnnouncement(`Loaded ${added} more article${added === 1 ? '' : 's'}. Showing ${articles.length} of ${total || articles.length}.`);
+      }
+    }
+    wasFetchingRef.current = isFetchingNextPage;
+    if (!isFetchingNextPage) prevCountRef.current = articles.length;
+  }, [isFetchingNextPage, articles.length, total]);
+
+  const handleLoadMore = () => {
+    prevCountRef.current = articles.length;
+    fetchNextPage();
+  };
 
   const newsletterContent = newsletterSection?.content as { heading?: string; description?: string; button_text?: string } | null;
   const footerContent = footerSection?.content as { copyright?: string; brand_description?: string; newsletter_placeholder?: string } | null;
@@ -144,12 +176,22 @@ const Index = () => {
           {!articlesLoading && articlesError && (
             <div
               role="alert"
-              className="rounded-[2rem] border border-destructive/30 bg-destructive/5 p-10 text-center"
+              className="rounded-[2rem] border border-destructive/30 bg-destructive/5 p-10 text-center flex flex-col items-center gap-4"
             >
-              <p className="text-base font-semibold text-destructive">Couldn't load articles</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {(articlesErrorObj as Error)?.message || 'Please try again in a moment.'}
-              </p>
+              <div>
+                <p className="text-base font-semibold text-destructive">Couldn't load articles</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {(articlesErrorObj as Error)?.message || 'Please try again in a moment.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => refetchArticles()}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-destructive/40 bg-background hover:bg-destructive/10 text-sm font-semibold transition-all"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </button>
             </div>
           )}
 
@@ -182,10 +224,10 @@ const Index = () => {
                 ))}
               </div>
 
-              <div className="mt-12 flex flex-col items-center gap-3" aria-live="polite">
+              <div className="mt-12 flex flex-col items-center gap-3">
                 {hasNextPage ? (
                   <button
-                    onClick={() => fetchNextPage()}
+                    onClick={handleLoadMore}
                     disabled={isFetchingNextPage}
                     aria-label="Load more articles"
                     className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-border bg-background hover:bg-muted/60 hover:border-accent/60 text-sm font-semibold transition-all disabled:opacity-60"
@@ -219,6 +261,11 @@ const Index = () => {
               </div>
             </>
           )}
+
+          {/* SR-only live region for pagination announcements */}
+          <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+            {loadMoreAnnouncement}
+          </div>
         </section>
 
         {/* eBooks Section */}
