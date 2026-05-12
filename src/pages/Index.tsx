@@ -241,24 +241,6 @@ const Index = () => {
             </div>
           )}
 
-          {/* Empty state */}
-          {!articlesLoading && !articlesError && !hasArticles && (
-            <div
-              role="status"
-              className="rounded-[2rem] border border-dashed border-border bg-card/40 p-12 text-center flex flex-col items-center gap-4"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
-                <Inbox className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-lg font-semibold">No articles published yet</p>
-                <p className="text-sm text-muted-foreground max-w-md">
-                  Check back soon — new stories are on the way.
-                </p>
-              </div>
-            </div>
-          )}
-
           {/* Articles grid */}
           {!articlesLoading && hasArticles && (
             <>
@@ -268,10 +250,44 @@ const Index = () => {
                     <ArticleCard {...article} size="small" featured={sort === 'featured' && index === 0} />
                   </div>
                 ))}
+
+                {/* Skeletons appended while fetching the next page */}
+                {isFetchingNextPage && (
+                  <>
+                    {[...Array(3)].map((_, i) => (
+                      <div
+                        key={`next-skel-${i}`}
+                        className="aspect-[4/3] rounded-[2rem] bg-muted animate-pulse"
+                        aria-hidden="true"
+                      />
+                    ))}
+                  </>
+                )}
               </div>
 
               <div className="mt-12 flex flex-col items-center gap-3">
-                {hasNextPage ? (
+                {/* Dedicated Load More error state */}
+                {isFetchNextPageError ? (
+                  <div
+                    role="alert"
+                    aria-live="assertive"
+                    className="rounded-2xl border border-destructive/30 bg-destructive/5 px-6 py-5 text-center flex flex-col items-center gap-3 max-w-md"
+                  >
+                    <p className="text-sm font-semibold text-destructive">Couldn't load more articles</p>
+                    <p className="text-xs text-muted-foreground">
+                      {friendlyError(articlesErrorObj)}
+                    </p>
+                    <button
+                      ref={loadMoreRetryRef}
+                      type="button"
+                      onClick={handleLoadMore}
+                      className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-destructive/40 bg-background hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 text-sm font-semibold transition-all"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      Retry load more
+                    </button>
+                  </div>
+                ) : hasNextPage ? (
                   <button
                     onClick={handleLoadMore}
                     disabled={isFetchingNextPage}
