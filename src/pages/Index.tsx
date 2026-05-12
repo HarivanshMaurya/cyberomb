@@ -202,22 +202,42 @@ const Index = () => {
           {!articlesLoading && articlesError && (
             <div
               role="alert"
+              aria-live="assertive"
               className="rounded-[2rem] border border-destructive/30 bg-destructive/5 p-10 text-center flex flex-col items-center gap-4"
             >
-              <div>
+              <div className="space-y-2">
                 <p className="text-base font-semibold text-destructive">Couldn't load articles</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {(articlesErrorObj as Error)?.message || 'Please try again in a moment.'}
+                <p className="text-sm text-muted-foreground max-w-md">
+                  {friendlyError(articlesErrorObj)}
                 </p>
               </div>
               <button
+                ref={errorRetryRef}
                 type="button"
                 onClick={() => refetchArticles()}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-destructive/40 bg-background hover:bg-destructive/10 text-sm font-semibold transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-destructive/40 bg-background hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 text-sm font-semibold transition-all"
               >
                 <RefreshCw className="w-4 h-4" />
                 Retry
               </button>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!articlesLoading && !articlesError && !hasArticles && (
+            <div
+              role="status"
+              className="rounded-[2rem] border border-dashed border-border bg-card/40 p-12 text-center flex flex-col items-center gap-4"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+                <Inbox className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-lg font-semibold">No articles published yet</p>
+                <p className="text-sm text-muted-foreground max-w-md">
+                  Check back soon — new stories are on the way.
+                </p>
+              </div>
             </div>
           )}
 
